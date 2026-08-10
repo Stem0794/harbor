@@ -2,7 +2,8 @@
 
 ## Automated targets
 
-- Per change: JVM tests and compile/lint on API 36.
+- Per change: JVM policy/topology/parser/privileged-output tests and compile/lint on API 36.
+- Manifest permission assertions run as a host-side APK check in the normal CI job; they do not require an emulator.
 - Emulator gate: API 29 and API 36 provisioning, profile-owner activation, freeze/unfreeze, reboot, and upgrade.
 - Nightly target matrix: API 29, 31, 33, 35, and 36.
 
@@ -12,6 +13,16 @@
 - API 29 arm64 `default` and `google_apis` images report `ro.crypto.state=unsupported` and reject the production provisioning flow because Android 10 requires encryption. The DPC lifecycle and freeze/unfreeze path passed only after a temporary debug-only `PROVISIONING_SKIP_ENCRYPTION` test change. That change is not present in Harbor; standard API 29 provisioning still requires a physical encrypted device gate.
 - API 36 AOSP denied UID 2000 cross-user package operations, including `install-existing --user 10`, with `Shell does not have permission to access user 10`. Shizuku ADB mode must report this as unsupported on affected builds rather than promising cloning.
 - The API 29 emulator allowed a shell install targeting the managed profile. This difference confirms that shell capability must be tested per Android/OEM build, not inferred from Shizuku availability.
+
+## Conservative compatibility behavior
+
+- Freeze/unfreeze treats a `false` result from Android as a failed policy update and leaves the displayed state unchanged.
+- Public profile discovery does not expose numeric user IDs. Shizuku commands accept only IDs parsed from a fresh system user listing or from the result of the allowlisted user-creation command and then revalidate them before use.
+- Package cloning is enabled only when the current full user and one active managed profile can be resolved unambiguously. A sibling profile, Private Space, malformed user-list output, or an unrecognized topology disables cloning with an explanation.
+- Android has no stable public deep link to one dedicated work-profile settings page across the supported OS/OEM range, so Harbor labels and opens generic System settings.
+- Advanced tools can be disabled locally; this releases Harbor's Shizuku binding but does not revoke Shizuku globally.
+
+These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below; no new physical-device result is claimed by this remediation.
 
 ## Required physical testing before stable release
 

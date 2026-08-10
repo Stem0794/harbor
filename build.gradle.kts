@@ -34,6 +34,9 @@ project(":app") {
     tasks.register("generateReleaseSbom") {
         group = "verification"
         description = "Generate a deterministic CycloneDX JSON inventory for the release runtime."
+        notCompatibleWithConfigurationCache(
+            "The task resolves release dependency metadata at execution time.",
+        )
 
         doLast {
             val modules = configurations.getByName("releaseRuntimeClasspath")

@@ -6,7 +6,9 @@ Harbor uses one APK in the personal and managed profiles. The personal instance 
 
 The DPC identity consists of the production application ID and `HarborDeviceAdminReceiver` component. Both are release compatibility contracts and must not change after public beta.
 
-The `core:policy` module contains only public Android policy APIs. Optional elevated behavior is isolated in `privileged:shizuku`, whose narrow AIDL interface exposes diagnostics, package installation for a known user, full-user creation, Harbor installation, and user switching. It exposes no arbitrary command execution. User targets are checked against a fresh privileged listing before each mutating operation, and the UserService is removed when Advanced tools close or permission is no longer available.
+The `core:policy` module contains only public Android policy APIs. Optional elevated behavior is isolated in `privileged:shizuku`, whose narrow AIDL interface exposes diagnostics, current-user and user-list queries, package installation for a known user, full-user creation, Harbor installation, and user switching. It exposes no arbitrary command execution. User targets are checked against a fresh privileged listing before each privileged operation, and the UserService is removed when Advanced tools close, the user disables them, or permission is no longer available.
+
+Public-API topology deliberately carries no numeric Android user IDs. Numeric IDs used by privileged commands originate only in Shizuku command output. Package cloning is available only when a fresh listing identifies the current switchable full user and exactly one active managed profile. Harbor cannot obtain a supported parent-ID mapping from the ordinary application APIs, so additional profiles make the relationship ambiguous and cloning fails closed.
 
 ## Multiple workspaces
 

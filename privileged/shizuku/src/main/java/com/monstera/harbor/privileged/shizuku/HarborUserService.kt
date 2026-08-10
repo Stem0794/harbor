@@ -7,6 +7,7 @@ import com.monstera.harbor.core.topology.AndroidUserId
 import com.monstera.harbor.core.topology.PackageName
 import com.monstera.harbor.core.topology.UserVisibleName
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
 @Keep
@@ -36,6 +37,8 @@ class HarborUserService() : IHarborUserService.Stub() {
     }
 
     override fun listUsers(): String = run(PrivilegedCommandFactory.listUsers()).encode()
+
+    override fun currentUser(): String = run(PrivilegedCommandFactory.currentUser()).encode()
 
     override fun installExisting(packageName: String, userId: Int): String = validated {
         PrivilegedCommandFactory.installExisting(PackageName(packageName), AndroidUserId(userId))
@@ -67,21 +70,14 @@ class HarborUserService() : IHarborUserService.Stub() {
         val process = ProcessBuilder(arguments)
             .redirectErrorStream(true)
             .start()
-        val output = StringBuffer()
+        val output = AtomicReference("")
         val outputReader = thread(
             start = true,
             isDaemon = true,
             name = "harbor-command-output",
         ) {
             process.inputStream.bufferedReader().use { reader ->
-                var total = 0
-                while (total < MAX_OUTPUT_CHARS) {
-                    val line = reader.readLine() ?: break
-                    val remaining = MAX_OUTPUT_CHARS - total
-                    val accepted = line.take(remaining)
-                    output.append(accepted).append('\n')
-                    total += accepted.length + 1
-                }
+                output.set(drainBoundedOutput(reader, MAX_OUTPUT_CHARS))
             }
         }
         if (!process.waitFor(COMMAND_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
@@ -90,7 +86,7 @@ class HarborUserService() : IHarborUserService.Stub() {
             return CommandResponse(124, "Operation timed out")
         }
         outputReader.join(OUTPUT_READER_JOIN_MILLIS)
-        return CommandResponse(process.exitValue(), output.toString().trim())
+        return CommandResponse(process.exitValue(), output.get())
     }
 
     private companion object {

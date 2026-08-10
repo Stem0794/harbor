@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                     graph = graph,
                     onProvision = { beginProvisioning(graph) },
                     onOpenWorkHarbor = ::openWorkHarbor,
-                    onOpenWorkSettings = ::openWorkSettings,
+                    onOpenSystemSettings = ::openSystemSettings,
                     onLaunchPackage = ::launchPackage,
                     onOpenPackageDetails = ::openPackageDetails,
                     onUninstallPackage = ::uninstallPackage,
@@ -63,9 +63,8 @@ class MainActivity : ComponentActivity() {
         }.getOrDefault(false)
     }
 
-    private fun openWorkSettings() {
-        val intent = Intent(Settings.ACTION_SYNC_SETTINGS)
-        startActivity(if (intent.resolveActivity(packageManager) != null) intent else Intent(Settings.ACTION_SETTINGS))
+    private fun openSystemSettings() {
+        startActivity(Intent(Settings.ACTION_SETTINGS))
     }
 
     private fun launchPackage(packageName: String): Boolean {
