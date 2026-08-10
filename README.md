@@ -76,7 +76,7 @@ The production application ID, DPC receiver component, and release signing ident
 
 Harbor is intended for F-Droid distribution rather than Google Play. Until the first F-Droid build is accepted, use the GitHub source and release artifacts only for development and testing.
 
-The GitHub release APK is an unsigned upstream artifact. F-Droid is expected to build the tagged source and sign the production package. Do not use an unsigned or debug APK for a profile that contains irreplaceable data.
+The GitHub release includes two APK artifacts. The Monstera-signed APK is convenient for alpha testing; the unsigned APK is the upstream/F-Droid reproducibility artifact. F-Droid is expected to build the tagged source and sign the production package with its own signing key. A Monstera-signed installation will not be upgradeable from a future F-Droid-signed installation unless the signing arrangement is explicitly coordinated, so choose one distribution channel for a given device. Do not use an alpha APK for a profile that contains irreplaceable data.
 
 For local development:
 

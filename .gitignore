@@ -9,6 +9,7 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.apk
+*.idsig
 *.aab
 *.ap_
 *.jks
