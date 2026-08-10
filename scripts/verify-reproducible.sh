@@ -6,9 +6,11 @@ second_dir=$(mktemp -d)
 trap 'rm -rf "$first_dir" "$second_dir"' EXIT
 gradle_bin=${GRADLE_BIN:-./gradlew}
 
-"$gradle_bin" --no-daemon clean assembleRelease
+"$gradle_bin" --no-daemon --no-parallel --no-configuration-cache clean
+"$gradle_bin" --no-daemon --no-parallel --no-configuration-cache assembleRelease
 cp app/build/outputs/apk/release/app-release-unsigned.apk "$first_dir/harbor.apk"
-"$gradle_bin" --no-daemon clean assembleRelease
+"$gradle_bin" --no-daemon --no-parallel --no-configuration-cache clean
+"$gradle_bin" --no-daemon --no-parallel --no-configuration-cache assembleRelease
 cp app/build/outputs/apk/release/app-release-unsigned.apk "$second_dir/harbor.apk"
 
 hash_file() {

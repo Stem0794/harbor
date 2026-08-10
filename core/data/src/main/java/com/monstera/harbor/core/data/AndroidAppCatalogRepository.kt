@@ -85,7 +85,10 @@ class AndroidAppCatalogRepository(
             PackageManager.MATCH_ALL,
         ).mapTo(hashSetOf()) { it.activityInfo.packageName }
         installedApplications.filter { info ->
-            info.flags and ApplicationInfo.FLAG_INSTALLED != 0
+            // System components without a launcher entry are implementation details,
+            // not applications the user can actually open from the work profile.
+            info.flags and ApplicationInfo.FLAG_INSTALLED != 0 &&
+                (info.flags and ApplicationInfo.FLAG_SYSTEM == 0 || info.packageName in launchablePackages)
         }.mapNotNull { info ->
             val packageName = runCatching { PackageName(info.packageName) }.getOrNull()
                 ?: return@mapNotNull null

@@ -30,6 +30,8 @@
 - Root-backed Shizuku receives the same operation allowlist as ADB-backed Shizuku.
 - Disabling Advanced tools clears the local opt-in and releases Harbor's Shizuku UserService without changing global Shizuku permission.
 - APK sideloading remains Android-mediated: Harbor only clears its profile-local unknown-source restriction after the user requests it, while Android asks the source app for separate consent. Harbor does not silently approve any installer.
+- Pinned launch shortcuts are created by the Harbor instance inside the work profile. Each shortcut stores an opaque UUID mapped to a validated local package name; the exported entry activity accepts no package or command arguments.
+- Workspace aliases and icon choices are local Harbor metadata. They are reconciled against a fresh user ID/name pair, and stale records are not silently applied to a reused Android user ID.
 
 ## Residual risks
 
@@ -39,3 +41,4 @@
 - A compromised Shizuku service already has privileges outside Harbor's control.
 - `QUERY_ALL_PACKAGES` exposes local package inventory to Harbor; the inventory remains on-device.
 - Removing a work profile or full Android user outside Harbor is destructive.
+- A launcher may retain a stale pinned shortcut after an app is removed or a work profile is paused; Harbor invalidates the UUID mapping or reports the local policy failure and does not launch an unverified package.

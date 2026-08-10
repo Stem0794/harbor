@@ -11,12 +11,74 @@ enum class PrivilegedAvailability {
     UNSUPPORTED,
 }
 
+enum class HarborPrivilegeLevel {
+    STANDARD,
+    SHIZUKU_ADB,
+    SHIZUKU_ROOT,
+}
+
+enum class HarborPrivilegeSecondaryState {
+    ADVANCED_DISABLED,
+    SHIZUKU_NOT_INSTALLED,
+    SHIZUKU_STOPPED,
+    SHIZUKU_PERMISSION_REQUIRED,
+    SHIZUKU_PERMISSION_DENIED,
+    ADVANCED_WORKSPACE_TOOLS_AVAILABLE,
+    ROOT_ALLOWLIST_ONLY,
+    UNSUPPORTED,
+}
+
+data class HarborPrivilegeState(
+    val level: HarborPrivilegeLevel,
+    val secondary: HarborPrivilegeSecondaryState,
+)
+
 data class PrivilegedBackendState(
     val availability: PrivilegedAvailability,
     val serverVersion: Int? = null,
     val effectiveUid: Int? = null,
     val detail: String? = null,
 )
+
+object HarborPrivilegeResolver {
+    private const val UID_ROOT = 0
+    private const val UID_SHELL = 2_000
+
+    fun resolve(
+        advancedEnabled: Boolean,
+        backend: PrivilegedBackendState,
+    ): HarborPrivilegeState {
+        if (!advancedEnabled) {
+            return HarborPrivilegeState(
+                HarborPrivilegeLevel.STANDARD,
+                HarborPrivilegeSecondaryState.ADVANCED_DISABLED,
+            )
+        }
+        return when (backend.availability) {
+            PrivilegedAvailability.NOT_INSTALLED -> standard(HarborPrivilegeSecondaryState.SHIZUKU_NOT_INSTALLED)
+            PrivilegedAvailability.BINDER_UNAVAILABLE -> standard(HarborPrivilegeSecondaryState.SHIZUKU_STOPPED)
+            PrivilegedAvailability.PERMISSION_REQUIRED -> standard(HarborPrivilegeSecondaryState.SHIZUKU_PERMISSION_REQUIRED)
+            PrivilegedAvailability.PERMISSION_DENIED -> standard(HarborPrivilegeSecondaryState.SHIZUKU_PERMISSION_DENIED)
+            PrivilegedAvailability.UNSUPPORTED -> standard(HarborPrivilegeSecondaryState.UNSUPPORTED)
+            PrivilegedAvailability.READY -> when (backend.effectiveUid) {
+                UID_SHELL -> HarborPrivilegeState(
+                    HarborPrivilegeLevel.SHIZUKU_ADB,
+                    HarborPrivilegeSecondaryState.ADVANCED_WORKSPACE_TOOLS_AVAILABLE,
+                )
+                UID_ROOT -> HarborPrivilegeState(
+                    HarborPrivilegeLevel.SHIZUKU_ROOT,
+                    HarborPrivilegeSecondaryState.ROOT_ALLOWLIST_ONLY,
+                )
+                else -> standard(HarborPrivilegeSecondaryState.UNSUPPORTED)
+            }
+        }
+    }
+
+    private fun standard(secondary: HarborPrivilegeSecondaryState) = HarborPrivilegeState(
+        HarborPrivilegeLevel.STANDARD,
+        secondary,
+    )
+}
 
 sealed interface PrivilegedResult<out T> {
     data class Success<T>(val value: T) : PrivilegedResult<T>
@@ -98,6 +160,13 @@ data class InstallExistingResult(
     val message: String,
 )
 
+data class CloneCandidate(
+    val packageName: PackageName,
+    val label: String,
+    val isSystem: Boolean,
+    val alreadyInstalledInTarget: Boolean,
+)
+
 interface PrivilegedBackend {
     fun observeState(): Flow<PrivilegedBackendState>
     fun refresh()
@@ -105,6 +174,7 @@ interface PrivilegedBackend {
     suspend fun diagnostics(): PrivilegedResult<SystemDiagnostics>
     suspend fun resolveCloneProfile(): PrivilegedResult<CloneProfileRelationship>
     suspend fun listPackages(user: AndroidUserId): PrivilegedResult<List<PackageName>>
+    suspend fun listPackagesInWorkProfile(user: AndroidUserId): PrivilegedResult<List<PackageName>>
     suspend fun installExisting(
         packageName: PackageName,
         targetUser: AndroidUserId,
@@ -125,6 +195,7 @@ class NoOpPrivilegedBackend : PrivilegedBackend {
     override suspend fun diagnostics(): PrivilegedResult<SystemDiagnostics> = unavailable()
     override suspend fun resolveCloneProfile(): PrivilegedResult<CloneProfileRelationship> = unavailable()
     override suspend fun listPackages(user: AndroidUserId): PrivilegedResult<List<PackageName>> = unavailable()
+    override suspend fun listPackagesInWorkProfile(user: AndroidUserId): PrivilegedResult<List<PackageName>> = unavailable()
     override suspend fun installExisting(
         packageName: PackageName,
         targetUser: AndroidUserId,

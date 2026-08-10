@@ -45,7 +45,7 @@ Harbor is behaviorally inspired by Island, but it is a clean implementation with
 
 ## Current status
 
-The current release line is `0.1.0-alpha02`.
+The current release line is `0.2.0-alpha01`.
 
 Implemented:
 
@@ -53,6 +53,9 @@ Implemented:
 - Standard managed-profile provisioning and profile-owner detection.
 - Lifecycle and recovery states for the primary work profile.
 - Searchable work-profile catalog, launch, details, freeze/unfreeze, and uninstall flows.
+- Lazy app icons with a generic fallback, multi-selection, sequential batch freeze/unfreeze, and partial-failure reporting.
+- UUID-scoped work-profile launcher shortcuts that unfreeze and launch a validated local target.
+- A conservative workspace dashboard with optional aliases/icons and stale Android-user metadata handling.
 - Optional Shizuku backend with diagnostics, allowlisted `install-existing`, full-user listing, creation, Harbor installation, and switching primitives.
 - Reproducible Gradle conventions, dependency verification, SBOM generation, and F-Droid packaging scaffolding.
 
@@ -60,6 +63,7 @@ Still experimental or device-dependent:
 
 - Shizuku ADB-mode package cloning on Android 16 and OEM builds.
 - Multiple full-user workspaces and provisioning a work profile inside a secondary user.
+- Launcher pinning and shortcut behavior across Pixel, Samsung, Xiaomi, and other OEM launchers.
 - API 29 provisioning on emulator images without device encryption.
 - OEM-specific launchers, Settings flows, process killing, user switching, and package-manager permissions.
 
