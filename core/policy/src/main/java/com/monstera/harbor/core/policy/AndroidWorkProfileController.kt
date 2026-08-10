@@ -21,6 +21,14 @@ class AndroidWorkProfileController(
 ) : WorkProfileController {
     private val policyManager = context.getSystemService(DevicePolicyManager::class.java)
 
+    init {
+        // Re-apply the supported parent -> work policy for profiles created by
+        // an older Harbor build, or after an OEM policy refresh.
+        if (runCatching { isOwner() }.getOrDefault(false)) {
+            CrossProfileSharingPolicy.apply(policyManager, admin)
+        }
+    }
+
     override fun observeState(): Flow<WorkProfileState> = callbackFlow {
         fun emitState() {
             trySend(snapshot())
@@ -74,6 +82,11 @@ class AndroidWorkProfileController(
             onSuccess = { PolicyResult.Success(Unit) },
             onFailure = { PolicyResult.Failure(it.message ?: it.javaClass.simpleName) },
         )
+    }
+
+    override suspend fun allowPersonalFileSharing(): PolicyResult<Unit> = withContext(Dispatchers.IO) {
+        if (!isOwner()) return@withContext PolicyResult.Failure("Harbor is not the profile owner")
+        CrossProfileSharingPolicy.apply(policyManager, admin)
     }
 
     private fun snapshot() = if (isOwner()) {
