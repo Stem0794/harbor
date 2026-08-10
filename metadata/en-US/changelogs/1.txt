@@ -1,1 +1,1 @@
-Directional personal-to-work file sharing, work-profile dashboard, privilege indicator, app icons, batch freeze/unfreeze, enriched Shizuku cloning, workspace aliases/icons, and secure work-profile launch shortcuts.
+Alpha03: Adds a supported personal-file picker and Share-to-Harbor receiver, improves cross-profile policy reapplication, and separates file import, APK installation, and work-app management UI. OEM Move-to-work commands may still be restricted.

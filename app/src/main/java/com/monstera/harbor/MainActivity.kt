@@ -8,6 +8,7 @@ import android.graphics.drawable.Icon
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.content.pm.LauncherApps
+import android.net.Uri
 import android.os.Bundle
 import android.os.Process
 import android.os.UserManager
@@ -18,13 +19,20 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.monstera.harbor.ui.HarborRoot
 import com.monstera.harbor.ui.theme.HarborTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val provisioningLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { recreate() }
+    private val personalFilePicker = registerForActivityResult(
+        ActivityResultContracts.OpenMultipleDocuments(),
+    ) { uris -> importPersonalFiles(uris) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +49,7 @@ class MainActivity : ComponentActivity() {
                     onOpenPackageDetails = ::openPackageDetails,
                     onUninstallPackage = ::uninstallPackage,
                     onAddShortcut = ::addShortcut,
+                    onPickPersonalFiles = ::pickPersonalFiles,
                 )
             }
         }
@@ -72,6 +81,28 @@ class MainActivity : ComponentActivity() {
 
     private fun openSystemSettings() {
         startActivity(Intent(Settings.ACTION_SETTINGS))
+    }
+
+    private fun pickPersonalFiles() {
+        personalFilePicker.launch(arrayOf("*/*"))
+    }
+
+    private fun importPersonalFiles(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                SharedFileImporter(contentResolver).copyUris(uris, null)
+            }
+            Toast.makeText(
+                this@MainActivity,
+                if (result.names.isEmpty()) {
+                    "No file could be copied. Use Share from the personal profile."
+                } else {
+                    "Copied ${result.names.size} file(s) to work Downloads/Harbor"
+                },
+                Toast.LENGTH_LONG,
+            ).show()
+        }
     }
 
     private fun launchPackage(packageName: String): Boolean {

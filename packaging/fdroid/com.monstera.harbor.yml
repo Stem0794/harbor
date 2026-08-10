@@ -16,6 +16,12 @@ RepoType: git
 Repo: https://github.com/Stem0794/harbor.git
 
 Builds:
+  - versionName: 0.2.0-alpha03
+    versionCode: 5
+    commit: v0.2.0-alpha03
+    subdir: .
+    gradle:
+      - yes
   - versionName: 0.2.0-alpha02
     versionCode: 4
     commit: v0.2.0-alpha02
@@ -43,5 +49,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.2.0-alpha02
-CurrentVersionCode: 4
+CurrentVersion: 0.2.0-alpha03
+CurrentVersionCode: 5
