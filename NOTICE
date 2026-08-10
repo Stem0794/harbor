@@ -1,0 +1,10 @@
+Harbor
+Copyright 2026 Harbor contributors
+
+Harbor is inspired by Island, Copyright Oasis Feng, licensed under the
+Apache License 2.0. Harbor is a clean implementation; any future source
+adapted from Island must be identified in this file and in the modified source.
+
+The optional Shizuku client API is maintained by RikkaApps and is distributed
+under its upstream open-source license. Harbor does not bundle the Shizuku
+manager or Sui.

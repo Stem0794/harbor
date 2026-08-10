@@ -1,0 +1,29 @@
+Categories:
+  - System
+License: Apache-2.0
+AuthorName: Harbor contributors
+SourceCode: https://github.com/OWNER/harbor
+IssueTracker: https://github.com/OWNER/harbor/issues
+
+AutoName: Harbor
+Summary: Local work-profile isolation and app management
+Description: |-
+  Harbor creates a standard Android work profile and manages applications
+  locally. Optional Advanced tools integrate with a separately installed
+  Shizuku service. The core app does not require Shizuku or network access.
+
+RepoType: git
+Repo: https://github.com/OWNER/harbor.git
+
+Builds:
+  - versionName: 0.1.0-alpha01
+    versionCode: 1
+    commit: v0.1.0-alpha01
+    subdir: .
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.0-alpha01
+CurrentVersionCode: 1
