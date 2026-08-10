@@ -145,6 +145,20 @@ class ShizukuPrivilegedBackend(
         PrivilegedResult.Success(packages)
     }
 
+    override suspend fun listPackagesInWorkProfile(user: AndroidUserId): PrivilegedResult<List<PackageName>> = call { remote ->
+        val relationship = latestCloneProfile(remote).getOrElseFailure { return@call it }
+        if (relationship.targetManagedProfile.id != user) {
+            return@call PrivilegedResult.Failure("The target is not the current unambiguous work profile")
+        }
+        val response = CommandResponse.decode(remote.listPackages(user.value))
+        if (!response.isSuccess) return@call PrivilegedResult.Failure(response.output)
+        PrivilegedResult.Success(
+            response.output.lineSequence().mapNotNull { line ->
+                runCatching { PackageName(line.removePrefix("package:").trim()) }.getOrNull()
+            }.distinct().sortedBy { it.value }.toList(),
+        )
+    }
+
     override suspend fun listUsers(): PrivilegedResult<List<SystemUser>> = call { remote ->
         latestUsers(remote).mapSuccess { users -> users.filter(SystemUser::isSwitchableFullUser) }
     }

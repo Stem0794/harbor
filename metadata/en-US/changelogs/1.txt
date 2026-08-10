@@ -1,1 +1,1 @@
-Initial pre-release implementation of work-profile provisioning, app management, optional Shizuku diagnostics and cloning, and experimental full-user workspaces.
+Work-profile dashboard, privilege indicator, app icons, batch freeze/unfreeze, enriched Shizuku cloning, workspace aliases/icons, and secure work-profile launch shortcuts.

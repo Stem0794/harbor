@@ -32,14 +32,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.monstera.harbor.core.topology.AndroidUserId
 import com.monstera.harbor.core.topology.CloneProfileRelationship
+import com.monstera.harbor.core.topology.CloneCandidate
+import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.LocalProfileKind
 import com.monstera.harbor.core.topology.MultiUserController
-import com.monstera.harbor.core.topology.PackageName
 import com.monstera.harbor.core.topology.PrivilegedAvailability
 import com.monstera.harbor.core.topology.PrivilegedBackend
 import com.monstera.harbor.core.topology.PrivilegedResult
@@ -47,6 +49,9 @@ import com.monstera.harbor.core.topology.ProfileTopology
 import com.monstera.harbor.core.topology.SystemDiagnostics
 import com.monstera.harbor.core.topology.SystemUser
 import com.monstera.harbor.core.topology.UserVisibleName
+import com.monstera.harbor.core.data.AppIconProvider
+import com.monstera.harbor.core.data.CloneCandidateEnricher
+import com.monstera.harbor.core.data.PackageMetadataProvider
 import kotlinx.coroutines.launch
 
 @Composable
@@ -54,6 +59,9 @@ fun AdvancedScreen(
     backend: PrivilegedBackend,
     multiUserController: MultiUserController,
     topology: ProfileTopology,
+    privilegeState: HarborPrivilegeState,
+    iconProvider: AppIconProvider,
+    packageMetadataProvider: PackageMetadataProvider,
     onBack: () -> Unit,
     onDisable: () -> Unit,
 ) {
@@ -62,24 +70,16 @@ fun AdvancedScreen(
             PrivilegedAvailability.BINDER_UNAVAILABLE,
         ),
     )
-    val scope = rememberCoroutineScope()
-    var diagnostics by remember { mutableStateOf<SystemDiagnostics?>(null) }
-    var status by remember { mutableStateOf<String?>(null) }
-    var busy by remember { mutableStateOf(false) }
+    val advancedViewModel: AdvancedViewModel = viewModel(
+        factory = AdvancedViewModel.Factory(backend),
+    )
+    val advancedState by advancedViewModel.state.collectAsStateWithLifecycle()
+    val diagnostics = advancedState.diagnostics
+    val status = advancedState.status
+    val busy = advancedState.busy
 
     DisposableEffect(backend) {
         onDispose { backend.release() }
-    }
-
-    fun runOperation(operation: suspend () -> PrivilegedResult<*>) {
-        scope.launch {
-            busy = true
-            status = when (val result = operation()) {
-                is PrivilegedResult.Success -> "Operation completed"
-                is PrivilegedResult.Failure -> result.reason
-            }
-            busy = false
-        }
     }
 
     Scaffold(
@@ -96,6 +96,10 @@ fun AdvancedScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
+                PrivilegeBadge(privilegeState)
+            }
+
+            item {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Shizuku", style = MaterialTheme.typography.titleLarge)
@@ -108,7 +112,7 @@ fun AdvancedScreen(
                         if (backendState.availability == PrivilegedAvailability.PERMISSION_REQUIRED) {
                             Button(
                                 enabled = !busy,
-                                onClick = { runOperation { backend.requestPermission() } },
+                                onClick = { advancedViewModel.runOperation { backend.requestPermission() } },
                             ) { Text("Grant permission") }
                         }
                     }
@@ -121,19 +125,7 @@ fun AdvancedScreen(
                 item {
                     Button(
                         enabled = !busy,
-                        onClick = {
-                            scope.launch {
-                                busy = true
-                                when (val result = backend.diagnostics()) {
-                                    is PrivilegedResult.Success -> {
-                                        diagnostics = result.value
-                                        status = "Diagnostics refreshed"
-                                    }
-                                    is PrivilegedResult.Failure -> status = result.reason
-                                }
-                                busy = false
-                            }
-                        },
+                        onClick = advancedViewModel::refreshDiagnostics,
                     ) { Text("Refresh diagnostics") }
                 }
 
@@ -143,9 +135,11 @@ fun AdvancedScreen(
                     item {
                         ClonePanel(
                             backend = backend,
+                            iconProvider = iconProvider,
+                            packageMetadataProvider = packageMetadataProvider,
                             busy = busy,
-                            onBusy = { busy = it },
-                            onStatus = { status = it },
+                            onBusy = advancedViewModel::setBusy,
+                            onStatus = advancedViewModel::setStatus,
                         )
                     }
                 } else {
@@ -153,8 +147,8 @@ fun AdvancedScreen(
                         MultiUserPanel(
                             controller = multiUserController,
                             busy = busy,
-                            onBusy = { busy = it },
-                            onStatus = { status = it },
+                            onBusy = advancedViewModel::setBusy,
+                            onStatus = advancedViewModel::setStatus,
                         )
                     }
                 }
@@ -183,15 +177,17 @@ private fun DiagnosticsCard(diagnostics: SystemDiagnostics) {
 @Composable
 private fun ClonePanel(
     backend: PrivilegedBackend,
+    iconProvider: AppIconProvider,
+    packageMetadataProvider: PackageMetadataProvider,
     busy: Boolean,
     onBusy: (Boolean) -> Unit,
     onStatus: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var relationship by remember { mutableStateOf<CloneProfileRelationship?>(null) }
-    var packages by remember { mutableStateOf<List<PackageName>>(emptyList()) }
+    var candidates by remember { mutableStateOf<List<CloneCandidate>>(emptyList()) }
     var query by remember { mutableStateOf("") }
-    var selected by remember { mutableStateOf<PackageName?>(null) }
+    var selected by remember { mutableStateOf<CloneCandidate?>(null) }
 
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -202,17 +198,38 @@ private fun ClonePanel(
                 onClick = {
                     scope.launch {
                         onBusy(true)
-                        packages = emptyList()
+                        candidates = emptyList()
                         relationship = null
                         when (val resolved = backend.resolveCloneProfile()) {
                             is PrivilegedResult.Success -> {
                                 when (val result = backend.listPackages(resolved.value.sourceFullUser.id)) {
                                     is PrivilegedResult.Success -> {
                                         relationship = resolved.value
-                                        packages = result.value
+                                        var targetStateAvailable = true
+                                        val installedInTarget = when (
+                                            val targetResult = backend.listPackagesInWorkProfile(
+                                                resolved.value.targetManagedProfile.id,
+                                            )
+                                        ) {
+                                            is PrivilegedResult.Success -> targetResult.value.toSet()
+                                            is PrivilegedResult.Failure -> {
+                                                targetStateAvailable = false
+                                                emptySet()
+                                            }
+                                        }
+                                        val metadata = result.value.mapNotNull { packageName ->
+                                            packageMetadataProvider.resolve(packageName)?.let { packageName to it }
+                                        }.toMap()
+                                        candidates = CloneCandidateEnricher.enrich(
+                                            result.value,
+                                            metadata,
+                                            installedInTarget,
+                                        )
                                         onStatus(
                                             "Found ${result.value.size} packages in user " +
-                                                resolved.value.sourceFullUser.id.value,
+                                                resolved.value.sourceFullUser.id.value +
+                                                if (targetStateAvailable) "" else
+                                                    "; target installation state is unavailable",
                                         )
                                     }
                                     is PrivilegedResult.Failure -> onStatus(result.reason)
@@ -225,27 +242,39 @@ private fun ClonePanel(
                 },
             ) { Text("Resolve and load parent packages") }
 
-            if (packages.isNotEmpty()) {
+            if (candidates.isNotEmpty()) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Filter package names") },
+                    label = { Text("Search apps or package names") },
                 )
-                packages.asSequence()
-                    .filter { query.isBlank() || it.value.contains(query, ignoreCase = true) }
+                candidates.asSequence()
+                    .filter {
+                        query.isBlank() || it.label.contains(query, true) ||
+                            it.packageName.value.contains(query, true)
+                    }
                     .take(8)
-                    .forEach { packageName ->
-                        Text(
-                            text = packageName.value,
-                            modifier = Modifier.fillMaxWidth().clickable { selected = packageName }.padding(8.dp),
-                            fontWeight = if (selected == packageName) FontWeight.Bold else FontWeight.Normal,
-                        )
+                    .forEach { candidate ->
+                        Row(
+                            Modifier.fillMaxWidth().clickable { selected = candidate }.padding(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            HarborAppIcon(iconProvider, candidate.packageName, contentDescription = candidate.label)
+                            Column(Modifier.weight(1f)) {
+                                Text(candidate.label, fontWeight = if (selected == candidate) FontWeight.Bold else FontWeight.Normal)
+                                Text(candidate.packageName.value, style = MaterialTheme.typography.bodySmall)
+                            }
+                            Text(
+                                if (candidate.alreadyInstalledInTarget) "Already installed" else "Available",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                 Button(
                     enabled = selected != null && relationship != null && !busy,
                     onClick = {
-                        val packageName = selected ?: return@Button
+                        val packageName = selected?.packageName ?: return@Button
                         val target = relationship?.targetManagedProfile ?: return@Button
                         scope.launch {
                             onBusy(true)

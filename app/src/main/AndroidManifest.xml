@@ -35,6 +35,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ShortcutEntryActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:noHistory="true" />
+
         <receiver
             android:name=".admin.HarborDeviceAdminReceiver"
             android:description="@string/admin_description"
