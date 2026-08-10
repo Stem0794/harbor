@@ -31,7 +31,7 @@ Requirements:
 ./gradlew generateSbom
 ```
 
-The production application ID is `io.github.theodorekonikowski.harbor`. Debug builds use `io.github.theodorekonikowski.harbor.debug` so development profiles cannot be confused with production profiles.
+The production application ID is `com.monstera.harbor`. Debug builds use `com.monstera.harbor.debug` so development profiles cannot be confused with production profiles.
 
 ## Modules
 

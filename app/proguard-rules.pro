@@ -1,2 +1,2 @@
--keep class io.github.theodorekonikowski.harbor.privileged.shizuku.HarborUserService { public <init>(); public <init>(android.content.Context); }
--keep class io.github.theodorekonikowski.harbor.privileged.shizuku.IHarborUserService$Stub { *; }
+-keep class com.monstera.harbor.privileged.shizuku.HarborUserService { public <init>(); public <init>(android.content.Context); }
+-keep class com.monstera.harbor.privileged.shizuku.IHarborUserService$Stub { *; }

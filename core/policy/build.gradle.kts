@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.github.theodorekonikowski.harbor.core.policy"
+    namespace = "com.monstera.harbor.core.policy"
     compileSdk = 36
     defaultConfig { minSdk = 29 }
     compileOptions {

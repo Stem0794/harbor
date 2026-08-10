@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.github.theodorekonikowski.harbor.core.topology"
+    namespace = "com.monstera.harbor.core.topology"
     compileSdk = 36
     defaultConfig { minSdk = 29 }
     compileOptions {

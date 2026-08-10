@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "io.github.theodorekonikowski.harbor"
+    namespace = "com.monstera.harbor"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "io.github.theodorekonikowski.harbor"
+        applicationId = "com.monstera.harbor"
         minSdk = 29
         targetSdk = 36
         versionCode = providers.gradleProperty("harbor.versionCode").get().toInt()
