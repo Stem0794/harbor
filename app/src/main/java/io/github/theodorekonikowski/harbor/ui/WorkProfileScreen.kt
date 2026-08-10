@@ -82,13 +82,15 @@ fun WorkProfileScreen(
                 Text("${apps.size} applications", style = MaterialTheme.typography.bodySmall)
                 TextButton(onClick = onOpenWorkSettings) { Text("Work settings") }
             }
+            val visibleApps = remember(apps, query) {
+                apps.filter {
+                    query.isBlank() || it.label.contains(query, true) || it.packageName.value.contains(query, true)
+                }
+            }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val visibleApps = apps.filter {
-                    query.isBlank() || it.label.contains(query, true) || it.packageName.value.contains(query, true)
-                }
                 items(visibleApps, key = { it.packageName.value }) { app ->
                     ManagedAppCard(
                         app = app,
@@ -97,8 +99,12 @@ fun WorkProfileScreen(
                             scope.launch {
                                 busyPackage = app.packageName.value
                                 when (val result = controller.setApplicationHidden(app.packageName, !app.isHidden)) {
-                                    is PolicyResult.Success -> apps = catalog.refresh().filterNot {
-                                        it.packageName.value == ownPackage
+                                    is PolicyResult.Success -> apps = apps.map { current ->
+                                        if (current.packageName == app.packageName) {
+                                            current.copy(isHidden = result.value)
+                                        } else {
+                                            current
+                                        }
                                     }
                                     is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
                                 }
