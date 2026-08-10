@@ -21,6 +21,17 @@ sealed interface PolicyResult<out T> {
 
 interface WorkProfileController {
     fun observeState(): Flow<WorkProfileState>
-    suspend fun setApplicationHidden(packageName: PackageName, hidden: Boolean): PolicyResult<Boolean>
+    suspend fun setApplicationHidden(packageName: PackageName, hidden: Boolean): PolicyResult<Unit>
     suspend fun isApplicationHidden(packageName: PackageName): PolicyResult<Boolean>
 }
+
+internal fun applyBooleanPolicyChange(change: () -> Boolean): PolicyResult<Unit> = runCatching(change).fold(
+    onSuccess = { applied ->
+        if (applied) {
+            PolicyResult.Success(Unit)
+        } else {
+            PolicyResult.Failure("Android did not apply the requested policy change")
+        }
+    },
+    onFailure = { PolicyResult.Failure(it.message ?: it.javaClass.simpleName) },
+)

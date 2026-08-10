@@ -9,4 +9,5 @@ interface IHarborUserService {
     String installHarbor(String packageName, int userId) = 5;
     String switchUser(int userId) = 6;
     String listPackages(int userId) = 7;
+    String currentUser() = 8;
 }
