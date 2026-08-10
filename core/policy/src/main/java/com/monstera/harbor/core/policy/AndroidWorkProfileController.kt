@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.UserManager
 import androidx.core.content.ContextCompat
 import com.monstera.harbor.core.topology.PackageName
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,16 @@ class AndroidWorkProfileController(
                     onFailure = { PolicyResult.Failure(it.message ?: it.javaClass.simpleName) },
                 )
         }
+
+    override suspend fun allowApkInstalls(): PolicyResult<Unit> = withContext(Dispatchers.IO) {
+        if (!isOwner()) return@withContext PolicyResult.Failure("Harbor is not the profile owner")
+        runCatching {
+            policyManager.clearUserRestriction(admin, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES)
+        }.fold(
+            onSuccess = { PolicyResult.Success(Unit) },
+            onFailure = { PolicyResult.Failure(it.message ?: it.javaClass.simpleName) },
+        )
+    }
 
     private fun snapshot() = if (isOwner()) {
         WorkProfileState(WorkProfileStatus.ACTIVE)

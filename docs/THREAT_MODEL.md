@@ -29,6 +29,7 @@
 - Full-user creation requires explicit confirmation. Full-user deletion is not implemented.
 - Root-backed Shizuku receives the same operation allowlist as ADB-backed Shizuku.
 - Disabling Advanced tools clears the local opt-in and releases Harbor's Shizuku UserService without changing global Shizuku permission.
+- APK sideloading remains Android-mediated: Harbor only clears its profile-local unknown-source restriction after the user requests it, while Android asks the source app for separate consent. Harbor does not silently approve any installer.
 
 ## Residual risks
 
