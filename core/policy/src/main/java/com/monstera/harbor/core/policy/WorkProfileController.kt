@@ -23,6 +23,7 @@ interface WorkProfileController {
     fun observeState(): Flow<WorkProfileState>
     suspend fun setApplicationHidden(packageName: PackageName, hidden: Boolean): PolicyResult<Unit>
     suspend fun isApplicationHidden(packageName: PackageName): PolicyResult<Boolean>
+    suspend fun allowApkInstalls(): PolicyResult<Unit>
 }
 
 internal fun applyBooleanPolicyChange(change: () -> Boolean): PolicyResult<Unit> = runCatching(change).fold(
