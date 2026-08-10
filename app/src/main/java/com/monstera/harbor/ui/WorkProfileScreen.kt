@@ -131,6 +131,25 @@ fun WorkProfileScreen(
                     }) { Text("Allow APK installs") }
                 }
             }
+            Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Personal → work files", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Allow Android's supported file-sharing flow from personal apps into this work profile. Work-to-personal sharing stays blocked by default.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedButton(onClick = {
+                        scope.launch {
+                            when (val result = controller.allowPersonalFileSharing()) {
+                                is PolicyResult.Success -> snackbar.showSnackbar(
+                                    "Personal-to-work file sharing is enabled; retry the move from your personal Files app.",
+                                )
+                                is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
+                            }
+                        }
+                    }) { Text("Allow personal → work files") }
+                }
+            }
             Text(
                 "Available in this work profile",
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),

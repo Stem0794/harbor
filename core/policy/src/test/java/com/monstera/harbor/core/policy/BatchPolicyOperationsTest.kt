@@ -22,6 +22,7 @@ class BatchPolicyOperationsTest {
                 if (packageName == packages[1]) PolicyResult.Failure("package disappeared") else PolicyResult.Success(Unit)
             override suspend fun isApplicationHidden(packageName: PackageName) = PolicyResult.Success(false)
             override suspend fun allowApkInstalls() = PolicyResult.Success(Unit)
+            override suspend fun allowPersonalFileSharing() = PolicyResult.Success(Unit)
         }
 
         val results = controller.setApplicationHiddenSequentially(packages, hidden = true)
