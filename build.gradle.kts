@@ -70,7 +70,7 @@ project(":app") {
   "metadata": {
     "component": {
       "type": "application",
-      "group": "io.github.theodorekonikowski",
+      "group": "com.monstera",
       "name": "harbor",
       "version": "${providers.gradleProperty("harbor.versionName").get().jsonEscaped()}"
     }

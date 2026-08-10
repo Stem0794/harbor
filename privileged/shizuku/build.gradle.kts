@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "io.github.theodorekonikowski.harbor.privileged.shizuku"
+    namespace = "com.monstera.harbor.privileged.shizuku"
     compileSdk = 36
     defaultConfig {
         minSdk = 29

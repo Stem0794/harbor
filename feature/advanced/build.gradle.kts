@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "io.github.theodorekonikowski.harbor.feature.advanced"
+    namespace = "com.monstera.harbor.feature.advanced"
     compileSdk = 36
     defaultConfig { minSdk = 29 }
     buildFeatures { compose = true }
