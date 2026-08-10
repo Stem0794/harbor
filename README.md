@@ -45,7 +45,7 @@ Harbor is behaviorally inspired by Island, but it is a clean implementation with
 
 ## Current status
 
-The current release line is `0.2.0-alpha01`.
+The current release line is `0.2.0-alpha02`.
 
 Implemented:
 
