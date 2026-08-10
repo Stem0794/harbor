@@ -1,0 +1,5 @@
+Harbor creates a standard Android work profile to isolate applications and their data from your personal profile.
+
+Core features include work-profile setup, a searchable work-app list, freeze and unfreeze, launch, application details, and user-confirmed uninstall. Harbor contains no advertising, analytics, accounts, or network access.
+
+Optional Advanced tools integrate with a separately installed Shizuku service for local diagnostics, cloning eligible installed packages with Android's install-existing operation, and experimental multiple full-user workspaces. Core isolation and management never require Shizuku.
