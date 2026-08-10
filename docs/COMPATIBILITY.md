@@ -21,6 +21,7 @@
 - Package cloning is enabled only when the current full user and one active managed profile can be resolved unambiguously. A sibling profile, Private Space, malformed user-list output, or an unrecognized topology disables cloning with an explanation.
 - Android has no stable public deep link to one dedicated work-profile settings page across the supported OS/OEM range, so Harbor labels and opens generic System settings.
 - Advanced tools can be disabled locally; this releases Harbor's Shizuku binding but does not revoke Shizuku globally.
+- Harbor can clear the work-profile `DISALLOW_INSTALL_UNKNOWN_SOURCES` restriction so Android can show the normal per-source consent flow for APKs opened from Chrome, Files, F-Droid, or another source. Harbor never grants a source app permission itself; OEMs may still block sideloading.
 
 These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below; no new physical-device result is claimed by this remediation.
 

@@ -2,8 +2,8 @@ Categories:
   - System
 License: Apache-2.0
 AuthorName: Harbor contributors
-SourceCode: https://github.com/OWNER/harbor
-IssueTracker: https://github.com/OWNER/harbor/issues
+SourceCode: https://github.com/Stem0794/harbor
+IssueTracker: https://github.com/Stem0794/harbor/issues
 
 AutoName: Harbor
 Summary: Local work-profile isolation and app management
@@ -13,9 +13,15 @@ Description: |-
   Shizuku service. The core app does not require Shizuku or network access.
 
 RepoType: git
-Repo: https://github.com/OWNER/harbor.git
+Repo: https://github.com/Stem0794/harbor.git
 
 Builds:
+  - versionName: 0.1.0-alpha02
+    versionCode: 2
+    commit: v0.1.0-alpha02
+    subdir: .
+    gradle:
+      - yes
   - versionName: 0.1.0-alpha01
     versionCode: 1
     commit: v0.1.0-alpha01
@@ -25,5 +31,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 0.1.0-alpha01
-CurrentVersionCode: 1
+CurrentVersion: 0.1.0-alpha02
+CurrentVersionCode: 2

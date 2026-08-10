@@ -82,6 +82,25 @@ fun WorkProfileScreen(
                 Text("${apps.size} applications", style = MaterialTheme.typography.bodySmall)
                 TextButton(onClick = onOpenSystemSettings) { Text("System settings") }
             }
+            Card(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Install APKs", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Allow Android to ask each source app for consent when you open an APK. Harbor does not grant any source permission automatically.",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    OutlinedButton(onClick = {
+                        scope.launch {
+                            when (val result = controller.allowApkInstalls()) {
+                                is PolicyResult.Success -> snackbar.showSnackbar(
+                                    "APK installs are allowed; retry the APK and Android will ask the source app for consent.",
+                                )
+                                is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
+                            }
+                        }
+                    }) { Text("Allow APK installs") }
+                }
+            }
             val visibleApps = remember(apps, query) {
                 apps.filter {
                     query.isBlank() || it.label.contains(query, true) || it.packageName.value.contains(query, true)
