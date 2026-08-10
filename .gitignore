@@ -14,6 +14,8 @@ captures/
 *.ap_
 *.jks
 *.keystore
+*.p12
+*.pfx
 keystore.properties
 
 **/build/
