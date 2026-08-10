@@ -39,6 +39,7 @@ fun HarborRoot(
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
     onAddShortcut: suspend (String) -> Boolean,
+    onPickPersonalFiles: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -140,6 +141,7 @@ fun HarborRoot(
             onOpenPackageDetails = onOpenPackageDetails,
             onUninstallPackage = onUninstallPackage,
             onAddShortcut = onAddShortcut,
+            onPickPersonalFiles = onPickPersonalFiles,
         )
     } else {
         val policyManager = context.getSystemService(DevicePolicyManager::class.java)

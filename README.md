@@ -15,6 +15,8 @@ Harbor is a free and open-source Android application for creating and managing a
 - Starts system-confirmed uninstall flows for non-system apps.
 - Explains when Android Settings must be used for work-profile toggles or removal.
 - Lets the user prepare APK installation while retaining Android's per-source consent prompt for the app that opened the APK.
+- Provides a supported personal-to-work file flow: tap `Pick from personal files` in work Harbor, or use the personal profile's Share action and choose Harbor with the work badge. Harbor copies the file into work-profile `Downloads/Harbor` without deleting the personal original.
+- The sharing policy is applied by the Harbor instance inside the work profile. When testing an update, update/open that work-badged Harbor copy; installing only the personal-profile copy does not change the active profile owner.
 - Provides optional Shizuku developer tools for diagnostics, allowlisted package cloning, and experimental multi-user workspaces.
 
 The core DPC path works without Shizuku. Advanced tools are opt-in and are never required to provision or manage the primary work profile.
@@ -45,7 +47,7 @@ Harbor is behaviorally inspired by Island, but it is a clean implementation with
 
 ## Current status
 
-The current release line is `0.2.0-alpha02`.
+The current release line is `0.2.0-alpha03`.
 
 Implemented:
 
