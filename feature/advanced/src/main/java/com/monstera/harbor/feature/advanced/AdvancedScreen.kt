@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.monstera.harbor.core.topology.AndroidUserId
+import com.monstera.harbor.core.topology.CloneProfileRelationship
 import com.monstera.harbor.core.topology.LocalProfileKind
 import com.monstera.harbor.core.topology.MultiUserController
 import com.monstera.harbor.core.topology.PackageName
@@ -54,6 +55,7 @@ fun AdvancedScreen(
     multiUserController: MultiUserController,
     topology: ProfileTopology,
     onBack: () -> Unit,
+    onDisable: () -> Unit,
 ) {
     val backendState by backend.observeState().collectAsState(
         initial = com.monstera.harbor.core.topology.PrivilegedBackendState(
@@ -85,6 +87,7 @@ fun AdvancedScreen(
             TopAppBar(
                 title = { Text("Advanced tools") },
                 navigationIcon = { TextButton(onClick = onBack) { Text("Back") } },
+                actions = { TextButton(onClick = onDisable) { Text("Disable") } },
             )
         },
     ) { padding ->
@@ -140,7 +143,6 @@ fun AdvancedScreen(
                     item {
                         ClonePanel(
                             backend = backend,
-                            topology = topology,
                             busy = busy,
                             onBusy = { busy = it },
                             onStatus = { status = it },
@@ -181,13 +183,12 @@ private fun DiagnosticsCard(diagnostics: SystemDiagnostics) {
 @Composable
 private fun ClonePanel(
     backend: PrivilegedBackend,
-    topology: ProfileTopology,
     busy: Boolean,
     onBusy: (Boolean) -> Unit,
     onStatus: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sourceUser = topology.associatedProfiles.firstOrNull { !it.isCurrent }?.userId
+    var relationship by remember { mutableStateOf<CloneProfileRelationship?>(null) }
     var packages by remember { mutableStateOf<List<PackageName>>(emptyList()) }
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<PackageName?>(null) }
@@ -196,60 +197,68 @@ private fun ClonePanel(
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Clone an installed package", style = MaterialTheme.typography.titleMedium)
             Text("Harbor asks Android's package manager to install an existing package into this work profile. App data is never copied.")
-            if (sourceUser == null) {
-                Text("No associated parent profile is visible.")
-            } else {
-                OutlinedButton(
-                    enabled = !busy,
+            OutlinedButton(
+                enabled = !busy,
+                onClick = {
+                    scope.launch {
+                        onBusy(true)
+                        packages = emptyList()
+                        relationship = null
+                        when (val resolved = backend.resolveCloneProfile()) {
+                            is PrivilegedResult.Success -> {
+                                when (val result = backend.listPackages(resolved.value.sourceFullUser.id)) {
+                                    is PrivilegedResult.Success -> {
+                                        relationship = resolved.value
+                                        packages = result.value
+                                        onStatus(
+                                            "Found ${result.value.size} packages in user " +
+                                                resolved.value.sourceFullUser.id.value,
+                                        )
+                                    }
+                                    is PrivilegedResult.Failure -> onStatus(result.reason)
+                                }
+                            }
+                            is PrivilegedResult.Failure -> onStatus(resolved.reason)
+                        }
+                        onBusy(false)
+                    }
+                },
+            ) { Text("Resolve and load parent packages") }
+
+            if (packages.isNotEmpty()) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Filter package names") },
+                )
+                packages.asSequence()
+                    .filter { query.isBlank() || it.value.contains(query, ignoreCase = true) }
+                    .take(8)
+                    .forEach { packageName ->
+                        Text(
+                            text = packageName.value,
+                            modifier = Modifier.fillMaxWidth().clickable { selected = packageName }.padding(8.dp),
+                            fontWeight = if (selected == packageName) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    }
+                Button(
+                    enabled = selected != null && relationship != null && !busy,
                     onClick = {
+                        val packageName = selected ?: return@Button
+                        val target = relationship?.targetManagedProfile ?: return@Button
                         scope.launch {
                             onBusy(true)
-                            when (val result = backend.listPackages(sourceUser)) {
-                                is PrivilegedResult.Success -> {
-                                    packages = result.value
-                                    onStatus("Found ${result.value.size} packages in user ${sourceUser.value}")
-                                }
-                                is PrivilegedResult.Failure -> onStatus(result.reason)
-                            }
+                            onStatus(
+                                when (val result = backend.installExisting(packageName, target.id)) {
+                                    is PrivilegedResult.Success -> result.value.message.ifBlank { "Package installed" }
+                                    is PrivilegedResult.Failure -> result.reason
+                                },
+                            )
                             onBusy(false)
                         }
                     },
-                ) { Text("Load parent packages") }
-
-                if (packages.isNotEmpty()) {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Filter package names") },
-                    )
-                    packages.asSequence()
-                        .filter { query.isBlank() || it.value.contains(query, ignoreCase = true) }
-                        .take(8)
-                        .forEach { packageName ->
-                            Text(
-                                text = packageName.value,
-                                modifier = Modifier.fillMaxWidth().clickable { selected = packageName }.padding(8.dp),
-                                fontWeight = if (selected == packageName) FontWeight.Bold else FontWeight.Normal,
-                            )
-                        }
-                    Button(
-                        enabled = selected != null && !busy,
-                        onClick = {
-                            val packageName = selected ?: return@Button
-                            scope.launch {
-                                onBusy(true)
-                                onStatus(
-                                    when (val result = backend.installExisting(packageName, topology.currentUser)) {
-                                        is PrivilegedResult.Success -> result.value.message.ifBlank { "Package installed" }
-                                        is PrivilegedResult.Failure -> result.reason
-                                    },
-                                )
-                                onBusy(false)
-                            }
-                        },
-                    ) { Text("Clone selected package") }
-                }
+                ) { Text("Clone selected package") }
             }
         }
     }

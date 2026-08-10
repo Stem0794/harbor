@@ -29,18 +29,59 @@ data class SystemUser(
     val flags: Int,
     val isRunning: Boolean,
 ) {
+    val isManagedProfile: Boolean
+        get() = flags and FLAG_MANAGED_PROFILE != 0
+
     val isProfile: Boolean
         get() = flags and (FLAG_MANAGED_PROFILE or FLAG_PROFILE) != 0
 
+    val isFullUser: Boolean
+        get() = flags and FLAG_FULL != 0 || !isProfile && flags and FLAG_SYSTEM == 0
+
     val isSwitchableFullUser: Boolean
-        get() = !isProfile && flags and (FLAG_RESTRICTED or FLAG_DISABLED or FLAG_SYSTEM) == 0
+        get() = isFullUser && !isProfile && flags and (FLAG_RESTRICTED or FLAG_DISABLED) == 0
 
     private companion object {
         const val FLAG_RESTRICTED = 0x00000008
         const val FLAG_MANAGED_PROFILE = 0x00000020
         const val FLAG_DISABLED = 0x00000040
+        const val FLAG_FULL = 0x00000400
         const val FLAG_SYSTEM = 0x00000800
         const val FLAG_PROFILE = 0x00001000
+    }
+}
+
+data class CloneProfileRelationship(
+    val sourceFullUser: SystemUser,
+    val targetManagedProfile: SystemUser,
+)
+
+object CloneProfileRelationshipResolver {
+    fun resolve(
+        currentFullUser: AndroidUserId,
+        users: List<SystemUser>,
+    ): PrivilegedResult<CloneProfileRelationship> {
+        val source = users.singleOrNull {
+            it.id == currentFullUser && it.isSwitchableFullUser
+        } ?: return PrivilegedResult.Failure(
+            "Harbor cannot safely identify the current full Android user",
+            false,
+        )
+        val profiles = users.filter(SystemUser::isProfile)
+        if (profiles.size != 1) {
+            return PrivilegedResult.Failure(
+                "Harbor cannot safely identify one work profile in this user topology",
+                false,
+            )
+        }
+        val target = profiles.single()
+        if (!target.isManagedProfile || !target.isRunning) {
+            return PrivilegedResult.Failure(
+                "The only visible profile is not an active managed work profile",
+                false,
+            )
+        }
+        return PrivilegedResult.Success(CloneProfileRelationship(source, target))
     }
 }
 
@@ -62,6 +103,7 @@ interface PrivilegedBackend {
     fun refresh()
     suspend fun requestPermission(): PrivilegedResult<Unit>
     suspend fun diagnostics(): PrivilegedResult<SystemDiagnostics>
+    suspend fun resolveCloneProfile(): PrivilegedResult<CloneProfileRelationship>
     suspend fun listPackages(user: AndroidUserId): PrivilegedResult<List<PackageName>>
     suspend fun installExisting(
         packageName: PackageName,
@@ -81,6 +123,7 @@ class NoOpPrivilegedBackend : PrivilegedBackend {
     override suspend fun requestPermission(): PrivilegedResult<Unit> = unavailable()
     override fun refresh() = Unit
     override suspend fun diagnostics(): PrivilegedResult<SystemDiagnostics> = unavailable()
+    override suspend fun resolveCloneProfile(): PrivilegedResult<CloneProfileRelationship> = unavailable()
     override suspend fun listPackages(user: AndroidUserId): PrivilegedResult<List<PackageName>> = unavailable()
     override suspend fun installExisting(
         packageName: PackageName,

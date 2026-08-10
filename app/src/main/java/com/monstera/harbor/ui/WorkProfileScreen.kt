@@ -43,7 +43,7 @@ fun WorkProfileScreen(
     controller: WorkProfileController,
     ownPackage: String,
     onAdvanced: () -> Unit,
-    onOpenWorkSettings: () -> Unit,
+    onOpenSystemSettings: () -> Unit,
     onLaunchPackage: (String) -> Boolean,
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
@@ -80,7 +80,7 @@ fun WorkProfileScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text("${apps.size} applications", style = MaterialTheme.typography.bodySmall)
-                TextButton(onClick = onOpenWorkSettings) { Text("Work settings") }
+                TextButton(onClick = onOpenSystemSettings) { Text("System settings") }
             }
             val visibleApps = remember(apps, query) {
                 apps.filter {
@@ -97,11 +97,12 @@ fun WorkProfileScreen(
                         busy = busyPackage == app.packageName.value,
                         onToggleHidden = {
                             scope.launch {
+                                val requestedHidden = !app.isHidden
                                 busyPackage = app.packageName.value
-                                when (val result = controller.setApplicationHidden(app.packageName, !app.isHidden)) {
+                                when (val result = controller.setApplicationHidden(app.packageName, requestedHidden)) {
                                     is PolicyResult.Success -> apps = apps.map { current ->
                                         if (current.packageName == app.packageName) {
-                                            current.copy(isHidden = result.value)
+                                            current.copy(isHidden = requestedHidden)
                                         } else {
                                             current
                                         }

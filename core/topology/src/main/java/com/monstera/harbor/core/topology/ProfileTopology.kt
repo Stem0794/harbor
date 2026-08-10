@@ -20,14 +20,12 @@ enum class ProfileOwnership {
 }
 
 data class AssociatedProfile(
-    val userId: AndroidUserId,
     val isCurrent: Boolean,
     val kind: LocalProfileKind,
     val ownership: ProfileOwnership,
 )
 
 data class ProfileTopology(
-    val currentUser: AndroidUserId,
     val localKind: LocalProfileKind,
     val harborIsProfileOwner: Boolean,
     val associatedProfiles: List<AssociatedProfile>,
@@ -54,10 +52,6 @@ class ProfileTopologyDetector(private val context: Context) {
             else -> LocalProfileKind.FULL_USER
         }
         return ProfileTopology(
-            // Android does not expose UserHandle#getIdentifier to ordinary apps. Its public
-            // hashCode is used only as a candidate and is revalidated against a fresh Shizuku
-            // user listing before any privileged operation.
-            currentUser = AndroidUserId(currentHandle.hashCode()),
             localKind = localKind,
             harborIsProfileOwner = isProfileOwner,
             associatedProfiles = userManager.userProfiles.map { handle ->
@@ -66,7 +60,6 @@ class ProfileTopologyDetector(private val context: Context) {
                     launcherApps.getActivityList(context.packageName, handle).isNotEmpty()
                 }.getOrDefault(false)
                 AssociatedProfile(
-                    userId = AndroidUserId(handle.hashCode()),
                     isCurrent = isCurrent,
                     kind = if (isCurrent) localKind else LocalProfileKind.UNKNOWN_PROFILE,
                     ownership = when {
