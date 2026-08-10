@@ -15,10 +15,12 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:data"))
     implementation(project(":core:topology"))
     implementation(project(":privileged:shizuku"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coroutines.android)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

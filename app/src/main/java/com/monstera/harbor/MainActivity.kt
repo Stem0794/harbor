@@ -2,11 +2,17 @@ package com.monstera.harbor
 
 import android.app.admin.DevicePolicyManager
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.content.pm.LauncherApps
 import android.os.Bundle
 import android.os.Process
 import android.os.UserManager
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -34,6 +40,7 @@ class MainActivity : ComponentActivity() {
                     onLaunchPackage = ::launchPackage,
                     onOpenPackageDetails = ::openPackageDetails,
                     onUninstallPackage = ::uninstallPackage,
+                    onAddShortcut = ::addShortcut,
                 )
             }
         }
@@ -81,5 +88,41 @@ class MainActivity : ComponentActivity() {
 
     private fun uninstallPackage(packageName: String) {
         startActivity(Intent(Intent.ACTION_DELETE, "package:$packageName".toUri()))
+    }
+
+    private suspend fun addShortcut(packageName: String): Boolean {
+        val shortcutManager = getSystemService(ShortcutManager::class.java)
+        if (!shortcutManager.isRequestPinShortcutSupported) return false
+        val applicationInfo = runCatching { packageManager.getApplicationInfo(packageName, 0) }.getOrNull()
+            ?: return false
+        val shortcutId = java.util.UUID.randomUUID().toString()
+        val graph = (application as HarborApplication).graph
+        graph.preferences.saveShortcut(
+            shortcutId,
+            com.monstera.harbor.core.topology.PackageName(packageName),
+        )
+        val drawable = applicationInfo.loadIcon(packageManager)
+        val iconSize = maxOf(drawable.intrinsicWidth, drawable.intrinsicHeight, 1)
+        val bitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).also { canvas ->
+            drawable.setBounds(0, 0, iconSize, iconSize)
+            drawable.draw(canvas)
+        }
+        val shortcut = ShortcutInfo.Builder(this, shortcutId)
+            .setShortLabel(applicationInfo.loadLabel(packageManager).toString().ifBlank { packageName })
+            .setLongLabel("Launch ${applicationInfo.loadLabel(packageManager)}")
+            .setIcon(Icon.createWithBitmap(bitmap))
+            .setIntent(
+                Intent(this, ShortcutEntryActivity::class.java)
+                    .putExtra(Intent.EXTRA_SHORTCUT_ID, shortcutId),
+            )
+            .build()
+        val requested = runCatching { shortcutManager.requestPinShortcut(shortcut, null) }.getOrDefault(false)
+        if (!requested) {
+            graph.preferences.removeShortcut(shortcutId)
+        } else {
+            Toast.makeText(this, "Choose where to add the Harbor shortcut", Toast.LENGTH_SHORT).show()
+        }
+        return requested
     }
 }

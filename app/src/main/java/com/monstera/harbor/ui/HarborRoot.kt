@@ -17,9 +17,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.monstera.harbor.HarborGraph
 import com.monstera.harbor.core.policy.WorkProfileStatus
+import com.monstera.harbor.core.topology.HarborPrivilegeResolver
+import com.monstera.harbor.core.topology.PrivilegedAvailability
+import com.monstera.harbor.core.topology.PrivilegedBackendState
 import com.monstera.harbor.feature.advanced.AdvancedScreen
+import com.monstera.harbor.core.topology.UserVisibleName
 import kotlinx.coroutines.launch
 
 private enum class HarborDestination { HOME, ADVANCED }
@@ -33,6 +38,7 @@ fun HarborRoot(
     onLaunchPackage: (String) -> Boolean,
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
+    onAddShortcut: suspend (String) -> Boolean,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -44,6 +50,18 @@ fun HarborRoot(
         ),
     )
     val advancedEnabled by graph.preferences.advancedToolsEnabled.collectAsStateWithLifecycle(false)
+    val privilegedState by graph.privilegedBackend.observeState().collectAsStateWithLifecycle(
+        initialValue = PrivilegedBackendState(PrivilegedAvailability.BINDER_UNAVAILABLE),
+    )
+    val privilegeState = HarborPrivilegeResolver.resolve(advancedEnabled, privilegedState)
+    val workspaceViewModel: WorkspaceViewModel = viewModel(
+        factory = WorkspaceViewModel.Factory(
+            graph.privilegedBackend,
+            graph.privilegedBackend,
+            graph.workspaceMetadataStore,
+        ),
+    )
+    val workspaceState by workspaceViewModel.state.collectAsStateWithLifecycle()
     var destination by remember { mutableStateOf(HarborDestination.HOME) }
     var showAdvancedConfirmation by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
@@ -54,6 +72,14 @@ fun HarborRoot(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(advancedEnabled, privilegedState.availability) {
+        if (advancedEnabled && privilegedState.availability == PrivilegedAvailability.READY) {
+            workspaceViewModel.refresh()
+        } else {
+            workspaceViewModel.clear()
+        }
     }
 
     fun openAdvanced() {
@@ -86,6 +112,9 @@ fun HarborRoot(
             backend = graph.privilegedBackend,
             multiUserController = graph.privilegedBackend,
             topology = topology,
+            privilegeState = HarborPrivilegeResolver.resolve(true, privilegedState),
+            iconProvider = graph.iconProvider,
+            packageMetadataProvider = graph.packageMetadataProvider,
             onBack = { destination = HarborDestination.HOME },
             onDisable = {
                 scope.launch {
@@ -103,11 +132,14 @@ fun HarborRoot(
             catalog = graph.appCatalog,
             controller = graph.policyController,
             ownPackage = context.packageName,
+            privilegeState = privilegeState,
+            iconProvider = graph.iconProvider,
             onAdvanced = ::openAdvanced,
             onOpenSystemSettings = onOpenSystemSettings,
             onLaunchPackage = onLaunchPackage,
             onOpenPackageDetails = onOpenPackageDetails,
             onUninstallPackage = onUninstallPackage,
+            onAddShortcut = onAddShortcut,
         )
     } else {
         val policyManager = context.getSystemService(DevicePolicyManager::class.java)
@@ -116,6 +148,22 @@ fun HarborRoot(
         )
         PersonalProfileScreen(
             topology = topology,
+            privilegeState = privilegeState,
+            workspaceUsers = workspaceState.users,
+            workspaceCurrentUserId = workspaceState.currentUserId,
+            workspaceMetadata = workspaceState.metadata,
+            workspaceBusy = workspaceState.loading,
+            workspaceMessage = workspaceState.message,
+            onRefreshWorkspaces = workspaceViewModel::refresh,
+            onSwitchWorkspace = workspaceViewModel::switchUser,
+            onInstallWorkspace = workspaceViewModel::installHarbor,
+            onCreateWorkspace = { name ->
+                runCatching { UserVisibleName(name) }
+                    .onSuccess(workspaceViewModel::createFullUser)
+                    .onFailure { workspaceViewModel.setMessage(it.message ?: "Invalid workspace name") }
+            },
+            onRenameWorkspace = workspaceViewModel::rename,
+            onChangeWorkspaceIcon = workspaceViewModel::setIcon,
             provisioningAllowed = provisioningAllowed,
             message = message,
             onProvision = onProvision,
