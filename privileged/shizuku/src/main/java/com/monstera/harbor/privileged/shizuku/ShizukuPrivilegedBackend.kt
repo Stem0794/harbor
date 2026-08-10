@@ -6,6 +6,8 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.IBinder
 import com.monstera.harbor.core.topology.AndroidUserId
+import com.monstera.harbor.core.topology.CloneProfileRelationship
+import com.monstera.harbor.core.topology.CloneProfileRelationshipResolver
 import com.monstera.harbor.core.topology.InstallExistingResult
 import com.monstera.harbor.core.topology.MultiUserController
 import com.monstera.harbor.core.topology.PackageName
@@ -114,21 +116,26 @@ class ShizukuPrivilegedBackend(
         )
     }
 
+    override suspend fun resolveCloneProfile(): PrivilegedResult<CloneProfileRelationship> = call { remote ->
+        latestCloneProfile(remote)
+    }
+
     override suspend fun installExisting(
         packageName: PackageName,
         targetUser: AndroidUserId,
     ): PrivilegedResult<InstallExistingResult> = call { remote ->
-        val target = latestUsers(remote).getOrElseFailure { return@call it }
-            .firstOrNull { it.id == targetUser && it.isProfile }
-            ?: return@call PrivilegedResult.Failure("The target is not a current Android profile")
+        val relationship = latestCloneProfile(remote).getOrElseFailure { return@call it }
+        val target = relationship.targetManagedProfile.takeIf { it.id == targetUser }
+            ?: return@call PrivilegedResult.Failure("The target is not the current unambiguous work profile")
         CommandResponse.decode(remote.installExisting(packageName.value, targetUser.value)).toResult {
             InstallExistingResult(packageName, target.id, output)
         }
     }
 
     override suspend fun listPackages(user: AndroidUserId): PrivilegedResult<List<PackageName>> = call { remote ->
-        if (latestUsers(remote).getOrElseFailure { return@call it }.none { it.id == user }) {
-            return@call PrivilegedResult.Failure("Android user ${user.value} is no longer available")
+        val relationship = latestCloneProfile(remote).getOrElseFailure { return@call it }
+        if (relationship.sourceFullUser.id != user) {
+            return@call PrivilegedResult.Failure("The package source is not the current unambiguous parent user")
         }
         val response = CommandResponse.decode(remote.listPackages(user.value))
         if (!response.isSuccess) return@call PrivilegedResult.Failure(response.output)
@@ -283,7 +290,34 @@ class ShizukuPrivilegedBackend(
         if (isSuccess) PrivilegedResult.Success(value()) else PrivilegedResult.Failure(output)
 
     private fun latestUsers(remote: IHarborUserService): PrivilegedResult<List<SystemUser>> =
-        CommandResponse.decode(remote.listUsers()).toResult { SystemUserParser.parse(output) }
+        CommandResponse.decode(remote.listUsers()).toResult {
+            val parsed = SystemUserParser.parseResult(output)
+            when {
+                !parsed.isComplete -> return PrivilegedResult.Failure(
+                    "Android returned a partially unrecognized user list",
+                    false,
+                )
+                parsed.users.isEmpty() -> return PrivilegedResult.Failure(
+                    "Android returned no recognizable users",
+                    false,
+                )
+                else -> parsed.users
+            }
+        }
+
+    private fun latestCloneProfile(
+        remote: IHarborUserService,
+    ): PrivilegedResult<CloneProfileRelationship> {
+        val currentResponse = CommandResponse.decode(remote.currentUser())
+        if (!currentResponse.isSuccess) return PrivilegedResult.Failure(currentResponse.output)
+        val currentUser = currentResponse.output.lineSequence()
+            .map(String::trim)
+            .firstNotNullOfOrNull(String::toIntOrNull)
+            ?.let(::AndroidUserId)
+            ?: return PrivilegedResult.Failure("Android did not report the current full user", false)
+        val users = latestUsers(remote).getOrElseFailure { return it }
+        return CloneProfileRelationshipResolver.resolve(currentUser, users)
+    }
 
     private inline fun <T, R> PrivilegedResult<T>.mapSuccess(transform: (T) -> R): PrivilegedResult<R> = when (this) {
         is PrivilegedResult.Success -> PrivilegedResult.Success(transform(value))

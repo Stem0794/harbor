@@ -29,7 +29,7 @@ fun HarborRoot(
     graph: HarborGraph,
     onProvision: () -> Unit,
     onOpenWorkHarbor: () -> Boolean,
-    onOpenWorkSettings: () -> Unit,
+    onOpenSystemSettings: () -> Unit,
     onLaunchPackage: (String) -> Boolean,
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
@@ -87,6 +87,13 @@ fun HarborRoot(
             multiUserController = graph.privilegedBackend,
             topology = topology,
             onBack = { destination = HarborDestination.HOME },
+            onDisable = {
+                scope.launch {
+                    graph.preferences.setAdvancedToolsEnabled(false)
+                    graph.privilegedBackend.release()
+                    destination = HarborDestination.HOME
+                }
+            },
         )
         return
     }
@@ -97,7 +104,7 @@ fun HarborRoot(
             controller = graph.policyController,
             ownPackage = context.packageName,
             onAdvanced = ::openAdvanced,
-            onOpenWorkSettings = onOpenWorkSettings,
+            onOpenSystemSettings = onOpenSystemSettings,
             onLaunchPackage = onLaunchPackage,
             onOpenPackageDetails = onOpenPackageDetails,
             onUninstallPackage = onUninstallPackage,

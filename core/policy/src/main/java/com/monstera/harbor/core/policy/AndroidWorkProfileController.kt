@@ -45,16 +45,14 @@ class AndroidWorkProfileController(
     override suspend fun setApplicationHidden(
         packageName: PackageName,
         hidden: Boolean,
-    ): PolicyResult<Boolean> = withContext(Dispatchers.IO) {
+    ): PolicyResult<Unit> = withContext(Dispatchers.IO) {
         if (!isOwner()) return@withContext PolicyResult.Failure("Harbor is not the profile owner")
         if (packageName.value in protectedPackages) {
             return@withContext PolicyResult.Failure("This package is required for profile recovery", false)
         }
-        runCatching { policyManager.setApplicationHidden(admin, packageName.value, hidden) }
-            .fold(
-                onSuccess = { PolicyResult.Success(it) },
-                onFailure = { PolicyResult.Failure(it.message ?: it.javaClass.simpleName) },
-            )
+        applyBooleanPolicyChange {
+            policyManager.setApplicationHidden(admin, packageName.value, hidden)
+        }
     }
 
     override suspend fun isApplicationHidden(packageName: PackageName): PolicyResult<Boolean> =

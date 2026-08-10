@@ -2,16 +2,13 @@ package com.monstera.harbor.core.topology
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
 
 /**
  * Regression scaffold for plan.md P1.4.
  *
- * Enable this class while implementing the full-user/switchability remediation.
- * The current implementation deliberately does not satisfy every assertion yet.
+ * Regression coverage for plan.md P1.4.
  */
-@Ignore("Enable while implementing plan.md P1.4")
 class UserClassificationRemediationTest {
     @Test
     fun normalSystemOwnerFullUserRemainsSwitchable() {
