@@ -1,1 +1,1 @@
-Work-profile dashboard, privilege indicator, app icons, batch freeze/unfreeze, enriched Shizuku cloning, workspace aliases/icons, and secure work-profile launch shortcuts.
+Directional personal-to-work file sharing, work-profile dashboard, privilege indicator, app icons, batch freeze/unfreeze, enriched Shizuku cloning, workspace aliases/icons, and secure work-profile launch shortcuts.
