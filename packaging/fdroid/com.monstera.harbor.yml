@@ -7,17 +7,10 @@ IssueTracker: https://github.com/Stem0794/harbor/issues
 Changelog: https://github.com/Stem0794/harbor/releases
 
 AutoName: Harbor
-Summary: Local work-profile isolation and app management
 Description: |-
   Harbor creates a standard Android work profile and manages applications
   locally. Optional Advanced tools integrate with a separately installed
   Shizuku service. The core app does not require Shizuku or network access.
-MaintainerNotes: |-
-  The core work-profile controller does not depend on Shizuku. The optional
-  Shizuku integration is disabled unless the user enables Advanced tools and
-  grants access to a separately installed Shizuku service. Harbor does not
-  bundle, download, or start that service.
-
 RepoType: git
 Repo: https://github.com/Stem0794/harbor.git
 
@@ -25,13 +18,19 @@ Builds:
   - versionName: 0.2.0-alpha05
     versionCode: 7
     commit: v0.2.0-alpha05
-    subdir: .
     gradle:
       - yes
     output: app/build/outputs/apk/release/app-release-unsigned.apk
 
+MaintainerNotes: |-
+  The core work-profile controller does not depend on Shizuku. The optional
+  Shizuku integration is disabled unless the user enables Advanced tools and
+  grants access to a separately installed Shizuku service. Harbor does not
+  bundle, download, or start that service.
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-UpdateCheckData: 'gradle.properties|harbor\.versionCode=(\d+)|gradle.properties|harbor\.versionName=([^\n]+)'
+UpdateCheckData: 
+  gradle.properties|harbor\.versionCode=(\d+)|gradle.properties|harbor\.versionName=([^\n]+)
 CurrentVersion: 0.2.0-alpha05
 CurrentVersionCode: 7
