@@ -16,6 +16,7 @@ captures/
 *.keystore
 *.p12
 *.pfx
+harbor-release-password.txt
 keystore.properties
 
 **/build/

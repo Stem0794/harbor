@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,10 +21,19 @@ fun PrivilegeBadge(
     modifier: Modifier = Modifier,
 ) {
     Card(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("Privilege", style = MaterialTheme.typography.labelLarge)
-            Text(state.level.label(), style = MaterialTheme.typography.titleMedium)
-            Text(state.secondary.label(), style = MaterialTheme.typography.bodySmall)
+        Row(
+            Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("Access", style = MaterialTheme.typography.labelLarge)
+                Text(state.level.label(), style = MaterialTheme.typography.titleMedium)
+            }
+            Text(
+                state.secondary.label(),
+                modifier = Modifier.weight(1.4f),
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 }
