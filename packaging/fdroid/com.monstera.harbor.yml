@@ -7,6 +7,7 @@ IssueTracker: https://github.com/Stem0794/harbor/issues
 Changelog: https://github.com/Stem0794/harbor/releases
 
 AutoName: Harbor
+
 RepoType: git
 Repo: https://github.com/Stem0794/harbor.git
 Binaries: https://github.com/Stem0794/harbor/releases/download/v%v/app-release-signed.apk
