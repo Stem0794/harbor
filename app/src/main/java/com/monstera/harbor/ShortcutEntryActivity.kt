@@ -25,9 +25,16 @@ class ShortcutEntryActivity : ComponentActivity() {
         }
         val graph = (application as HarborApplication).graph
         lifecycleScope.launch {
-            val packageName = graph.preferences.shortcutPackage(shortcutId)
-            if (packageName == null) {
+            val target = graph.preferences.shortcutTarget(shortcutId)
+            if (target == null) {
                 finishWithMessage("This Harbor shortcut is no longer available")
+                return@launch
+            }
+            val packageName = target.packageName
+            val currentSigners = PackageSigner.fingerprints(packageManager, packageName.value)
+            if (currentSigners.isEmpty() || currentSigners.intersect(target.signerDigests).isEmpty()) {
+                graph.preferences.removeShortcut(shortcutId)
+                finishWithMessage("The target app identity changed; create a new shortcut")
                 return@launch
             }
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName.value)

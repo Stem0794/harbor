@@ -138,6 +138,11 @@ fun WorkProfileScreen(
                             "Choose files in Personal Harbor, or share from a personal app to Harbor's briefcase target.",
                             style = MaterialTheme.typography.bodySmall,
                         )
+                        Text(
+                            "Android may also offer these files to other compatible work apps. If you choose another app, that app receives the selected file. Harbor copies files and never deletes the personal original.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                         Column(
                             Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -238,6 +243,11 @@ fun WorkProfileScreen(
                 Text(
                     if (uiState.query.isBlank()) "Apps in this work profile" else "Matching apps",
                     style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    "Freeze hides an app without uninstalling it; its work data stays on the device. Add to launcher creates a home-screen shortcut and unfreezes the app when opened.",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
 
@@ -345,7 +355,7 @@ private fun ManagedAppCard(
                     modifier = Modifier.weight(1f),
                     enabled = !busy && !app.isSystem,
                     onClick = onToggleHidden,
-                ) { Text(if (app.isHidden) "Unfreeze" else "Freeze") }
+                ) { Text(if (app.isHidden) "Unfreeze app" else "Freeze app") }
                 OutlinedButton(
                     modifier = Modifier.weight(1f),
                     enabled = app.isLaunchable && !app.isHidden,
@@ -356,7 +366,7 @@ private fun ManagedAppCard(
                 TextButton(onClick = onDetails) { Text("Details") }
                 if (app.isLaunchable) {
                     TextButton(onClick = onAddShortcut) {
-                        Text(if (app.isHidden) "Shortcut + unfreeze" else "Add shortcut")
+                        Text(if (app.isHidden) "Add & unfreeze" else "Add to launcher")
                     }
                 }
                 if (!app.isSystem) {

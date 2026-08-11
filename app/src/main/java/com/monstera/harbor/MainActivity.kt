@@ -10,11 +10,8 @@ import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.content.pm.LauncherApps
 import android.net.Uri
 import android.os.Bundle
-import android.os.Process
-import android.os.UserManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -67,14 +64,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openWorkHarbor(): Boolean {
-        val launcherApps = getSystemService(LauncherApps::class.java)
-        val userManager = getSystemService(UserManager::class.java)
-        val target = userManager.userProfiles.firstNotNullOfOrNull { user ->
-            if (user == Process.myUserHandle()) return@firstNotNullOfOrNull null
-            launcherApps.getActivityList(packageName, user).firstOrNull()?.let { user to it.componentName }
-        } ?: return false
+        // CrossProfileApps exposes the profiles that this app can reach, rather than
+        // every full Android user. This avoids accidentally opening Harbor in a
+        // secondary user when the work-profile button is pressed.
+        val crossProfileApps = getSystemService(CrossProfileApps::class.java)
+        val target = runCatching { crossProfileApps.targetUserProfiles.singleOrNull() }
+            .getOrNull()
+            ?: return false
         return runCatching {
-            launcherApps.startMainActivity(target.second, target.first, null, null)
+            crossProfileApps.startMainActivity(ComponentName(this, MainActivity::class.java), target)
             true
         }.getOrDefault(false)
     }
@@ -149,11 +147,14 @@ class MainActivity : ComponentActivity() {
         if (!shortcutManager.isRequestPinShortcutSupported) return false
         val applicationInfo = runCatching { packageManager.getApplicationInfo(packageName, 0) }.getOrNull()
             ?: return false
+        val signerDigests = PackageSigner.fingerprints(packageManager, packageName)
+        if (signerDigests.isEmpty()) return false
         val shortcutId = java.util.UUID.randomUUID().toString()
         val graph = (application as HarborApplication).graph
         graph.preferences.saveShortcut(
             shortcutId,
             com.monstera.harbor.core.topology.PackageName(packageName),
+            signerDigests,
         )
         val drawable = applicationInfo.loadIcon(packageManager)
         val iconSize = maxOf(drawable.intrinsicWidth, drawable.intrinsicHeight, 1)

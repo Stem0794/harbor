@@ -96,7 +96,7 @@ fun AdvancedScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                PrivilegeBadge(privilegeState)
+                PrivilegeBadge(privilegeState, showAdvancedDetails = true)
             }
 
             item {

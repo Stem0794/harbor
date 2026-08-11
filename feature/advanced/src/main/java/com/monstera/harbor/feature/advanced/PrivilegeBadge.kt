@@ -19,6 +19,7 @@ import com.monstera.harbor.core.topology.HarborPrivilegeState
 fun PrivilegeBadge(
     state: HarborPrivilegeState,
     modifier: Modifier = Modifier,
+    showAdvancedDetails: Boolean = false,
 ) {
     Card(modifier.fillMaxWidth()) {
         Row(
@@ -30,7 +31,7 @@ fun PrivilegeBadge(
                 Text(state.level.label(), style = MaterialTheme.typography.titleMedium)
             }
             Text(
-                state.secondary.label(),
+                if (showAdvancedDetails) state.secondary.label() else "Standard Android access",
                 modifier = Modifier.weight(1.4f),
                 style = MaterialTheme.typography.bodySmall,
             )
