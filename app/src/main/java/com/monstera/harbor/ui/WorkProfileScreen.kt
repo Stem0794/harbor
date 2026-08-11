@@ -1,5 +1,6 @@
 package com.monstera.harbor.ui
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -40,8 +40,8 @@ import com.monstera.harbor.core.data.ManagedApp
 import com.monstera.harbor.core.policy.PolicyResult
 import com.monstera.harbor.core.policy.WorkProfileController
 import com.monstera.harbor.core.topology.HarborPrivilegeState
-import com.monstera.harbor.feature.advanced.PrivilegeBadge
 import com.monstera.harbor.feature.advanced.HarborAppIcon
+import com.monstera.harbor.feature.advanced.PrivilegeBadge
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +58,7 @@ fun WorkProfileScreen(
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
     onAddShortcut: suspend (String) -> Boolean,
-    onPickPersonalFiles: () -> Unit,
+    onOpenPersonalHarbor: () -> Boolean,
 ) {
     val viewModel: WorkAppsViewModel = viewModel(
         factory = WorkAppsViewModel.Factory(catalog, controller, ownPackage),
@@ -87,7 +87,7 @@ fun WorkProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Harbor work profile") },
+                title = { Text("Work profile") },
                 actions = { TextButton(onClick = onAdvanced) { Text("Advanced") } },
             )
         },
@@ -95,130 +95,162 @@ fun WorkProfileScreen(
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item { PrivilegeBadge(privilegeState) }
+
             item {
-                OutlinedTextField(
-                    value = uiState.query,
-                    onValueChange = viewModel::setQuery,
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Search work apps") },
-                    singleLine = true,
-                )
-            }
-            item {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text("${uiState.apps.size} available apps", style = MaterialTheme.typography.bodySmall)
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        TextButton(onClick = onOpenSystemSettings) { Text("System settings") }
-                        TextButton(onClick = {
-                            selectionMode = !selectionMode
-                            viewModel.clearSelection()
-                        }) { Text(if (selectionMode) "Done" else "Select") }
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text("Work apps", style = MaterialTheme.typography.titleMedium)
+                                Text(
+                                    "${uiState.apps.size} available in this profile",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            TextButton(onClick = onOpenSystemSettings) { Text("Settings") }
+                        }
+                        OutlinedTextField(
+                            value = uiState.query,
+                            onValueChange = viewModel::setQuery,
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Search apps") },
+                            singleLine = true,
+                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                            TextButton(onClick = {
+                                selectionMode = !selectionMode
+                                viewModel.clearSelection()
+                            }) { Text(if (selectionMode) "Done" else "Select apps") }
+                        }
                     }
                 }
             }
+
             item {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Import personal files", style = MaterialTheme.typography.titleMedium)
+                        Text("Move files to Work", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Use Pick from personal files here, or use Share in the personal profile and choose Harbor with the briefcase badge. Harbor copies the file into work Downloads/Harbor and never deletes the personal original. An OEM ‘Move to work’ command may remain blocked by the phone manufacturer.",
+                            "Choose files in Personal Harbor, or share from a personal app to Harbor's briefcase target.",
                             style = MaterialTheme.typography.bodySmall,
                         )
+                        Text(
+                            "Android may also offer these files to other compatible work apps. If you choose another app, that app receives the selected file. Harbor copies files and never deletes the personal original.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Column(
+                            Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                if (!onOpenPersonalHarbor()) {
+                                    scope.launch {
+                                        snackbar.showSnackbar("Open Personal Harbor from the personal profile")
+                                    }
+                                }
+                            },
+                            ) { Text("Open Personal Harbor") }
+                            OutlinedButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                enabled = !sharingBusy,
+                                onClick = {
+                                    sharingBusy = true
+                                    scope.launch {
+                                        when (val result = controller.allowPersonalFileSharing()) {
+                                            is PolicyResult.Success -> {
+                                                sharingRequested = true
+                                                snackbar.showSnackbar("Sharing to Harbor is enabled")
+                                            }
+                                            is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
+                                        }
+                                        sharingBusy = false
+                                    }
+                                },
+                            ) { Text(if (sharingBusy) "Enabling…" else "Enable sharing") }
+                        }
                         if (sharingRequested) {
                             Text(
-                                "Android Share → Harbor is enabled. If Move to work still says ‘Action non autorisée’, use Share or this picker instead; Harbor cannot override that OEM-only command.",
+                                "Use Share → Harbor with the briefcase badge. The Android “Move to work” command may still be blocked by the device manufacturer.",
                                 color = MaterialTheme.colorScheme.primary,
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        Button(onClick = onPickPersonalFiles) {
-                            Text("Pick from personal files")
-                        }
-                        OutlinedButton(
-                            enabled = !sharingBusy,
-                            onClick = {
-                                sharingBusy = true
-                                scope.launch {
-                                    when (val result = controller.allowPersonalFileSharing()) {
-                                        is PolicyResult.Success -> {
-                                            sharingRequested = true
-                                            snackbar.showSnackbar(
-                                                "Android sharing is enabled. Use Share → Harbor (work), not Move to work.",
-                                            )
-                                        }
-                                        is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
-                                    }
-                                    sharingBusy = false
-                                }
-                            },
-                        ) { Text(if (sharingBusy) "Enabling…" else "Enable Share → Harbor") }
                     }
                 }
             }
+
             item {
                 Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Install APKs", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Allow Android to ask each source app for consent when you open an APK. Harbor does not grant any source permission automatically.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                    Row(
+                        Modifier.padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text("Install APKs", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Android will ask each source app for permission when you open an APK.",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                         OutlinedButton(onClick = {
                             scope.launch {
                                 when (val result = controller.allowApkInstalls()) {
                                     is PolicyResult.Success -> snackbar.showSnackbar(
-                                        "APK installs are allowed; retry the APK and Android will ask the source app for consent.",
+                                        "APK installs are allowed; retry the APK.",
                                     )
                                     is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
                                 }
                             }
-                        }) { Text("Allow APK installs") }
+                        }) { Text("Allow") }
                     }
                 }
             }
-            item {
-                Text(
-                    "Apps available in this work profile (${visibleApps.size})",
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
+
             if (selectionMode) {
                 item {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        TextButton(onClick = viewModel::selectAllVisible) { Text("Select all visible") }
-                        Text("${uiState.selectedPackages.size} selected", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                item {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        Button(
-                            enabled = !uiState.operationInProgress && uiState.selectedPackages.isNotEmpty(),
-                            onClick = { viewModel.setSelectedHidden(true) },
-                        ) { Text("Freeze") }
-                        OutlinedButton(
-                            enabled = !uiState.operationInProgress && uiState.selectedPackages.isNotEmpty(),
-                            onClick = { viewModel.setSelectedHidden(false) },
-                        ) { Text("Unfreeze") }
-                        TextButton(onClick = {
-                            selectionMode = false
-                            viewModel.clearSelection()
-                        }) { Text("Cancel") }
+                    Card(Modifier.fillMaxWidth()) {
+                        Row(
+                            Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            TextButton(onClick = viewModel::selectAllVisible) { Text("Select all") }
+                            Text(
+                                "${uiState.selectedPackages.size} selected",
+                                modifier = Modifier.weight(1f).padding(top = 12.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Button(
+                                enabled = !uiState.operationInProgress && uiState.selectedPackages.isNotEmpty(),
+                                onClick = { viewModel.setSelectedHidden(true) },
+                            ) { Text("Freeze") }
+                            OutlinedButton(
+                                enabled = !uiState.operationInProgress && uiState.selectedPackages.isNotEmpty(),
+                                onClick = { viewModel.setSelectedHidden(false) },
+                            ) { Text("Unfreeze") }
+                        }
                     }
                 }
             }
+
+            item {
+                Text(
+                    if (uiState.query.isBlank()) "Apps in this work profile" else "Matching apps",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    "Freeze hides an app without uninstalling it; its work data stays on the device. Add to launcher creates a home-screen shortcut and unfreezes the app when opened.",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+
             if (visibleApps.isEmpty()) {
                 item {
                     Text(
@@ -227,7 +259,7 @@ fun WorkProfileScreen(
                         } else {
                             "No matching apps"
                         },
-                        modifier = Modifier.padding(4.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -295,11 +327,20 @@ private fun ManagedAppCard(
             ),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 HarborAppIcon(iconProvider, app.packageName, contentDescription = app.label)
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(app.label, style = MaterialTheme.typography.titleMedium)
-                    Text(app.packageName.value, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        when {
+                            app.isHidden -> "Frozen"
+                            app.isSystem -> "System app · read-only"
+                            !app.isEnabled -> "Disabled"
+                            else -> "Available"
+                        },
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 if (selectionMode) {
                     Checkbox(
@@ -309,31 +350,28 @@ private fun ManagedAppCard(
                     )
                 }
             }
-            Text(
-                when {
-                    app.isHidden -> "Frozen"
-                    app.isSystem -> "System app"
-                    !app.isEnabled -> "Disabled"
-                    else -> "Available"
-                },
-                color = MaterialTheme.colorScheme.primary,
-            )
-            if (!selectionMode) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        enabled = !busy && !app.isSystem,
-                        onClick = onToggleHidden,
-                    ) { Text(if (app.isHidden) "Unfreeze" else "Freeze") }
-                    OutlinedButton(enabled = app.isLaunchable && !app.isHidden, onClick = onLaunch) { Text("Open") }
-                    OutlinedButton(onClick = onDetails) { Text("Details") }
-                }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    enabled = !busy && !app.isSystem,
+                    onClick = onToggleHidden,
+                ) { Text(if (app.isHidden) "Unfreeze app" else "Freeze app") }
                 OutlinedButton(
-                    enabled = app.isLaunchable,
-                    onClick = onAddShortcut,
-                ) { Text(if (app.isHidden) "Launch & unfreeze shortcut" else "Add launcher shortcut") }
+                    modifier = Modifier.weight(1f),
+                    enabled = app.isLaunchable && !app.isHidden,
+                    onClick = onLaunch,
+                ) { Text("Open") }
             }
-            if (!app.isSystem) {
-                TextButton(onClick = onUninstall) { Text("Uninstall") }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                TextButton(onClick = onDetails) { Text("Details") }
+                if (app.isLaunchable) {
+                    TextButton(onClick = onAddShortcut) {
+                        Text(if (app.isHidden) "Add & unfreeze" else "Add to launcher")
+                    }
+                }
+                if (!app.isSystem) {
+                    TextButton(onClick = onUninstall) { Text("Uninstall") }
+                }
             }
         }
     }

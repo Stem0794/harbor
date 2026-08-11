@@ -1,17 +1,17 @@
 package com.monstera.harbor
 
 import android.app.admin.DevicePolicyManager
+import android.content.ClipData
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.CrossProfileApps
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.content.pm.LauncherApps
 import android.net.Uri
 import android.os.Bundle
-import android.os.Process
-import android.os.UserManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -19,20 +19,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import com.monstera.harbor.ui.HarborRoot
 import com.monstera.harbor.ui.theme.HarborTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val provisioningLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { recreate() }
-    private val personalFilePicker = registerForActivityResult(
+    private val filesToWorkPicker = registerForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments(),
-    ) { uris -> importPersonalFiles(uris) }
+    ) { uris -> sendFilesToWork(uris) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +45,8 @@ class MainActivity : ComponentActivity() {
                     onOpenPackageDetails = ::openPackageDetails,
                     onUninstallPackage = ::uninstallPackage,
                     onAddShortcut = ::addShortcut,
-                    onPickPersonalFiles = ::pickPersonalFiles,
+                    onOpenPersonalHarbor = ::openPersonalHarbor,
+                    onSendFilesToWork = ::pickFilesToSend,
                 )
             }
         }
@@ -67,14 +64,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun openWorkHarbor(): Boolean {
-        val launcherApps = getSystemService(LauncherApps::class.java)
-        val userManager = getSystemService(UserManager::class.java)
-        val target = userManager.userProfiles.firstNotNullOfOrNull { user ->
-            if (user == Process.myUserHandle()) return@firstNotNullOfOrNull null
-            launcherApps.getActivityList(packageName, user).firstOrNull()?.let { user to it.componentName }
-        } ?: return false
+        // CrossProfileApps exposes the profiles that this app can reach, rather than
+        // every full Android user. This avoids accidentally opening Harbor in a
+        // secondary user when the work-profile button is pressed.
+        val crossProfileApps = getSystemService(CrossProfileApps::class.java)
+        val target = runCatching { crossProfileApps.targetUserProfiles.singleOrNull() }
+            .getOrNull()
+            ?: return false
         return runCatching {
-            launcherApps.startMainActivity(target.second, target.first, null, null)
+            crossProfileApps.startMainActivity(ComponentName(this, MainActivity::class.java), target)
             true
         }.getOrDefault(false)
     }
@@ -83,23 +81,46 @@ class MainActivity : ComponentActivity() {
         startActivity(Intent(Settings.ACTION_SETTINGS))
     }
 
-    private fun pickPersonalFiles() {
-        personalFilePicker.launch(arrayOf("*/*"))
+    private fun openPersonalHarbor(): Boolean {
+        val crossProfileApps = getSystemService(CrossProfileApps::class.java)
+        val target = crossProfileApps.targetUserProfiles.singleOrNull() ?: return false
+        return runCatching {
+            crossProfileApps.startMainActivity(
+                ComponentName(this, MainActivity::class.java),
+                target,
+            )
+            true
+        }.getOrDefault(false)
     }
 
-    private fun importPersonalFiles(uris: List<Uri>) {
+    private fun pickFilesToSend() {
+        filesToWorkPicker.launch(arrayOf("*/*"))
+    }
+
+    private fun sendFilesToWork(uris: List<Uri>) {
         if (uris.isEmpty()) return
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                SharedFileImporter(contentResolver).copyUris(uris, null)
+        val selected = uris.take(MAX_SHARED_FILES)
+        val shareIntent = Intent(
+            if (selected.size == 1) Intent.ACTION_SEND else Intent.ACTION_SEND_MULTIPLE,
+        ).apply {
+            setPackage(packageName)
+            type = selected.mapNotNull(contentResolver::getType).distinct().singleOrNull() ?: "*/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = ClipData.newUri(contentResolver, "Harbor file", selected.first()).apply {
+                selected.drop(1).forEach { addItem(ClipData.Item(it)) }
             }
+            if (selected.size == 1) {
+                putExtra(Intent.EXTRA_STREAM, selected.first())
+            } else {
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(selected))
+            }
+        }
+        runCatching {
+            startActivity(Intent.createChooser(shareIntent, "Send to Harbor work profile"))
+        }.onFailure {
             Toast.makeText(
                 this@MainActivity,
-                if (result.names.isEmpty()) {
-                    "No file could be copied. Use Share from the personal profile."
-                } else {
-                    "Copied ${result.names.size} file(s) to work Downloads/Harbor"
-                },
+                "Work Harbor is not available as a Share target. Open work Harbor, enable Share, then retry.",
                 Toast.LENGTH_LONG,
             ).show()
         }
@@ -126,11 +147,14 @@ class MainActivity : ComponentActivity() {
         if (!shortcutManager.isRequestPinShortcutSupported) return false
         val applicationInfo = runCatching { packageManager.getApplicationInfo(packageName, 0) }.getOrNull()
             ?: return false
+        val signerDigests = PackageSigner.fingerprints(packageManager, packageName)
+        if (signerDigests.isEmpty()) return false
         val shortcutId = java.util.UUID.randomUUID().toString()
         val graph = (application as HarborApplication).graph
         graph.preferences.saveShortcut(
             shortcutId,
             com.monstera.harbor.core.topology.PackageName(packageName),
+            signerDigests,
         )
         val drawable = applicationInfo.loadIcon(packageManager)
         val iconSize = maxOf(drawable.intrinsicWidth, drawable.intrinsicHeight, 1)
@@ -155,5 +179,9 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Choose where to add the Harbor shortcut", Toast.LENGTH_SHORT).show()
         }
         return requested
+    }
+
+    private companion object {
+        const val MAX_SHARED_FILES = 50
     }
 }

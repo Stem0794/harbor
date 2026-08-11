@@ -11,6 +11,11 @@ import com.monstera.harbor.core.topology.PackageName
 
 private val Context.harborDataStore by preferencesDataStore("harbor_preferences")
 
+data class ShortcutTarget(
+    val packageName: PackageName,
+    val signerDigests: Set<String>,
+)
+
 class HarborPreferences(private val context: Context) {
     val advancedToolsEnabled: Flow<Boolean> = context.harborDataStore.data.map { preferences ->
         preferences[ADVANCED_TOOLS_ENABLED] ?: false
@@ -20,28 +25,52 @@ class HarborPreferences(private val context: Context) {
         context.harborDataStore.edit { it[ADVANCED_TOOLS_ENABLED] = enabled }
     }
 
-    suspend fun saveShortcut(shortcutId: String, packageName: PackageName) {
+    suspend fun saveShortcut(
+        shortcutId: String,
+        packageName: PackageName,
+        signerDigests: Set<String>,
+    ) {
+        require(signerDigests.isNotEmpty()) { "A shortcut must have a signer identity" }
         ShortcutIdValidator.normalize(shortcutId)?.let { normalized ->
-            context.harborDataStore.edit { it[shortcutKey(normalized)] = packageName.value }
+            context.harborDataStore.edit {
+                it[shortcutKey(normalized)] = packageName.value
+                it[shortcutSignerKey(normalized)] = signerDigests.sorted().joinToString(",")
+            }
         }
     }
 
     suspend fun removeShortcut(shortcutId: String) {
         ShortcutIdValidator.normalize(shortcutId)?.let { normalized ->
-            context.harborDataStore.edit { it.remove(shortcutKey(normalized)) }
+            context.harborDataStore.edit {
+                it.remove(shortcutKey(normalized))
+                it.remove(shortcutSignerKey(normalized))
+            }
         }
     }
 
-    suspend fun shortcutPackage(shortcutId: String): PackageName? {
+    suspend fun shortcutTarget(shortcutId: String): ShortcutTarget? {
         val normalized = ShortcutIdValidator.normalize(shortcutId) ?: return null
         return context.harborDataStore.data.map { preferences ->
-            preferences[shortcutKey(normalized)]?.let { value -> runCatching { PackageName(value) }.getOrNull() }
+            val packageName = preferences[shortcutKey(normalized)]
+                ?.let { value -> runCatching { PackageName(value) }.getOrNull() }
+            val signerDigests = preferences[shortcutSignerKey(normalized)]
+                ?.split(',')
+                ?.map(String::trim)
+                ?.filter { it.matches(SIGNER_DIGEST) }
+                ?.toSet()
+                .orEmpty()
+            if (packageName == null || signerDigests.isEmpty()) null
+            else ShortcutTarget(packageName, signerDigests)
         }.first()
     }
 
     private companion object {
         val ADVANCED_TOOLS_ENABLED = booleanPreferencesKey("advanced_tools_enabled")
+        val SIGNER_DIGEST = Regex("[0-9a-fA-F]{64}")
 
         fun shortcutKey(id: String) = androidx.datastore.preferences.core.stringPreferencesKey("shortcut_$id")
+
+        fun shortcutSignerKey(id: String) =
+            androidx.datastore.preferences.core.stringPreferencesKey("shortcut_signers_$id")
     }
 }

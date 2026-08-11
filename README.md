@@ -15,7 +15,7 @@ Harbor is a free and open-source Android application for creating and managing a
 - Starts system-confirmed uninstall flows for non-system apps.
 - Explains when Android Settings must be used for work-profile toggles or removal.
 - Lets the user prepare APK installation while retaining Android's per-source consent prompt for the app that opened the APK.
-- Provides a supported personal-to-work file flow: tap `Pick from personal files` in work Harbor, or use the personal profile's Share action and choose Harbor with the work badge. Harbor copies the file into work-profile `Downloads/Harbor` without deleting the personal original.
+- Provides a supported personal-to-work file flow: open Personal Harbor from Work, tap `Choose files` in Personal, or use a personal app's Share action and choose Harbor with the work badge. Harbor copies the file into work-profile `Downloads/Harbor` without deleting the personal original. Because Android uses generic cross-profile share filters, other compatible work apps may also be offered as recipients; choosing another recipient sends that app the selected file, and Harbor warns before enabling this flow.
 - The sharing policy is applied by the Harbor instance inside the work profile. When testing an update, update/open that work-badged Harbor copy; installing only the personal-profile copy does not change the active profile owner.
 - Provides optional Shizuku developer tools for diagnostics, allowlisted package cloning, and experimental multi-user workspaces.
 
@@ -23,13 +23,13 @@ The core DPC path works without Shizuku. Advanced tools are opt-in and are never
 
 ## Screenshots
 
-The following screenshots were captured from the API 36 AOSP emulator during the MVP validation flow.
+The following screenshots were captured from a physical Samsung SM-S921B running Android 16 (API 36) during the alpha04 validation flow.
 
-| Work-profile setup | Local work-profile app catalog |
+| Personal profile dashboard | Work-profile app management |
 | --- | --- |
-| ![Harbor work-profile setup](docs/screenshots/harbor-setup-api36.png) | ![Harbor work-profile app catalog](docs/screenshots/harbor-apps-api36.png) |
+| ![Harbor personal profile dashboard](docs/screenshots/harbor-personal-samsung-api36.png) | ![Harbor work-profile app management](docs/screenshots/harbor-work-samsung-api36.png) |
 
-The screenshots show the current public-API MVP. OEM Settings screens, work-profile launchers, and Shizuku behavior can look different on real devices.
+The screenshots show the current public-API MVP, including the cross-profile sharing disclosure. OEM Settings screens, work-profile launchers, and Shizuku behavior can look different on other devices.
 
 ## Design principles
 
@@ -47,7 +47,7 @@ Harbor is behaviorally inspired by Island, but it is a clean implementation with
 
 ## Current status
 
-The current release line is `0.2.0-alpha03`.
+The current release line is `0.2.0-alpha04`.
 
 Implemented:
 
