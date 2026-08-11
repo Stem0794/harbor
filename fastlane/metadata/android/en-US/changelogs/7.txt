@@ -1,0 +1,1 @@
+Prepares the tagged source for clean F-Droid builds and adds complete release metadata.

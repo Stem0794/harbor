@@ -1,0 +1,1 @@
+Alpha05: Adds clean F-Droid verification metadata, explicit tag version extraction, and release presentation assets.

@@ -1,0 +1,1 @@
+Adds lifecycle recovery, app management, reproducibility checks, and F-Droid packaging scaffolding.

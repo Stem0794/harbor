@@ -1,0 +1,1 @@
+Hardens work-profile policy boundaries, app shortcuts, cross-profile navigation, and dependency reproducibility.

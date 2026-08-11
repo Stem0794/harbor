@@ -1,0 +1,1 @@
+Improves app catalog actions, profile-state handling, and release hardening.

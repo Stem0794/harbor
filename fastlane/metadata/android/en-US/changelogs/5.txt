@@ -1,0 +1,1 @@
+Adds supported personal-file sharing, cross-profile policy handling, and clearer management UI.
