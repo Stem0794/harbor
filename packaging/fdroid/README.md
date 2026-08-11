@@ -10,11 +10,10 @@ not itself published by F-Droid until the corresponding metadata is accepted.
 1. Keep the public source repository at its permanent URL.
 2. Tag the audited source revision and make sure the recipe's `commit` and
    version fields match that tag.
-3. Clone `https://gitlab.com/fdroid/fdroiddata`, copy this recipe to its
-   `metadata/` directory, and copy the localized summary from
-   `packaging/fdroid/metadata/com.monstera.harbor/en-US/summary.txt` to
-   `metadata/com.monstera.harbor/en-US/summary.txt`. Current fdroiddata CI
-   requires summaries to be localized rather than kept inline in the recipe.
+3. Clone `https://gitlab.com/fdroid/fdroiddata` and copy this recipe to its
+   `metadata/` directory. Do not add summary, description, screenshots, or
+   changelog files to fdroiddata: they are maintained in Harbor's
+   `fastlane/metadata/android/` tree and are pulled from the source checkout.
    Then run `fdroid readmeta`, `fdroid lint`,
    `fdroid checkupdates`, and `fdroid build -v -l`.
 4. Run `fdroid scanner` and `fdroid build --server` where a configured F-Droid
