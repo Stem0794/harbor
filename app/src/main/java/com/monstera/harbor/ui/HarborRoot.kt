@@ -39,7 +39,8 @@ fun HarborRoot(
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
     onAddShortcut: suspend (String) -> Boolean,
-    onPickPersonalFiles: () -> Unit,
+    onOpenPersonalHarbor: () -> Boolean,
+    onSendFilesToWork: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -141,7 +142,7 @@ fun HarborRoot(
             onOpenPackageDetails = onOpenPackageDetails,
             onUninstallPackage = onUninstallPackage,
             onAddShortcut = onAddShortcut,
-            onPickPersonalFiles = onPickPersonalFiles,
+            onOpenPersonalHarbor = onOpenPersonalHarbor,
         )
     } else {
         val policyManager = context.getSystemService(DevicePolicyManager::class.java)
@@ -172,6 +173,7 @@ fun HarborRoot(
             onOpenWorkHarbor = {
                 message = if (onOpenWorkHarbor()) null else "Open the work-badged Harbor icon from your launcher."
             },
+            onSendFilesToWork = onSendFilesToWork,
             onAdvanced = ::openAdvanced,
         )
     }

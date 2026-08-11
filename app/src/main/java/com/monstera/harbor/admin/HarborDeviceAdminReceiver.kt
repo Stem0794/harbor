@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.UserManager
 import com.monstera.harbor.R
+import com.monstera.harbor.FileImportReceiverAvailability
 import com.monstera.harbor.core.policy.CrossProfileSharingPolicy
 
 class HarborDeviceAdminReceiver : DeviceAdminReceiver() {
@@ -14,6 +15,7 @@ class HarborDeviceAdminReceiver : DeviceAdminReceiver() {
         val policyManager = context.getSystemService(DevicePolicyManager::class.java)
         val admin = ComponentName(context, HarborDeviceAdminReceiver::class.java)
         if (!policyManager.isProfileOwnerApp(context.packageName)) return
+        FileImportReceiverAvailability.update(context)
 
         // Let Android ask the actual source app for per-source consent when an APK is opened.
         // Harbor never grants that consent itself and does not enable installs globally.

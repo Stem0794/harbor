@@ -9,10 +9,10 @@ import android.os.UserManager
 /**
  * The narrow cross-profile data flow Harbor supports: personal -> work files.
  *
- * Work apps may open the personal document picker so the user can explicitly
- * import a selected file. Harbor does not register work-to-personal export
- * targets. These filters mirror Android's default sharing/picker filters and
- * make the intended directions explicit for OEMs that omit them.
+ * Personal apps may explicitly send selected files to a matching activity in
+ * the work profile. Harbor does not register work-to-personal export targets.
+ * These filters mirror Android's default sharing filters and make the intended
+ * direction explicit for OEMs that omit them.
  */
 object CrossProfileSharingPolicy {
     internal data class IntentRule(
@@ -46,24 +46,6 @@ object CrossProfileSharingPolicy {
         ),
     )
 
-    /** Work apps can use Android's picker to choose personal content to import. */
-    internal val managedToParentPickerRules = listOf(
-        IntentRule(
-            action = Intent.ACTION_GET_CONTENT,
-            direction = DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-            categories = setOf(Intent.CATEGORY_DEFAULT, Intent.CATEGORY_OPENABLE),
-        ),
-        IntentRule(
-            action = Intent.ACTION_OPEN_DOCUMENT,
-            direction = DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-            categories = setOf(Intent.CATEGORY_DEFAULT, Intent.CATEGORY_OPENABLE),
-        ),
-        IntentRule(
-            action = Intent.ACTION_PICK,
-            direction = DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-        ),
-    )
-
     fun apply(
         policyManager: DevicePolicyManager,
         admin: ComponentName,
@@ -78,7 +60,7 @@ object CrossProfileSharingPolicy {
             admin,
             UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
         )
-        (parentToManagedFileRules + managedToParentPickerRules).forEach { rule ->
+        parentToManagedFileRules.forEach { rule ->
             policyManager.addCrossProfileIntentFilter(
                 admin,
                 IntentFilter().apply {

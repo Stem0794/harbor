@@ -31,20 +31,4 @@ class CrossProfileSharingPolicyTest {
             CrossProfileSharingPolicy.parentToManagedFileRules.map { it.mimeType },
         )
     }
-
-    @Test
-    fun pickerRulesAllowWorkAppsToChoosePersonalFiles() {
-        assertEquals(
-            listOf(Intent.ACTION_GET_CONTENT, Intent.ACTION_OPEN_DOCUMENT, Intent.ACTION_PICK),
-            CrossProfileSharingPolicy.managedToParentPickerRules.map { it.action },
-        )
-        assertEquals(
-            listOf(
-                DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-                DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-                DevicePolicyManager.FLAG_PARENT_CAN_ACCESS_MANAGED,
-            ),
-            CrossProfileSharingPolicy.managedToParentPickerRules.map { it.direction },
-        )
-    }
 }

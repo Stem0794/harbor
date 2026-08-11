@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.AlertDialog
@@ -54,6 +56,7 @@ fun PersonalProfileScreen(
     message: String?,
     onProvision: () -> Unit,
     onOpenWorkHarbor: () -> Unit,
+    onSendFilesToWork: () -> Unit,
     onAdvanced: () -> Unit,
 ) {
     var createWorkspace by remember { mutableStateOf(false) }
@@ -111,7 +114,11 @@ fun PersonalProfileScreen(
     }
     Scaffold(topBar = { TopAppBar(title = { Text("Harbor") }) }) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(20.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text("Private space for everyday apps", style = MaterialTheme.typography.headlineMedium)
@@ -176,6 +183,19 @@ fun PersonalProfileScreen(
                 }
             }
             workspaceMessage?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+
+            if (associatedHarbor) {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Send files to Work", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Choose files in Personal. Android then sends only those files to Harbor in Work, where they are copied into Downloads/Harbor.",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                        Button(onClick = onSendFilesToWork) { Text("Choose files") }
+                    }
+                }
+            }
 
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

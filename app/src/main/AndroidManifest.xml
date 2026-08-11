@@ -37,6 +37,7 @@
 
         <activity
             android:name=".ImportFilesActivity"
+            android:enabled="false"
             android:exported="true"
             android:label="@string/import_files_label"
             android:grantUriPermissions="true">

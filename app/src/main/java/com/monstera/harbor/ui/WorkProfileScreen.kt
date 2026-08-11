@@ -58,7 +58,7 @@ fun WorkProfileScreen(
     onOpenPackageDetails: (String) -> Unit,
     onUninstallPackage: (String) -> Unit,
     onAddShortcut: suspend (String) -> Boolean,
-    onPickPersonalFiles: () -> Unit,
+    onOpenPersonalHarbor: () -> Boolean,
 ) {
     val viewModel: WorkAppsViewModel = viewModel(
         factory = WorkAppsViewModel.Factory(catalog, controller, ownPackage),
@@ -128,18 +128,24 @@ fun WorkProfileScreen(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Import personal files", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            "Use Pick from personal files here, or use Share in the personal profile and choose Harbor with the briefcase badge. Harbor copies the file into work Downloads/Harbor and never deletes the personal original. An OEM ‘Move to work’ command may remain blocked by the phone manufacturer.",
+                            "Open Personal Harbor and choose files there, or use Share in a personal app and choose Harbor with the briefcase badge. Harbor copies the file into work Downloads/Harbor and never deletes the personal original. OEM ‘Move to work’ and cross-profile picker commands may remain blocked.",
                             style = MaterialTheme.typography.bodySmall,
                         )
                         if (sharingRequested) {
                             Text(
-                                "Android Share → Harbor is enabled. If Move to work still says ‘Action non autorisée’, use Share or this picker instead; Harbor cannot override that OEM-only command.",
+                                "Android Share → Harbor is enabled. If Move to work says ‘Action non autorisée’, use Personal Harbor or Share instead; Harbor cannot override that OEM-only command.",
                                 color = MaterialTheme.colorScheme.primary,
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
-                        Button(onClick = onPickPersonalFiles) {
-                            Text("Pick from personal files")
+                        Button(onClick = {
+                            if (!onOpenPersonalHarbor()) {
+                                scope.launch {
+                                    snackbar.showSnackbar("Open the personal Harbor icon, then tap Send files to Work")
+                                }
+                            }
+                        }) {
+                            Text("Open Personal Harbor")
                         }
                         OutlinedButton(
                             enabled = !sharingBusy,
