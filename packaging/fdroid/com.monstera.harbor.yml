@@ -10,7 +10,6 @@ AutoName: Harbor
 RepoType: git
 Repo: https://github.com/Stem0794/harbor.git
 Binaries: https://github.com/Stem0794/harbor/releases/download/v%v/app-release-signed.apk
-AllowedAPKSigningKeys: 1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d
 
 Builds:
   - versionName: 0.2.0-alpha05
@@ -19,6 +18,8 @@ Builds:
     subdir: app
     gradle:
       - yes
+
+AllowedAPKSigningKeys: 1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d
 
 MaintainerNotes: |-
   The core work-profile controller does not depend on Shizuku. The optional
