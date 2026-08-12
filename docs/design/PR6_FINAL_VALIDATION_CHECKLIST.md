@@ -6,7 +6,8 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `dba967f`
+- Runtime build validated for the recorded physical smoke test: `dba967f`
+- Current PR code head: `2383c57` (hero-action state mapping and selection-close icon; not yet installed on the S24)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -56,6 +57,10 @@ Targeted Direction 2 polish validation on the same signed alpha05 build:
 - [ ] `Add & unfreeze` was not exposed by the device after freezing Agenda because
   Android no longer reported that package as launchable; the same `Shortcut`
   icon path is used by the existing conditional action in source.
+
+The current PR head adds the pure Personal hero-action resolver and the
+selection-mode Close icon. Those changes are covered by unit tests, but the
+S24 was not connected for a final-current-head install during this pass.
 
 ## Accessibility validation
 
@@ -112,8 +117,8 @@ operations remain untested.
 ## App actions
 
 - [ ] Open launches a launchable non-frozen app.
-- [ ] Freeze succeeds and UI reflects the controller result.
-- [ ] Unfreeze succeeds and UI reflects the controller result.
+- [x] Freeze succeeds and UI reflects the controller result.
+- [x] Unfreeze succeeds and UI reflects the controller result.
 - [ ] App details opens Android app details.
 - [ ] Uninstall invokes Android's existing confirmation flow.
 - [ ] Normal launchable app shows `Add to launcher`.
@@ -124,8 +129,10 @@ operations remain untested.
 
 Notes:
 
-No app action, freeze/unfreeze, uninstall, or shortcut operation was performed
-on the physical device.
+On the recorded S24 runtime, Agenda was frozen and then unfrozen; the catalog
+returned it to Available. Open, App details, Uninstall, launcher pinning, and
+the conditional `Add & unfreeze` path remain untested. The current-head
+selection Close icon is unit/build validated but not physically exercised.
 
 ## Selection mode
 
@@ -201,9 +208,10 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-Screenshots were re-captured from the current signed alpha05 APK on Samsung S24
-/ Android 16, then copied to the matching docs and Fastlane paths. README
-rendering was not exercised here.
+Screenshots were re-captured from the signed alpha05 APK for runtime
+`dba967f` on Samsung S24 / Android 16, then copied to the matching docs and
+Fastlane paths. They do not claim that the later current-head integration
+changes were installed. README rendering was not exercised here.
 
 ## Final repository gate
 
@@ -211,7 +219,7 @@ rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`406d8accf0d77280d9e156705a32a0b365b4db7e5db425924b0acd8efb35c023`).
+- [x] Reproducibility verification passes (`0a7de4a54618562c9b0ab992c3d6e6ad0a3eccfe69a09106833af3ff85ecd71a`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
