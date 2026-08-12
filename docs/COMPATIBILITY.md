@@ -14,6 +14,13 @@
 - API 36 AOSP denied UID 2000 cross-user package operations, including `install-existing --user 10`, with `Shell does not have permission to access user 10`. Shizuku ADB mode must report this as unsupported on affected builds rather than promising cloning.
 - The API 29 emulator allowed a shell install targeting the managed profile. This difference confirms that shell capability must be tested per Android/OEM build, not inferred from Shizuku availability.
 
+## Physical devices tested
+
+- Samsung Galaxy S24 (`SM-S921B`), Android 16 (API 36): physical validation has covered Harbor's core work-profile flow. The current README screenshots were captured on this device during the alpha04 validation flow.
+- OnePlus 13, Android 16 (API 36): an external F-Droid tester verified the main screen, Refresh, and Advanced screens with no crashes or ANRs. Core `Create space` provisioning was not exercised because the device already had a managed profile and Android did not allow another work profile for that parent user. Shizuku was installed but not running, so Shizuku-backed Advanced and space-management flows were not exercised.
+
+These entries record observed test coverage, not blanket certification of every Harbor feature on those devices. The full stable-release matrix below still applies.
+
 ## Conservative compatibility behavior
 
 - Freeze/unfreeze treats a `false` result from Android as a failed policy update and leaves the displayed state unchanged.
@@ -30,7 +37,7 @@
 - Dashboard cards for secondary Android users show only existence and `profile state unknown` until that user is opened locally. Harbor-only aliases/icons are invalidated when the observed user name changes or the user disappears.
 - Pinned shortcuts are created from the work-profile Harbor instance and are bound to the target app's current signing certificate. Launcher behavior, work badges, profile pause/lock handling, and stale shortcut cleanup remain launcher/OEM dependent and require physical testing.
 
-These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below; no new physical-device result is claimed by this remediation.
+These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below.
 
 ## Required physical testing before stable release
 
