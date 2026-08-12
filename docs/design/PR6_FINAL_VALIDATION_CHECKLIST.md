@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `4cddf10`
+- Commit SHA: `dba967f`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -47,6 +47,15 @@ Notes:
 Samsung Galaxy S24 / Android 16 dark-theme screenshots were clear at 1080×2340.
 The Work app action sheet was also captured; light theme, large-font, and
 bottom-sheet dismissal cases remain untested.
+
+Targeted Direction 2 polish validation on the same signed alpha05 build:
+
+- [x] Lighthouse beam apex is at the right-side lantern and fans leftward.
+- [x] Normal Work action sheet shows the corrected launcher-shortcut icon.
+- [x] Freeze/unfreeze was exercised on Agenda and the app was restored to Available.
+- [ ] `Add & unfreeze` was not exposed by the device after freezing Agenda because
+  Android no longer reported that package as launchable; the same `Shortcut`
+  icon path is used by the existing conditional action in source.
 
 ## Accessibility validation
 
