@@ -7,7 +7,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 ## Validation record
 
 - Runtime build validated for the recorded physical smoke test: `dba967f`
-- Current PR code head: `2383c57` (hero-action state mapping and selection-close icon; not yet installed on the S24)
+- Current PR code head: `74d601c` (hero action/tone polish; not yet installed on the S24)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -58,9 +58,10 @@ Targeted Direction 2 polish validation on the same signed alpha05 build:
   Android no longer reported that package as launchable; the same `Shortcut`
   icon path is used by the existing conditional action in source.
 
-The current PR head adds the pure Personal hero-action resolver and the
-selection-mode Close icon. Those changes are covered by unit tests, but the
-S24 was not connected for a final-current-head install during this pass.
+The current PR head adds the pure Personal hero-action resolver, selection-mode
+Close icon, state-tone hero treatment, and conditional divider rendering. Those
+changes are covered by unit tests, but the S24 was not connected for a
+final-current-head install during this pass.
 
 ## Accessibility validation
 
@@ -219,7 +220,7 @@ changes were installed. README rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`0a7de4a54618562c9b0ab992c3d6e6ad0a3eccfe69a09106833af3ff85ecd71a`).
+- [x] Reproducibility verification passes (`1517e27db110c0b3ae6fb59e9f98734a0ee8f83e3714fe49fc1f9426b55bd094`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
