@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.monstera.harbor.core.topology.CloneProfileRelationship
 import com.monstera.harbor.core.topology.CloneCandidate
 import com.monstera.harbor.core.topology.HarborPrivilegeState
@@ -100,7 +101,7 @@ fun AdvancedScreen(
             }
 
             item {
-                Card(Modifier.fillMaxWidth()) {
+                Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Shizuku", style = MaterialTheme.typography.titleLarge)
                         Text(backendState.availability.userLabel())
@@ -160,7 +161,7 @@ fun AdvancedScreen(
 
 @Composable
 private fun DiagnosticsCard(diagnostics: SystemDiagnostics) {
-    Card(Modifier.fillMaxWidth()) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text("Local diagnostics", style = MaterialTheme.typography.titleMedium)
             Text("UID: ${diagnostics.effectiveUid}")
@@ -189,7 +190,7 @@ private fun ClonePanel(
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf<CloneCandidate?>(null) }
 
-    Card(Modifier.fillMaxWidth()) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Clone an installed package", style = MaterialTheme.typography.titleMedium)
             Text("Harbor asks Android's package manager to install an existing package into this work profile. App data is never copied.")
@@ -336,7 +337,7 @@ private fun MultiUserPanel(
         )
     }
 
-    Card(Modifier.fillMaxWidth()) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text("Multiple full-user workspaces", style = MaterialTheme.typography.titleMedium)
             Text("Experimental. Each full user may provision one standard Harbor work profile after switching into it.")

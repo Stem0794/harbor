@@ -9,10 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -34,7 +31,14 @@ import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.ProfileOwnership
 import com.monstera.harbor.core.topology.ProfileTopology
 import com.monstera.harbor.core.topology.SystemUser
-import com.monstera.harbor.feature.advanced.PrivilegeBadge
+import com.monstera.harbor.ui.designsystem.HarborEmptyState
+import com.monstera.harbor.ui.designsystem.HarborHeroCard
+import com.monstera.harbor.ui.designsystem.HarborInfoCard
+import com.monstera.harbor.ui.designsystem.HarborPrivacyCard
+import com.monstera.harbor.ui.designsystem.HarborSectionTitle
+import com.monstera.harbor.ui.designsystem.HarborSpacing
+import com.monstera.harbor.ui.privacy.privacyFacts
+import com.monstera.harbor.ui.privacy.workSpacePresentation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,15 +119,11 @@ fun PersonalProfileScreen(
     val hasForeignOrUnknownProfile = topology.associatedProfiles.any {
         !it.isCurrent && it.ownership == ProfileOwnership.FOREIGN_OR_UNKNOWN
     }
-    val setupMessage = when {
-        associatedHarbor -> "Work profile active and managed by Harbor."
-        hasForeignOrUnknownProfile && provisioningAllowed ->
-            "Another profile exists. Harbor will not take ownership of it."
-        hasForeignOrUnknownProfile ->
-            "Another profile exists and Android does not currently allow another work profile."
-        provisioningAllowed -> "Ready to create a work profile."
-        else -> "Android does not currently allow another work profile."
-    }
+    val presentation = workSpacePresentation(
+        harborManagedProfile = associatedHarbor,
+        foreignProfile = hasForeignOrUnknownProfile,
+        provisioningAllowed = provisioningAllowed,
+    )
 
     Scaffold(
         topBar = {
@@ -138,143 +138,112 @@ fun PersonalProfileScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = HarborSpacing.screen, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(HarborSpacing.section),
         ) {
-            Text("Personal profile", style = MaterialTheme.typography.headlineSmall)
-            Text(
-                "Keep work apps and data in a separate Android space.",
-                style = MaterialTheme.typography.bodyMedium,
+            HarborHeroCard(
+                title = presentation.title,
+                body = presentation.body,
+                tone = presentation.tone,
+                primaryLabel = presentation.primaryAction,
+                onPrimary = if (associatedHarbor) onOpenWorkHarbor else onProvision,
+                secondaryLabel = if (associatedHarbor) "Send files" else null,
+                onSecondary = if (associatedHarbor) onSendFilesToWork else null,
             )
-            PrivilegeBadge(privilegeState)
 
-            Card(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text("Spaces", style = MaterialTheme.typography.titleMedium)
-                            Text(setupMessage, style = MaterialTheme.typography.bodySmall)
-                        }
-                        TextButton(enabled = !workspaceBusy, onClick = onRefreshWorkspaces) {
-                            Text("Refresh")
-                        }
-                    }
-                    ProfileRow(
-                        name = "Personal",
-                        detail = "This Android user",
-                    )
-                    ProfileRow(
-                        name = "Work",
-                        detail = if (associatedHarbor) "Active · Harbor manages it" else "Not set up",
-                        action = if (associatedHarbor) {
-                            { OutlinedButton(onClick = onOpenWorkHarbor) { Text("Manage") } }
-                        } else if (provisioningAllowed) {
-                            { Button(onClick = onProvision) { Text("Create") } }
-                        } else {
-                            null
-                        },
-                    )
-                }
+            HarborPrivacyCard(privacyFacts())
+
+            HarborInfoCard(
+                title = "Your spaces",
+                body = "Personal and Work are separate Android spaces. Harbor only manages profiles it owns.",
+            ) {
+                SpaceSummaryRow("Personal", "This Android user")
+                SpaceSummaryRow(
+                    "Work",
+                    if (associatedHarbor) "Ready · managed by Harbor" else "Not set up",
+                    action = if (associatedHarbor) {
+                        { OutlinedButton(onClick = onOpenWorkHarbor) { Text("Open Work") } }
+                    } else if (provisioningAllowed) {
+                        { OutlinedButton(onClick = onProvision) { Text("Create") } }
+                    } else null,
+                )
             }
 
             if (associatedHarbor) {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Move files to Work", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Choose files in Personal; Harbor copies them to Work/Downloads/Harbor.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                        Button(onClick = onSendFilesToWork) { Text("Choose files") }
-                    }
-                }
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Update Harbor", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            "Update the work copy from a browser or Files app with the briefcase badge.",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
+                HarborInfoCard(
+                    title = "Update Harbor in Work",
+                    body = "Use the browser or Files app inside Work and choose the Harbor icon with the briefcase badge.",
+                )
             }
 
             if (workspaceUsers.isNotEmpty() || privilegeState.level != HarborPrivilegeLevel.STANDARD) {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Additional workspaces", style = MaterialTheme.typography.titleMedium)
-                        if (workspaceUsers.isEmpty()) {
-                            Text(
-                                "Optional Shizuku access is required to manage Android users.",
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        } else {
-                            workspaceUsers.filter { it.id != workspaceCurrentUserId }.forEach { user ->
-                                val metadata = workspaceMetadata.firstOrNull {
-                                    !it.stale && it.androidUserId == user.id && it.lastKnownSystemName == user.name
-                                }
-                                WorkspaceCard(
-                                    user = user,
-                                    metadata = metadata,
-                                    busy = workspaceBusy,
-                                    onSwitch = { onSwitchWorkspace(user) },
-                                    onInstall = { onInstallWorkspace(user) },
-                                    onRename = {
-                                        alias = metadata?.alias.orEmpty()
-                                        renameTarget = user
-                                    },
-                                    onChangeIcon = {
-                                        val icons = WorkspaceIconKey.entries
-                                        val current = metadata?.iconKey ?: WorkspaceIconKey.GENERIC
-                                        onChangeWorkspaceIcon(user, icons[(icons.indexOf(current) + 1) % icons.size])
-                                    },
-                                )
-                            }
+                HarborSectionTitle(
+                    title = "Additional workspaces",
+                    supportingText = "Experimental full-user workspaces are managed through Advanced tools.",
+                )
+                HarborInfoCard(
+                    title = "Optional workspaces",
+                    body = if (workspaceUsers.isEmpty()) {
+                        "Enable Advanced tools to manage additional Android users."
+                    } else null,
+                ) {
+                    workspaceUsers.filter { it.id != workspaceCurrentUserId }.forEach { user ->
+                        val metadata = workspaceMetadata.firstOrNull {
+                            !it.stale && it.androidUserId == user.id && it.lastKnownSystemName == user.name
                         }
-                        if (privilegeState.level != HarborPrivilegeLevel.STANDARD) {
-                            OutlinedButton(enabled = !workspaceBusy, onClick = { createWorkspace = true }) {
-                                Text("Create workspace")
-                            }
+                        WorkspaceRow(
+                            user = user,
+                            metadata = metadata,
+                            busy = workspaceBusy,
+                            onSwitch = { onSwitchWorkspace(user) },
+                            onInstall = { onInstallWorkspace(user) },
+                            onRename = {
+                                alias = metadata?.alias.orEmpty()
+                                renameTarget = user
+                            },
+                            onChangeIcon = {
+                                val icons = WorkspaceIconKey.entries
+                                val current = metadata?.iconKey ?: WorkspaceIconKey.GENERIC
+                                onChangeWorkspaceIcon(user, icons[(icons.indexOf(current) + 1) % icons.size])
+                            },
+                        )
+                    }
+                    if (privilegeState.level != HarborPrivilegeLevel.STANDARD) {
+                        OutlinedButton(enabled = !workspaceBusy, onClick = { createWorkspace = true }) {
+                            Text("Create workspace")
                         }
                     }
                 }
             }
 
-            workspaceMessage?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-            message?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-
+            workspaceMessage?.let { HarborEmptyState("Workspace update", it) }
+            message?.let { HarborEmptyState("Harbor status", it) }
             Text(
-                "No accounts, analytics, advertising, or network access.",
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Text(
-                "Remove a work profile in Android Settings. This permanently deletes its apps and data.",
-                style = MaterialTheme.typography.bodySmall,
+                "Remove a Work profile in Android Settings. This permanently deletes its apps and data.",
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
 }
 
 @Composable
-private fun ProfileRow(
+private fun SpaceSummaryRow(
     name: String,
     detail: String,
     action: (@Composable () -> Unit)? = null,
 ) {
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(name, style = MaterialTheme.typography.bodyLarge)
-            Text(detail, style = MaterialTheme.typography.bodySmall)
+            Text(name, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
+            Text(detail, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
         }
         action?.invoke()
     }
 }
 
 @Composable
-private fun WorkspaceCard(
+private fun WorkspaceRow(
     user: SystemUser,
     metadata: WorkspaceMetadata?,
     busy: Boolean,
@@ -283,22 +252,18 @@ private fun WorkspaceCard(
     onRename: () -> Unit,
     onChangeIcon: () -> Unit,
 ) {
-    Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(metadata?.alias ?: user.name, style = MaterialTheme.typography.bodyLarge)
-                    Text("Android user · profile state unknown", style = MaterialTheme.typography.bodySmall)
-                }
-                TextButton(enabled = !busy, onClick = onSwitch) { Text("Switch") }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(metadata?.alias ?: user.name, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
+                Text("Android user · profile state unknown", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                TextButton(enabled = !busy, onClick = onInstall) { Text("Install Harbor") }
-                TextButton(enabled = !busy, onClick = onRename) { Text("Rename") }
-                TextButton(enabled = !busy, onClick = onChangeIcon) {
-                    Text("Icon: ${metadata?.iconKey?.name ?: "GENERIC"}")
-                }
-            }
+            OutlinedButton(enabled = !busy, onClick = onSwitch) { Text("Switch") }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            TextButton(enabled = !busy, onClick = onInstall) { Text("Install Harbor") }
+            TextButton(enabled = !busy, onClick = onRename) { Text("Rename") }
+            TextButton(enabled = !busy, onClick = onChangeIcon) { Text("Icon") }
         }
     }
 }

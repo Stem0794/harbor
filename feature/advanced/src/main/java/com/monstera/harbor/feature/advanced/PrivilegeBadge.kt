@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import com.monstera.harbor.core.topology.HarborPrivilegeLevel
 import com.monstera.harbor.core.topology.HarborPrivilegeSecondaryState
 import com.monstera.harbor.core.topology.HarborPrivilegeState
@@ -21,7 +22,7 @@ fun PrivilegeBadge(
     modifier: Modifier = Modifier,
     showAdvancedDetails: Boolean = false,
 ) {
-    Card(modifier.fillMaxWidth()) {
+    Card(modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
         Row(
             Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
