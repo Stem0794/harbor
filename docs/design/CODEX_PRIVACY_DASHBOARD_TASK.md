@@ -4,18 +4,21 @@ You are implementing the selected Harbor UI redesign on branch `codex/ui-privacy
 
 ## Read first
 
-1. `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md`
-2. `docs/design/harbor-ui-direction2-privacy-dashboard.svg`
-3. `app/src/main/java/com/monstera/harbor/ui/HarborRoot.kt`
-4. `app/src/main/java/com/monstera/harbor/ui/PersonalProfileScreen.kt`
-5. `app/src/main/java/com/monstera/harbor/ui/WorkProfileScreen.kt`
-6. `app/src/main/java/com/monstera/harbor/ui/WorkAppsViewModel.kt`
-7. `feature/advanced/src/main/java/com/monstera/harbor/feature/advanced/AdvancedScreen.kt`
-8. `docs/ARCHITECTURE.md`
-9. `docs/THREAT_MODEL.md`
-10. `docs/COMPATIBILITY.md`
+1. `docs/design/CODEX_START_HERE.md`
+2. `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md`
+3. `docs/design/PRIVACY_DASHBOARD_REVIEW.md`
+4. `docs/design/UI_COMPONENT_LIBRARY.md`
+5. `docs/design/harbor-ui-direction2-privacy-dashboard.svg`
+6. `app/src/main/java/com/monstera/harbor/ui/HarborRoot.kt`
+7. `app/src/main/java/com/monstera/harbor/ui/PersonalProfileScreen.kt`
+8. `app/src/main/java/com/monstera/harbor/ui/WorkProfileScreen.kt`
+9. `app/src/main/java/com/monstera/harbor/ui/WorkAppsViewModel.kt`
+10. `feature/advanced/src/main/java/com/monstera/harbor/feature/advanced/AdvancedScreen.kt`
+11. `docs/ARCHITECTURE.md`
+12. `docs/THREAT_MODEL.md`
+13. `docs/COMPATIBILITY.md`
 
-The generated image is a style reference only. The implementation plan overrides it whenever semantics differ.
+The generated image is a style reference only. The implementation plan and review override it whenever semantics differ.
 
 ## Hard guardrails
 
@@ -31,8 +34,10 @@ Do not:
 - silently enable Advanced;
 - turn failed policy operations into optimistic UI success;
 - claim Work apps have no internet access;
-- invent app descriptions/metadata that the catalog does not provide;
-- treat Personal and Work as ordinary same-process tabs.
+- invent app descriptions/metadata the catalog does not provide;
+- treat Personal and Work as ordinary same-process tabs;
+- invoke Work-profile DPC policy operations from Personal Harbor;
+- place policy/topology/privileged logic inside reusable design-system components.
 
 ## Existing behavior must remain available
 
@@ -67,6 +72,20 @@ Advanced:
 - multi-user operations;
 - backend release lifecycle.
 
+## Reusable UI library
+
+Use and preserve the app-internal Harbor design-system package:
+
+`app/src/main/java/com/monstera/harbor/ui/designsystem/`
+
+Current library guide:
+
+`docs/design/UI_COMPONENT_LIBRARY.md`
+
+Reuse or extend these generic primitives rather than creating parallel screen-local versions. Keep them state-light and presentation-only.
+
+Feature-specific state and policy mapping stays outside this package, including the pure presentation mappers under `ui/privacy`.
+
 ## Implement in this order
 
 ### 1. Validate scaffold and baseline
@@ -95,7 +114,8 @@ Target presentation:
 - quick `Send files` action only when primary Work exists;
 - Privacy by default card using `harborPrivacyFacts`;
 - optional additional workspaces below normal content and clearly marked Advanced/experimental;
-- remove the normal always-visible privilege badge.
+- remove the normal always-visible privilege badge;
+- reuse the Harbor design-system primitives where appropriate.
 
 Keep all existing callback signatures unless a small contract refactor materially improves testability.
 
@@ -115,9 +135,9 @@ N apps                         Select
 ...
 ```
 
-Replace `ManagedAppCard` with a compact row.
+Replace `ManagedAppCard` with the reusable compact Harbor app-row pattern.
 
-Opening a row/overflow should show a Material 3 `ModalBottomSheet` (or a similarly clear standard component) with only valid actions for that app. Use `workAppStatus(...)` and `workAppActions(...)` as the semantic baseline; adjust the mapper only if the live pre-refactor behavior proves different.
+Opening a row/overflow should show a Material 3 `ModalBottomSheet` or similarly clear standard component with only valid actions for that app. Use `workAppStatus(...)` and `workAppActions(...)` as the semantic baseline; adjust the mapper only if the live pre-refactor behavior proves different.
 
 Do not use an optimistic Freeze switch.
 
@@ -137,13 +157,15 @@ Requirements:
 - preserve select-all-visible;
 - preserve busy/partial-failure behavior.
 
-### 5. Settings destination
+### 5. Role-aware Settings destination
 
 Extend local root navigation without making profiles ordinary tabs.
 
-Personal and Work instances may each enter a local Settings screen.
+Personal and Work instances may each enter a local Settings screen, but Settings capabilities must be derived from actual local profile-owner/topology state.
 
-Settings sections:
+#### Work Harbor
+
+Work/profile-owner Harbor may expose actionable:
 
 ```text
 Work
@@ -160,7 +182,18 @@ Advanced
   Multiple workspaces (only when contextually useful)
 ```
 
-Move the Work-screen sharing and APK cards into Settings/detail content while preserving their existing controllers and copy constraints.
+Move the existing file-sharing and APK-install policy controls from the Work app screen into Work Settings/detail content. Preserve their existing controllers, consent model, and copy constraints.
+
+#### Personal Harbor
+
+Personal Harbor must not call `allowPersonalFileSharing()` or `allowApkInstalls()` locally.
+
+For those entries either:
+
+- omit the actionable controls; or
+- present an explanatory action that explicitly opens Work Harbor using the existing cross-profile path.
+
+Do not mirror Work policy state into Personal preferences or present Personal-side toggles as authoritative.
 
 Advanced entry must call the same opt-in confirmation path when Advanced is disabled.
 
@@ -169,6 +202,7 @@ Advanced entry must call the same opt-in confirmation path when Advanced is disa
 Only after Personal/Work/Settings are stable:
 
 - align surfaces/spacing/typography with the new design;
+- reuse design-system primitives where they fit;
 - do not change privileged operations or backend semantics as part of visual cleanup.
 
 ### 7. Tests
@@ -176,8 +210,10 @@ Only after Personal/Work/Settings are stable:
 At minimum add/retain coverage for:
 
 - provisioning presentation states;
-- app action availability if extracted to a pure mapper;
+- app action availability;
 - selection filtering/behavior;
+- role-aware Settings capability/presentation;
+- Personal Settings cannot directly invoke Work DPC policy operations;
 - settings/advanced opt-in presentation;
 - no invalid mutation actions for system apps;
 - no unsafe create action in Android-blocked state.
@@ -190,7 +226,7 @@ Run at least:
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-If repository release checks are practical in the environment, also run the documented release verification commands.
+Also run the repository's release/reproducibility checks before completion.
 
 Inspect the merged manifest and confirm no new network/privileged permissions were introduced.
 
@@ -206,6 +242,7 @@ Inspect the merged manifest and confirm no new network/privileged permissions we
 - 200% font scale does not hide the primary provisioning/manage action.
 - TalkBack has labels for icon-only controls.
 - No generated-mockup-only claim is introduced into production copy.
+- Personal Settings does not present itself as the owner of Work DPC policy.
 
 ## Architecture acceptance criteria
 
@@ -215,7 +252,9 @@ Inspect the merged manifest and confirm no new network/privileged permissions we
 - Advanced remains opt-in.
 - No user-ID guessing or privileged target inference is added to UI state.
 - DPM operation results still determine visible success/failure.
+- File-sharing/APK DPC changes are only performed by Work/profile-owner Harbor.
 - Core policy/data/topology modules do not gain UI-specific dependencies.
+- `ui/designsystem` remains presentation-only and reusable.
 
 ## Expected file shape
 
@@ -227,18 +266,24 @@ app/src/main/java/com/monstera/harbor/ui/
   PersonalProfileScreen.kt
   WorkProfileScreen.kt
   HarborSettingsScreen.kt
+  designsystem/
+    HarborUiComponents.kt
   privacy/
     PrivacyDashboardPresentation.kt
-    PrivacyDashboardComponents.kt
     WorkAppPresentation.kt
   theme/
     HarborTheme.kt
 
 app/src/test/java/com/monstera/harbor/ui/
-  ...presentation/action mapping tests...
+  ...presentation/action/settings mapping tests...
+
+docs/design/
+  UI_COMPONENT_LIBRARY.md
 ```
 
 Avoid a single giant composable. Keep behavior callbacks at screen boundaries and visual primitives state-light.
+
+When a genuinely reusable visual pattern is introduced, extend `ui/designsystem` rather than creating a second component family inside a feature screen.
 
 ## Final self-review before handing back
 
@@ -247,12 +292,14 @@ Review the diff specifically for:
 1. **Semantic drift** — did any UI simplification change policy behavior?
 2. **False privacy claims** — especially network isolation.
 3. **Cross-profile confusion** — did navigation become fake local tabs?
-4. **Privilege leakage** — did normal UI expose/trigger Advanced operations without opt-in?
-5. **Optimistic policy state** — does Freeze/Share/APK show success before controller success?
-6. **Action availability** — are system/hidden/non-launchable rules preserved?
-7. **Accessibility** — labels, touch targets, font scale, color independence.
-8. **Density** — is the Work app list actually more useful than the old card stack?
-9. **Theme** — both system light and dark mode.
-10. **Dependencies/manifest** — no unnecessary new dependency or permission.
+4. **Settings ownership** — can Personal Harbor incorrectly mutate Work DPC policy?
+5. **Privilege leakage** — did normal UI expose/trigger Advanced operations without opt-in?
+6. **Optimistic policy state** — does Freeze/Share/APK show success before controller success?
+7. **Action availability** — are system/hidden/non-launchable rules preserved?
+8. **Accessibility** — labels, touch targets, font scale, color independence.
+9. **Density** — is the Work app list actually more useful than the old card stack?
+10. **Design-system consistency** — were reusable patterns added to the shared library rather than duplicated?
+11. **Theme** — both system light and dark mode.
+12. **Dependencies/manifest** — no unnecessary new dependency or permission.
 
 If any of these fail, fix them before considering the refactor complete.
