@@ -187,7 +187,18 @@ fun HarborIcon(
             HarborIconKind.Check -> { line(Offset(w * .2f, h * .5f), Offset(w * .43f, h * .72f)); line(Offset(w * .43f, h * .72f), Offset(w * .82f, h * .28f)) }
             HarborIconKind.Open -> { drawRoundRect(tint, Offset(w * .18f, h * .18f), Size(w * .58f, h * .64f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .06f), style = line); line(Offset(w * .48f, h * .52f), Offset(w * .82f, h * .18f)); line(Offset(w * .58f, h * .18f), Offset(w * .82f, h * .18f)); line(Offset(w * .82f, h * .18f), Offset(w * .82f, h * .42f)) }
             HarborIconKind.Freeze -> { circle(center, w * .28f, fill = false); line(Offset(w * .5f, h * .12f), Offset(w * .5f, h * .88f)); line(Offset(w * .18f, h * .3f), Offset(w * .82f, h * .7f)); line(Offset(w * .82f, h * .3f), Offset(w * .18f, h * .7f)) }
-            HarborIconKind.Shortcut -> { drawCircle(tint, w * .32f, Offset(w * .38f, h * .5f), style = line); line(Offset(w * .58f, h * .28f), Offset(w * .84f, h * .28f)); line(Offset(w * .84f, h * .28f), Offset(w * .84f, h * .54f)); line(Offset(w * .84f, h * .28f), Offset(w * .58f, h * .54f)) }
+            HarborIconKind.Shortcut -> {
+                drawRoundRect(
+                    tint,
+                    Offset(w * .16f, h * .3f),
+                    Size(w * .4f, h * .42f),
+                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .06f),
+                    style = line,
+                )
+                line(Offset(w * .48f, h * .52f), Offset(w * .82f, h * .18f))
+                line(Offset(w * .64f, h * .18f), Offset(w * .82f, h * .18f))
+                line(Offset(w * .82f, h * .18f), Offset(w * .82f, h * .36f))
+            }
             HarborIconKind.Details -> { drawCircle(tint, w * .38f, center, style = line); line(Offset(w * .5f, h * .47f), Offset(w * .5f, h * .72f)); circle(Offset(w * .5f, h * .3f), stroke * .75f) }
             HarborIconKind.Uninstall -> { drawRoundRect(tint, Offset(w * .3f, h * .28f), Size(w * .4f, h * .58f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .03f), style = line); line(Offset(w * .24f, h * .2f), Offset(w * .76f, h * .2f)); line(Offset(w * .4f, h * .12f), Offset(w * .6f, h * .12f)); line(Offset(w * .43f, h * .4f), Offset(w * .43f, h * .7f)); line(Offset(w * .57f, h * .4f), Offset(w * .57f, h * .7f)) }
             HarborIconKind.Home -> { val p = Path().apply { moveTo(w * .16f, h * .48f); lineTo(w * .5f, h * .18f); lineTo(w * .84f, h * .48f); lineTo(w * .78f, h * .48f); lineTo(w * .78f, h * .84f); lineTo(w * .22f, h * .84f); lineTo(w * .22f, h * .48f); close() }; drawPath(p, tint, style = line) }
@@ -372,7 +383,12 @@ fun HarborSearchField(
 fun HarborHeroBackground(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         drawRect(Brush.linearGradient(listOf(HarborColors.heroStart, HarborColors.heroEnd), Offset.Zero, Offset(size.width, size.height)))
-        val beam = Path().apply { moveTo(size.width * .34f, size.height * .28f); lineTo(size.width * .93f, size.height * .12f); lineTo(size.width * .93f, size.height * .38f); close() }
+        val beam = Path().apply {
+            moveTo(size.width * .82f, size.height * .28f)
+            lineTo(size.width * .34f, size.height * .17f)
+            lineTo(size.width * .34f, size.height * .4f)
+            close()
+        }
         drawPath(beam, Color(0xFF1BA6A8).copy(alpha = .2f))
         val rocks = Path().apply { moveTo(size.width * .53f, size.height); cubicTo(size.width * .64f, size.height * .78f, size.width * .77f, size.height * .9f, size.width, size.height * .67f); lineTo(size.width, size.height); close() }
         drawPath(rocks, Color(0xFF031D25))
