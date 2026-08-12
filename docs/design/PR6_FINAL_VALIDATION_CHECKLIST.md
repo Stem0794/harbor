@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `PENDING FINAL CLEANUP COMMIT`
+- Commit SHA: `61fe4ba`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated repository validation only
@@ -44,7 +44,7 @@ speculatively and no screenshots were replaced.
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Accessibility validation
 
@@ -56,7 +56,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Personal dashboard
 
@@ -73,7 +73,7 @@ Notes:
 
 Notes / untestable states:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Work app manager
 
@@ -91,7 +91,7 @@ Notes / untestable states:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## App actions
 
@@ -108,7 +108,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Selection mode
 
@@ -125,7 +125,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Work controls bottom sheet
 
@@ -140,7 +140,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Personal → Work file flow
 
@@ -151,7 +151,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Advanced / Shizuku
 
@@ -164,7 +164,7 @@ Notes:
 
 Notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected.`
 
 ## Screenshot readiness
 
@@ -179,18 +179,18 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-`<fill in>`
+`NOT TESTED — no physical device connected; existing screenshots were not replaced.`
 
 ## Final repository gate
 
-- [ ] Unit tests + lint pass on the final commit.
-- [ ] Release build passes.
-- [ ] SBOM generation passes.
-- [ ] Prohibited-permission verification passes.
-- [ ] Reproducibility verification passes.
-- [ ] Diff/whitespace validation passes.
-- [ ] No unresolved P1/P2 review finding remains.
-- [ ] Documentation matches the implementation actually present in PR #6.
+- [x] Unit tests + lint pass on the final commit.
+- [x] Release build passes.
+- [x] SBOM generation passes.
+- [x] Prohibited-permission verification passes.
+- [x] Reproducibility verification passes (`49fb99732fc2285bf500b4aa4137da4428c6a8ed10cb16c6dff79c87915cc419`).
+- [x] Diff/whitespace validation passes.
+- [x] No unresolved P1/P2 review finding remains in the reviewed scope.
+- [x] Documentation matches the implementation actually present in PR #6.
 
 ## Final result
 
@@ -201,5 +201,4 @@ Screenshot notes:
 Defects / blockers / untested items:
 
 Physical blocker: no Samsung Galaxy S24 or OnePlus 13 was connected through
-ADB during this run. Automated repository checks are recorded separately after
-the final cleanup commit.
+ADB during this run. Automated repository checks passed on commit `61fe4ba`.
