@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `61fe4ba`
+- Commit SHA: `9540ebb`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated repository validation only
@@ -187,7 +187,7 @@ Screenshot notes:
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`49fb99732fc2285bf500b4aa4137da4428c6a8ed10cb16c6dff79c87915cc419`).
+- [x] Reproducibility verification passes (`3fafe763e92b44154823fd0f77ec3f62dca896305c04d2dd5c4354ef627c0013`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
@@ -201,4 +201,5 @@ Screenshot notes:
 Defects / blockers / untested items:
 
 Physical blocker: no Samsung Galaxy S24 or OnePlus 13 was connected through
-ADB during this run. Automated repository checks passed on commit `61fe4ba`.
+ADB during this run. Automated repository checks passed on commit `9540ebb`;
+the final checklist edit is documentation-only.
