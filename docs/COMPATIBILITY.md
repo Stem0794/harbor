@@ -14,6 +14,11 @@
 - API 36 AOSP denied UID 2000 cross-user package operations, including `install-existing --user 10`, with `Shell does not have permission to access user 10`. Shizuku ADB mode must report this as unsupported on affected builds rather than promising cloning.
 - The API 29 emulator allowed a shell install targeting the managed profile. This difference confirms that shell capability must be tested per Android/OEM build, not inferred from Shizuku availability.
 
+## Physical devices tested
+
+- Samsung Galaxy S24
+- OnePlus 13
+
 ## Conservative compatibility behavior
 
 - Freeze/unfreeze treats a `false` result from Android as a failed policy update and leaves the displayed state unchanged.
@@ -30,7 +35,7 @@
 - Dashboard cards for secondary Android users show only existence and `profile state unknown` until that user is opened locally. Harbor-only aliases/icons are invalidated when the observed user name changes or the user disappears.
 - Pinned shortcuts are created from the work-profile Harbor instance and are bound to the target app's current signing certificate. Launcher behavior, work badges, profile pause/lock handling, and stale shortcut cleanup remain launcher/OEM dependent and require physical testing.
 
-These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below; no new physical-device result is claimed by this remediation.
+These behaviors are covered by host-side regression tests. Their UI and OEM command behavior still require the physical-device matrix below.
 
 ## Required physical testing before stable release
 

@@ -1,149 +1,196 @@
 # Harbor
 
-Harbor is a free and open-source Android application for creating and managing a standard Android work profile. It is designed for people who want a practical isolation boundary for apps and data without depending on Google Play services, root, or a cloud account.
+**A private space for Android apps, built on Android's work-profile system.**
 
-> Harbor is alpha software. The core flow is implemented and tested on AOSP Android 16, but provisioning and Device Policy Controller behavior still need broader physical-device validation before a stable release.
+Harbor is a free and open-source Android app that creates and manages a standard Android work profile. You can use that profile to keep selected apps and their data separate from your personal side of the phone.
 
-## What Harbor does
+Harbor does **not** require Google Play services, root, a cloud account, analytics, advertising, or Internet access for its core features.
 
-- Creates one consent-based managed work profile for the current Android user.
-- Detects whether the local Harbor instance owns the profile.
-- Lists applications installed in that work profile.
-- Searches the local application catalog.
-- Launches apps and opens their Android system details page.
-- Freezes and unfreezes eligible apps with `DevicePolicyManager.setApplicationHidden`.
-- Starts system-confirmed uninstall flows for non-system apps.
-- Explains when Android Settings must be used for work-profile toggles or removal.
-- Lets the user prepare APK installation while retaining Android's per-source consent prompt for the app that opened the APK.
-- Provides a supported personal-to-work file flow: open Personal Harbor from Work, tap `Choose files` in Personal, or use a personal app's Share action and choose Harbor with the work badge. Harbor copies the file into work-profile `Downloads/Harbor` without deleting the personal original. Because Android uses generic cross-profile share filters, other compatible work apps may also be offered as recipients; choosing another recipient sends that app the selected file, and Harbor warns before enabling this flow.
-- The sharing policy is applied by the Harbor instance inside the work profile. When testing an update, update/open that work-badged Harbor copy; installing only the personal-profile copy does not change the active profile owner.
-- Provides optional Shizuku developer tools for diagnostics, allowlisted package cloning, and experimental multi-user workspaces.
+> **Harbor is alpha software.** Use it for testing and non-critical data while device compatibility is still being expanded.
 
-The core DPC path works without Shizuku. Advanced tools are opt-in and are never required to provision or manage the primary work profile.
+## What can I do with Harbor?
+
+- Create a standard Android work profile.
+- See the apps installed inside the work profile.
+- Search and launch work apps.
+- Freeze and unfreeze eligible apps.
+- Open Android's app-details screen or uninstall apps.
+- Create launcher shortcuts for work apps.
+- Send files from your personal profile into the work profile.
+- Prepare APK installs while keeping Android's normal security/consent prompts.
+- Optionally use Shizuku for advanced diagnostics, package cloning, and experimental additional workspaces.
+
+The normal work-profile features do **not** require Shizuku.
 
 ## Screenshots
 
-The following screenshots were captured from a physical Samsung SM-S921B running Android 16 (API 36) during the alpha04 validation flow.
+<p align="center">
+  <img src="docs/screenshots/harbor-personal-samsung-api36.png" alt="Harbor personal profile dashboard" width="45%" />
+  <img src="docs/screenshots/harbor-work-samsung-api36.png" alt="Harbor work-profile app management" width="45%" />
+</p>
 
-| Personal profile dashboard | Work-profile app management |
-| --- | --- |
-| ![Harbor personal profile dashboard](docs/screenshots/harbor-personal-samsung-api36.png) | ![Harbor work-profile app management](docs/screenshots/harbor-work-samsung-api36.png) |
+<p align="center"><sub>Harbor running on a Samsung Galaxy S24 with Android 16 (API 36).</sub></p>
 
-The screenshots show the current public-API MVP, including the cross-profile sharing disclosure. OEM Settings screens, work-profile launchers, and Shizuku behavior can look different on other devices.
+## How it works
 
-## Design principles
+Android work profiles are separate spaces managed by the operating system. Apps inside the work profile have their own app data and appear with Android's work badge.
 
-Harbor deliberately stays close to supported Android APIs:
+Harbor uses Android's supported `DevicePolicyManager` APIs to create and manage that profile. The Harbor copy inside the work profile becomes the profile owner and performs management actions locally.
 
-- Public `DevicePolicyManager` APIs for profile-owner operations.
-- No hidden API reflection, direct `su`, or arbitrary shell console.
-- No automated `dpm set-profile-owner` or consent bypass.
-- No Firebase, Google Play services, analytics, crash reporting, advertising, account system, or remote configuration.
-- No network permission in the core application.
-- Local app and user diagnostics remain on the device.
-- Shizuku commands use a fixed operation allowlist, validated package/user identifiers, bounded output, and no command-string concatenation.
+Harbor does not try to bypass Android's security model with hidden APIs, automatic `dpm set-profile-owner`, root commands, or a general-purpose shell.
 
-Harbor is behaviorally inspired by Island, but it is a clean implementation with a new application identity and a public-API-first architecture.
+### One work profile per Android user
 
-## Current status
+Stock Android generally allows **one managed work profile per parent Android user**.
 
-The current release line is `0.2.0-alpha05`.
+If Harbor shows:
 
-Implemented:
+> Another profile exists and Android does not currently allow another work profile
 
-- API 29 through API 36 build configuration.
-- Standard managed-profile provisioning and profile-owner detection.
-- Lifecycle and recovery states for the primary work profile.
-- Searchable work-profile catalog, launch, details, freeze/unfreeze, and uninstall flows.
-- Lazy app icons with a generic fallback, multi-selection, sequential batch freeze/unfreeze, and partial-failure reporting.
-- UUID-scoped work-profile launcher shortcuts that unfreeze and launch a validated local target.
-- A conservative workspace dashboard with optional aliases/icons and stale Android-user metadata handling.
-- Optional Shizuku backend with diagnostics, allowlisted `install-existing`, full-user listing, creation, Harbor installation, and switching primitives.
-- Reproducible Gradle conventions, dependency verification, SBOM generation, and F-Droid packaging scaffolding.
+that means Android has reported that the current user cannot create another managed profile. This commonly happens when a work profile already exists from an employer, another DPC, Island, Shelter, or a similar app.
 
-Still experimental or device-dependent:
+Harbor intentionally respects this platform limit instead of trying to bypass it.
 
-- Shizuku ADB-mode package cloning on Android 16 and OEM builds.
-- Multiple full-user workspaces and provisioning a work profile inside a secondary user.
-- Launcher pinning and shortcut behavior across Pixel, Samsung, Xiaomi, and other OEM launchers.
-- API 29 provisioning on emulator images without device encryption.
-- OEM-specific launchers, Settings flows, process killing, user switching, and package-manager permissions.
+## Getting started
 
-See [the compatibility matrix](docs/COMPATIBILITY.md) for the evidence and required physical-device gates.
+1. Install Harbor.
+2. Open Harbor on the personal side of the phone.
+3. Tap **Create space**.
+4. Follow Android's work-profile setup screens.
+5. Open the work-badged Harbor app to manage apps inside the new profile.
 
-## Application identity
+Harbor is intended for distribution through **F-Droid**. Until the F-Droid build is accepted, the latest alpha builds are available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
 
-- Production application ID: `com.monstera.harbor`
-- Debug application ID: `com.monstera.harbor.debug`
-- DPC receiver: `com.monstera.harbor.admin.HarborDeviceAdminReceiver`
+The GitHub release currently includes a Monstera-signed APK for testing and an unsigned reproducible artifact for F-Droid/upstream verification. A future F-Droid build will use F-Droid's signing key, so a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
 
-The production application ID, DPC receiver component, and release signing identity are update-compatibility contracts. They must remain stable once a public distribution build is shipped.
+Do not use an alpha build for a work profile containing irreplaceable data.
 
-## Installation
+## Personal to work file sharing
 
-Harbor is intended for F-Droid distribution rather than Google Play. Until the first F-Droid build is accepted, use the GitHub source and release artifacts only for development and testing.
+Harbor supports sending files **from Personal to Work**.
 
-The GitHub release includes two APK artifacts. The Monstera-signed APK is convenient for alpha testing; the unsigned APK is the upstream/F-Droid reproducibility artifact. F-Droid is expected to build the tagged source and sign the production package with its own signing key. A Monstera-signed installation will not be upgradeable from a future F-Droid-signed installation unless the signing arrangement is explicitly coordinated, so choose one distribution channel for a given device. Do not use an alpha APK for a profile that contains irreplaceable data.
+You can either:
 
-For local development:
+- open Personal Harbor from the work side and choose files, or
+- use Android's Share menu from a personal app and select the work-badged Harbor app.
 
-1. Install a JDK 17 and Android SDK Platform 36.
-2. Enable USB debugging on a disposable test device or start an AOSP emulator.
-3. Build the debug APK with `./gradlew assembleDebug`.
-4. Install it with `adb install app/build/outputs/apk/debug/app-debug.apk`.
-5. Provision the work profile through Harbor and the Android consent screens.
+Harbor copies the selected file into:
 
-Debug builds use a separate application ID and cannot update production/F-Droid installations.
+```text
+Downloads/Harbor
+```
 
-## Shizuku integration
+inside the work profile. The original personal file is not deleted.
 
-Shizuku is optional and must be installed and activated separately by the user. Harbor does not bundle, download, start, or update the Shizuku manager.
+Android uses generic cross-profile share filters, so other compatible work apps may also appear as possible recipients. Harbor warns about this before enabling the sharing flow.
 
-When enabled under Advanced, Harbor can:
+Harbor does not provide a work-to-personal export flow.
 
-- Report Shizuku availability, server version, permission state, and effective UID.
-- Show redacted local user/profile/package-manager diagnostics.
-- Attempt allowlisted `install-existing` cloning into the existing Harbor work profile.
-- List and create secondary full Android users where the device supports it.
-- Install Harbor for a secondary user and guide the user through normal work-profile provisioning there.
+## Privacy
 
-ADB-shell and root-backed Shizuku use the same Harbor operation allowlist. A root UID does not automatically unlock additional commands. Android/OEM capability checks are performed per operation.
+Harbor is designed to work locally.
+
+- No `INTERNET` permission.
+- No analytics or telemetry.
+- No advertising.
+- No account system.
+- No Firebase or Google Play services dependency.
+- No remote configuration.
+- App and user diagnostics stay on the device.
+
+Harbor declares Android's `QUERY_ALL_PACKAGES` permission because its core app-management screen needs to enumerate the applications installed in the **local work profile**. Android 11 and newer otherwise filter package visibility. This permission lets Harbor build its local app catalog; it does not grant access to another app's private data, Internet access, or arbitrary cross-user access.
+
+See [Privacy](docs/PRIVACY.md) and [Threat model](docs/THREAT_MODEL.md) for the full details.
+
+## Shizuku and advanced tools
+
+Shizuku is optional and must be installed and started separately by the user.
+
+When Advanced tools are enabled, Harbor can use a small allowlisted privileged backend to:
+
+- show local diagnostics,
+- attempt `install-existing` package cloning,
+- list Android users,
+- create a secondary full Android user where supported,
+- install Harbor for that user, and
+- switch users.
+
+There is no arbitrary command console. Harbor validates package names and user IDs and fails closed when the device topology cannot be determined safely.
+
+Shizuku behavior varies considerably by Android version and OEM. A running Shizuku server does not guarantee that every advanced operation is available.
 
 ## Multiple workspaces
 
-Stock-compatible Android guarantees at most one managed profile per parent full user. Harbor therefore models multiple workspaces as:
+Android normally allows one managed profile for each parent full user. Harbor's experimental multi-workspace model therefore uses additional full Android users:
 
 ```text
-Primary full user
-└── One Harbor work profile
+Primary Android user
+└── Harbor work profile
 
-Secondary full user A
-└── One Harbor work profile
+Secondary Android user A
+└── Harbor work profile
 
-Secondary full user B
-└── One Harbor work profile
+Secondary Android user B
+└── Harbor work profile
 ```
 
-Switching full users is a platform-level operation; remote users cannot be managed as if they were visible inside the primary user. User creation consumes storage, may be disabled by an OEM, and is experimental. User deletion is intentionally not implemented because it destroys personal and work-profile data.
+This feature is experimental and depends on OEM support. Harbor intentionally does not implement full-user deletion because deleting an Android user destroys its personal and work-profile data.
 
-## Build from source
+## Compatibility
 
-Requirements:
+Harbor targets Android 10 through Android 16 (API 29-36), but work-profile provisioning and device-policy behavior can differ between manufacturers.
+
+### Physical devices tested
+
+- Samsung Galaxy S24
+- OnePlus 13
+
+See [Compatibility](docs/COMPATIBILITY.md) for emulator results, device-specific limitations, and the remaining physical-device test matrix.
+
+## Current release
+
+Current release line: **0.2.0-alpha05**
+
+The core work-profile path includes:
+
+- managed-profile provisioning and profile-owner detection,
+- searchable work-app catalog,
+- app launch/details/uninstall,
+- freeze/unfreeze,
+- batch operations,
+- work-app launcher shortcuts,
+- personal-to-work file sharing, and
+- local lifecycle/recovery handling.
+
+Advanced Shizuku operations, secondary-user workspaces, some launcher behavior, and some OEM-specific flows remain experimental.
+
+## For developers
+
+### Requirements
 
 - JDK 17
 - Android SDK Platform 36
 - Android Build Tools 36.0.0
 
-Common verification commands:
+### Build and verify
 
 ```shell
 ./gradlew testDebugUnitTest lintDebug assembleRelease
 ./gradlew generateSbom
 ```
 
-The build resolves dependencies only from Google Maven, Maven Central, and the Gradle Plugin Portal. Dependency verification and lockfiles are committed. See [the dependency audit](docs/DEPENDENCIES.md) for licenses and the optional Shizuku dependency.
+Debug builds use `com.monstera.harbor.debug` and cannot update production/F-Droid installations.
 
-## Repository layout
+Production identity:
+
+```text
+Application ID: com.monstera.harbor
+DPC receiver:   com.monstera.harbor.admin.HarborDeviceAdminReceiver
+```
+
+These identities, together with the production signing identity, are update-compatibility contracts.
+
+### Project structure
 
 ```text
 app/                    Compose UI, DPC receiver, manifests
@@ -154,35 +201,21 @@ privileged/shizuku/     Isolated Shizuku UserService backend
 feature/advanced/       Shizuku and multiple-user UI
 build-logic/            Shared Gradle conventions
 docs/                   Architecture, privacy, threat model, release guidance
-packaging/fdroid/       Candidate F-Droid metadata
+packaging/fdroid/       F-Droid metadata and build recipe
 ```
 
-## Privacy and security
+Before contributing, read:
 
-Harbor has no telemetry and no network permission. The app catalog is read from the local Android package manager and is not uploaded. Shizuku diagnostics are local and only run after the user explicitly enables Advanced tools and grants Shizuku permission.
+- [Architecture](docs/ARCHITECTURE.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Compatibility](docs/COMPATIBILITY.md)
+- [Dependencies](docs/DEPENDENCIES.md)
+- [Releasing](docs/RELEASING.md)
 
-The most important security boundary is Android's work-profile and profile-owner model. Harbor does not claim that it can bypass OEM restrictions, inspect remote users authoritatively, or transfer ownership from Island/Insular. Removing a work profile or full user through Android Settings is destructive.
-
-Read [Privacy](docs/PRIVACY.md) and [Threat model](docs/THREAT_MODEL.md) before testing on a device with important data.
-
-## Compatibility and testing
-
-Automated checks cover JVM tests, compilation, lint, release assembly, and manifest/security tests where available. Emulator validation covers AOSP API 36 and API 29 constraints. Before a stable release, the project requires physical testing on a current Pixel, an Android 10 reference device, Samsung, Xiaomi, an Oppo/Realme/Vivo device, and a GMS-free build.
-
-Known limitations include OEM provisioning failures, one-managed-profile-per-parent limits, work profiles inside secondary users, Shizuku process death, package-manager permission differences, and launcher-specific behavior.
-
-See [Compatibility](docs/COMPATIBILITY.md) and [Releasing](docs/RELEASING.md).
-
-## Contributing
-
-Small, focused contributions are welcome. Please:
-
-1. Read [Architecture](docs/ARCHITECTURE.md), [Threat model](docs/THREAT_MODEL.md), and [Compatibility](docs/COMPATIBILITY.md).
-2. Keep the core DPC path independent from Shizuku.
-3. Avoid hidden APIs, privileged permissions, arbitrary commands, network telemetry, and proprietary dependencies.
-4. Add or update tests for policy, topology, parser, and privileged-command changes.
-5. Run the verification commands above and report the Android/OEM device used for manual testing.
+Changes to the core DPC path should remain independent from Shizuku and avoid hidden APIs, privileged permissions, arbitrary commands, network telemetry, and proprietary dependencies.
 
 ## License
 
-Apache License 2.0. Harbor is inspired by Island, but is a new implementation and does not use Island's legacy module or privileged-service architecture.
+Apache License 2.0.
+
+Harbor is behaviorally inspired by Island, but it is a clean implementation with its own application identity and public-API-first architecture.
