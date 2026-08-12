@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `733ad6c`
+- Commit SHA: `bfd6ae1`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -192,8 +192,9 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-Screenshots were captured from the Samsung S24 smoke test and copied to the
-matching docs and Fastlane paths. README rendering was not exercised here.
+Screenshots were re-captured from the current signed alpha05 APK built from
+`bfd6ae1` on Samsung S24 / Android 16, then copied to the matching docs and
+Fastlane paths. README rendering was not exercised here.
 
 ## Final repository gate
 
