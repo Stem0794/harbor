@@ -1,133 +1,163 @@
-# Codex task: finish PR #6 cleanup and validation
+# Codex task: implement Direction 2 visual fidelity on PR #6
 
-Branch: `codex/ui-privacy-dashboard`
-PR: #6
-Scope: **documentation cleanup + physical-device validation + screenshots**
+Branch: `codex/ui-privacy-dashboard`  
+PR: #6  
+Scope: **UI-only visual-fidelity pass**
 
-## Read first
+## Authoritative inputs
 
-1. `docs/design/PR6_FINAL_CLEANUP_PLAN.md`
-2. `docs/design/PR6_FINAL_VALIDATION_CHECKLIST.md`
-3. `docs/design/CODEX_START_HERE.md`
-4. `docs/design/UI_COMPONENT_LIBRARY.md`
-5. `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md`
+1. `docs/design/PR6_DIRECTION2_PIXEL_FIDELITY_PLAN.md`
+2. user-supplied `harbor-direction2-reference.png` raster mockup
+3. current Personal/Work runtime behavior and callbacks
 
-The runtime UI review fixes are already implemented. Do not redo them.
+The raster is the visual source of truth. The simplified SVG is not.
 
 ## Hard boundary
 
-Do not change runtime code unless device validation exposes a concrete defect.
-
 Preserve all existing:
 
-- Personal/Work routing;
-- callbacks and controller ownership;
-- DevicePolicyManager behavior;
-- provisioning behavior;
-- topology/user-ID trust rules;
+- Personal/Work profile routing;
+- provisioning behavior and Android consent;
+- DevicePolicyManager/profile-owner behavior;
+- callbacks/controllers/ViewModels;
+- topology and user-ID trust rules;
 - file-sharing behavior;
 - APK-install behavior;
-- app launch/freeze/unfreeze/details/uninstall behavior;
+- launch/freeze/unfreeze/details/uninstall behavior;
+- batch sequential/partial-failure behavior;
 - shortcut behavior and signer validation;
 - Advanced/Shizuku behavior;
-- multi-user behavior;
-- manifest permissions and dependencies.
+- manifest permissions and dependency policy.
 
-Do not add a Settings architecture, capability resolver, policy state model, new navigation framework, permission, dependency, network capability, telemetry, hidden API, arbitrary shell access, or destructive user deletion.
+Do not add a role-aware Settings architecture, policy capability resolver, new policy state, new network capability, telemetry, hidden APIs, arbitrary shell access, or destructive user deletion.
 
-## 1. Clean the historical plan
+## Implement in this order
 
-Edit `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md` so it remains useful historical context without containing stale instructions that look current.
+### 1. Reference + before state
 
-Remove/rewrite:
+- Ensure the supplied raster is locally visible to the coding session.
+- Keep the current S24 screenshots as before-images.
+- Create convenient Personal/Work reference crops locally.
+- Do not approximate from `harbor-ui-direction2-privacy-dashboard.svg`.
 
-- proposed local Settings navigation;
-- Personal/Work Settings destinations;
-- role-aware Settings/capability-resolver requirements;
-- Work Settings / Personal Settings test requirements;
-- obsolete scaffold filenames;
-- statements that live screens have not yet been migrated;
-- Definition-of-Done requirements for unimplemented Settings architecture.
+### 2. Direction 2 assets and tokens
 
-Use current implementation names where relevant:
+- Add explicit sampled dark/teal color tokens from the fidelity plan.
+- Add the lighthouse Harbor mark matching the raster.
+- Add the Work mark matching the raster.
+- Add lighthouse/beam/waves hero artwork.
+- Add dedicated vector icons required by the mockup.
+- Replace text glyph icons such as `⋮`, `›`, and `×`.
+- Keep these resources presentation-only.
 
-- `PrivacyPresentation.kt`
-- `WorkUiReviewScaffold.kt`
-- `HarborDesignSystem.kt`
-- `PersonalProfileScreen.kt`
-- `WorkProfileScreen.kt`
+### 3. Personal screen
 
-Describe the Work controls bottom sheet as presentation-only relocation of existing Work-side callbacks/controllers.
+Rebuild the first viewport to match the left phone:
 
-## 2. Cross-check documentation
+- branded Harbor header;
+- large lighthouse hero;
+- full-width cyan `Open Work` CTA;
+- quick-action tiles;
+- structured Privacy by default panel with icons/dividers/trailing checks;
+- mockup-style bottom navigation shell;
+- move current secondary information out of the first visual viewport without removing its behavior.
 
-Verify these files agree with the final UI-only scope:
+Use the semantic substitutions in the fidelity plan:
 
-- `CODEX_START_HERE.md`
-- `PR6_FINAL_CLEANUP_PLAN.md`
-- `PR6_REVIEW_FIX_PLAN.md`
-- `UI_COMPONENT_LIBRARY.md`
-- `UI_PRIVACY_DASHBOARD_PLAN.md`
+- `No network permission`, not a false Work-offline claim;
+- no duplicate Work-profile creation when Work is already ready;
+- `Work` navigation uses the existing cross-profile callback.
 
-Do not expand the scope while reconciling wording.
+### 4. Work header/search/list
 
-## 3. Physical-device validation
+Rebuild the right-phone upper half:
 
-Complete `PR6_FINAL_VALIDATION_CHECKLIST.md` on the actual build under test.
+- menu icon + Work mark + `Work space` + accurate subtitle + overflow;
+- filled rounded search surface, not a default outlined field;
+- compact count/Select row;
+- dense rounded app rows with 48dp icons;
+- data-backed secondary line only;
+- reference-style status pills;
+- real overflow icon.
 
-Required primary device:
+Preserve current search, count, selection, and system-app rules.
 
-- Samsung Galaxy S24
+### 5. App action bottom sheet
 
-Optional secondary device:
+Rebuild the right-phone lower half:
 
-- OnePlus 13
+- Direction 2 dark sheet shell;
+- rounded top corners and drag handle;
+- real app icon + app identity header;
+- action-specific leading icons;
+- dividers;
+- Open;
+- Freeze/Unfreeze with an authoritative trailing switch;
+- Add to launcher / Add & unfreeze;
+- App details;
+- red Uninstall row.
 
-Record:
+The Freeze switch must derive from `app.isHidden` and must not update optimistically before controller success.
 
-- commit SHA;
-- APK/build;
-- Android version/API level;
-- tester/date;
-- PASS / FAIL / NOT TESTED for each relevant item;
-- notes for any item that cannot be exercised safely.
+### 6. Secondary Work surfaces
 
-Do not make speculative code changes for an untestable state.
+- Left menu may present existing `Open Personal Harbor` and `Advanced` callbacks.
+- Right overflow keeps existing Work-side file-sharing, APK-install, and Android Settings callbacks.
+- Restyle these surfaces consistently without creating a new policy/settings architecture.
 
-## 4. Screenshots
+### 7. State/accessibility pass
 
-Only after the physical validation is accepted:
+Verify:
 
-- capture real Personal and Work screens;
-- replace matching files under `docs/screenshots/`;
-- replace matching Fastlane phone screenshots;
-- verify README rendering;
-- do not use the generated concept mockup as release evidence.
+- ready/setup/blocked Personal hero variants;
+- available/frozen/read-only/disabled/non-launchable Work rows;
+- selection mode;
+- 48dp touch targets;
+- TalkBack labels;
+- large font;
+- long app names/package names;
+- sheet scrolling/insets;
+- no status communicated by color alone.
 
-If the existing screenshot filenames remain unchanged, prefer replacing the image files rather than rewriting README references unnecessarily.
+### 8. Physical visual-diff loop
 
-## 5. Final verification
+On Samsung Galaxy S24 / Android 16:
 
-On the final commit, require:
+1. force dark mode;
+2. capture Personal screenshot;
+3. compare side-by-side and with a transparency overlay against the Personal raster crop;
+4. iterate colors, spacing, typography, art and dimensions;
+5. capture Work list screenshot;
+6. repeat against the right-phone upper crop;
+7. open a normal user-app action sheet;
+8. repeat against the right-phone lower crop.
+
+Do not stop because the information architecture is similar. Stop only when the screenshots read as the **same design**.
+
+### 9. Final validation
+
+Run:
 
 ```shell
 ./gradlew --no-daemon testDebugUnitTest lintDebug assembleRelease generateSbom
 ```
 
-Also require:
+Also run prohibited-permission verification, reproducibility verification, and diff/whitespace validation.
 
-- prohibited-permission verification;
-- reproducibility verification;
-- diff/whitespace validation.
+Refresh docs/Fastlane screenshots only after the new visual result is accepted.
 
 ## Definition of done
 
-- Historical plan no longer contains misleading Settings-era instructions.
-- Documentation matches the implementation present in PR #6.
-- Physical-device validation is recorded.
-- No unresolved P1/P2 review finding remains.
-- Screenshots are refreshed if this UI is intended to ship immediately.
-- Full CI and reproducibility checks pass on the latest head.
-- PR remains draft until the physical validation checklist is complete.
+- Lighthouse logo/hero imagery matches the raster closely.
+- Personal first viewport matches the left-phone composition.
+- Work list matches the right-phone composition.
+- Action sheet matches the right-phone sheet composition.
+- Explicit sampled palette replaces generic Material-default appearance.
+- No generic TopAppBar/outlined-search/generic-card-stack/text-glyph icon treatment dominates the primary UI.
+- Accurate Harbor semantics replace only the few incorrect mockup claims/actions documented in the plan.
+- Existing behavior/policy/profile ownership is unchanged.
+- S24 side-by-side visual review is accepted.
+- Accessibility remains usable.
+- Full CI and reproducibility checks pass.
 
-If device testing exposes a real defect, document it first and make the smallest targeted fix possible. Do not reopen the architecture/design scope.
+If the screen still looks like a generic Material reinterpretation of the mockup rather than the mockup itself, continue iterating.
