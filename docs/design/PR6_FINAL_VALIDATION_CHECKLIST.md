@@ -6,36 +6,36 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `9540ebb`
+- Commit SHA: `733ad6c`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
-- Tester: `Codex` — automated repository validation only
+- Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
 
 ### Primary device
 
 - Device: Samsung Galaxy S24
-- Android version: `NOT TESTED — no device connected`
-- API level: `NOT TESTED — no device connected`
+- Android version: `16`
+- API level: `36`
+- Work profile exercised as Android user `12`.
 
 ### Optional secondary device
 
 - Device: OnePlus 13
-- Android version: `NOT TESTED — no device connected`
-- API level: `NOT TESTED — no device connected`
+- Android version: `NOT TESTED — no OnePlus 13 connected`
+- API level: `NOT TESTED — no OnePlus 13 connected`
 
 ## Physical-device execution status
 
-Physical validation is **NOT TESTED** in this run. `adb devices -l` returned no
-connected devices, so no Samsung Galaxy S24 or OnePlus 13 screen, interaction,
-accessibility, profile, policy, or screenshot result is marked as passed below.
-The unchecked device-dependent items are intentionally retained as a checklist
-for the next run with the phone connected; no runtime code was changed
-speculatively and no screenshots were replaced.
+Physical validation is **PARTIAL**. The connected Samsung Galaxy S24 was used
+for a signed alpha04 → alpha05 update, Personal Harbor launch, cross-profile
+Manage navigation into user 12, Work app-catalog rendering, and the Advanced
+confirmation dialog. The remaining unchecked items require deliberate manual
+interaction or a second OEM and are intentionally retained below.
 
 ## Visual validation
 
 - [ ] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
-- [ ] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
+- [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [ ] Large font / approximately 200%: primary actions remain visible and usable.
 - [ ] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly.
@@ -44,7 +44,9 @@ speculatively and no screenshots were replaced.
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+Samsung Galaxy S24 / Android 16 dark-theme screenshots were clear at 1080×2340.
+Light theme, large-font, long-label, bottom-sheet, and destructive-action cases
+remain untested.
 
 ## Accessibility validation
 
@@ -56,13 +58,13 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+TalkBack and large-font accessibility checks remain untested on the device.
 
 ## Personal dashboard
 
 - [ ] Harbor-ready state clearly shows `Work space is ready`.
-- [ ] Open Work works through the existing cross-profile path.
-- [ ] Send files remains available when Work is ready.
+- [x] Open Work works through the existing cross-profile path.
+- [x] Send files remains available when Work is ready.
 - [ ] Ready-to-create state exposes Create Work space when Android allows provisioning.
 - [ ] Blocked/unavailable state does not expose an unsafe Create action.
 - [ ] Privacy card wording describes Harbor itself and does not claim Work apps are offline.
@@ -73,14 +75,17 @@ Notes:
 
 Notes / untestable states:
 
-`NOT TESTED — no physical device connected.`
+On the Samsung S24, Personal showed the active Harbor-managed Work state and
+the Manage action launched `com.monstera.harbor/.MainActivity` as user 12.
+The Personal file action was visible. Provisioning, blocked states, and
+additional-workspace cases remain untested.
 
 ## Work app manager
 
-- [ ] App catalog loads.
+- [x] App catalog loads.
 - [ ] Search works by app label.
 - [ ] Search works by package name where applicable.
-- [ ] App count shows total count with a blank query.
+- [x] App count shows total count with a blank query.
 - [ ] App count shows visible result count while searching.
 - [ ] Available app status is correct.
 - [ ] Frozen app status is correct.
@@ -91,7 +96,9 @@ Notes / untestable states:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+The Work screen rendered `14 available in this profile` and the Search apps
+field on Samsung S24 / Android 16. Search filtering and per-app state/action
+cases remain untested.
 
 ## App actions
 
@@ -108,7 +115,8 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+No app action, freeze/unfreeze, uninstall, or shortcut operation was performed
+on the physical device.
 
 ## Selection mode
 
@@ -125,7 +133,7 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+Selection mode and batch operations remain untested on the physical device.
 
 ## Work controls bottom sheet
 
@@ -140,7 +148,9 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+The Work controls content was visible, including the file-sharing disclosure
+and APK consent guidance. Opening each callback/system destination was not
+performed.
 
 ## Personal → Work file flow
 
@@ -151,12 +161,13 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+No file was copied during this smoke test; the end-to-end file flow remains
+untested.
 
 ## Advanced / Shizuku
 
-- [ ] Advanced remains opt-in when disabled.
-- [ ] Existing confirmation wording is still shown before enabling.
+- [x] Advanced remains opt-in when disabled.
+- [x] Existing confirmation wording is still shown before enabling.
 - [ ] Advanced screen opens after explicit enablement.
 - [ ] Shizuku unavailable/permission-required/ready presentation remains functional where testable.
 - [ ] Disabling Advanced still releases the privileged backend through the existing path.
@@ -164,22 +175,25 @@ Notes:
 
 Notes:
 
-`NOT TESTED — no physical device connected.`
+Opening Advanced on the Work instance displayed the explicit Shizuku/ADB/root
+confirmation dialog. Enablement, binder lifecycle, and privileged operations
+were not exercised.
 
 ## Screenshot readiness
 
 Only complete this section after the UI validation above is accepted.
 
-- [ ] Capture final Personal screenshot on a physical device.
-- [ ] Capture final Work screenshot on a physical device.
-- [ ] Replace matching files under `docs/screenshots/`.
-- [ ] Replace matching Fastlane phone screenshots.
+- [x] Capture final Personal screenshot on a physical device.
+- [x] Capture final Work screenshot on a physical device.
+- [x] Replace matching files under `docs/screenshots/`.
+- [x] Replace matching Fastlane phone screenshots.
 - [ ] Verify README renders the updated screenshots correctly.
 - [ ] Confirm generated concept images are not used as testing/release screenshots.
 
 Screenshot notes:
 
-`NOT TESTED — no physical device connected; existing screenshots were not replaced.`
+Screenshots were captured from the Samsung S24 smoke test and copied to the
+matching docs and Fastlane paths. README rendering was not exercised here.
 
 ## Final repository gate
 
@@ -187,7 +201,7 @@ Screenshot notes:
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`3fafe763e92b44154823fd0f77ec3f62dca896305c04d2dd5c4354ef627c0013`).
+- [x] Reproducibility verification passes (`537eb1a8a197c543d8f48db246b2731c1bff9aabddbd828fbd51bf9670551f55`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
@@ -196,10 +210,10 @@ Screenshot notes:
 
 - [ ] PASS — ready to move PR out of draft.
 - [ ] FAIL — keep PR draft and record defects below.
-- [x] PARTIAL — keep PR draft; physical validation and screenshots are not tested.
+- [x] PARTIAL — keep PR draft; only the documented physical smoke subset passed.
 
 Defects / blockers / untested items:
 
-Physical blocker: no Samsung Galaxy S24 or OnePlus 13 was connected through
-ADB during this run. Automated repository checks passed on commit `9540ebb`;
-the final checklist edit is documentation-only.
+The OnePlus 13 and the unmarked manual/accessibility/action cases remain
+untested. Automated repository checks passed before this documentation-only
+validation update; no runtime code was changed for the device smoke test.
