@@ -6,22 +6,31 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `<fill in>`
-- APK/build: `<fill in>`
-- Date: `<fill in>`
-- Tester: `<fill in>`
+- Commit SHA: `PENDING FINAL CLEANUP COMMIT`
+- APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
+- Date: `2026-08-12`
+- Tester: `Codex` — automated repository validation only
 
 ### Primary device
 
 - Device: Samsung Galaxy S24
-- Android version: `<fill in>`
-- API level: `<fill in>`
+- Android version: `NOT TESTED — no device connected`
+- API level: `NOT TESTED — no device connected`
 
 ### Optional secondary device
 
 - Device: OnePlus 13
-- Android version: `<fill in or NOT TESTED>`
-- API level: `<fill in or NOT TESTED>`
+- Android version: `NOT TESTED — no device connected`
+- API level: `NOT TESTED — no device connected`
+
+## Physical-device execution status
+
+Physical validation is **NOT TESTED** in this run. `adb devices -l` returned no
+connected devices, so no Samsung Galaxy S24 or OnePlus 13 screen, interaction,
+accessibility, profile, policy, or screenshot result is marked as passed below.
+The unchecked device-dependent items are intentionally retained as a checklist
+for the next run with the phone connected; no runtime code was changed
+speculatively and no screenshots were replaced.
 
 ## Visual validation
 
@@ -187,8 +196,10 @@ Screenshot notes:
 
 - [ ] PASS — ready to move PR out of draft.
 - [ ] FAIL — keep PR draft and record defects below.
-- [ ] PARTIAL — keep PR draft; list untested blockers below.
+- [x] PARTIAL — keep PR draft; physical validation and screenshots are not tested.
 
 Defects / blockers / untested items:
 
-`<fill in>`
+Physical blocker: no Samsung Galaxy S24 or OnePlus 13 was connected through
+ADB during this run. Automated repository checks are recorded separately after
+the final cleanup commit.
