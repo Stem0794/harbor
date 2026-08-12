@@ -1,153 +1,133 @@
-# Codex task: finish PR #6 UI review fixes
+# Codex task: finish PR #6 cleanup and validation
 
 Branch: `codex/ui-privacy-dashboard`
 PR: #6
-Scope: **UI-only follow-up**
+Scope: **documentation cleanup + physical-device validation + screenshots**
 
 ## Read first
 
-1. `docs/design/PR6_REVIEW_FIX_PLAN.md`
-2. `docs/design/CODEX_START_HERE.md`
-3. `docs/design/UI_COMPONENT_LIBRARY.md`
-4. current `PersonalProfileScreen.kt`
-5. current `WorkProfileScreen.kt`
-6. `app/src/main/java/com/monstera/harbor/ui/privacy/WorkUiReviewScaffold.kt`
-7. `app/src/test/java/com/monstera/harbor/ui/privacy/WorkUiReviewScaffoldTest.kt`
+1. `docs/design/PR6_FINAL_CLEANUP_PLAN.md`
+2. `docs/design/PR6_FINAL_VALIDATION_CHECKLIST.md`
+3. `docs/design/CODEX_START_HERE.md`
+4. `docs/design/UI_COMPONENT_LIBRARY.md`
+5. `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md`
 
-The older `UI_PRIVACY_DASHBOARD_PLAN.md` is design history. If it conflicts with the review-fix plan, the review-fix plan is authoritative.
+The runtime UI review fixes are already implemented. Do not redo them.
 
 ## Hard boundary
 
-Do not create or refactor Harbor's policy/role architecture for this task.
+Do not change runtime code unless device validation exposes a concrete defect.
 
-Preserve:
+Preserve all existing:
 
-- existing `HarborRoot` Personal-vs-Work routing;
-- existing callbacks and controller ownership;
-- existing DevicePolicyManager behavior;
-- existing provisioning behavior;
-- existing topology/user-ID trust rules;
-- existing file-sharing behavior;
-- existing APK-install behavior;
-- existing package launch/freeze/unfreeze/details/uninstall behavior;
-- existing shortcut implementation and signer validation;
-- existing Advanced/Shizuku behavior;
-- existing multi-user behavior.
+- Personal/Work routing;
+- callbacks and controller ownership;
+- DevicePolicyManager behavior;
+- provisioning behavior;
+- topology/user-ID trust rules;
+- file-sharing behavior;
+- APK-install behavior;
+- app launch/freeze/unfreeze/details/uninstall behavior;
+- shortcut behavior and signer validation;
+- Advanced/Shizuku behavior;
+- multi-user behavior;
+- manifest permissions and dependencies.
 
-Do not add:
+Do not add a Settings architecture, capability resolver, policy state model, new navigation framework, permission, dependency, network capability, telemetry, hidden API, arbitrary shell access, or destructive user deletion.
 
-- role-aware Settings architecture;
-- capability resolvers;
-- authoritative Personal-side Work policy state;
-- new navigation/state architecture for Settings;
-- new permissions/dependencies/networking/telemetry;
-- hidden APIs, general shell access, or destructive user deletion.
+## 1. Clean the historical plan
 
-## Implement exactly these fixes
+Edit `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md` so it remains useful historical context without containing stale instructions that look current.
 
-### 1. Restore workspace Refresh
+Remove/rewrite:
 
-`PersonalProfileScreen` still accepts `onRefreshWorkspaces` but the redesigned UI no longer exposes it.
+- proposed local Settings navigation;
+- Personal/Work Settings destinations;
+- role-aware Settings/capability-resolver requirements;
+- Work Settings / Personal Settings test requirements;
+- obsolete scaffold filenames;
+- statements that live screens have not yet been migrated;
+- Definition-of-Done requirements for unimplemented Settings architecture.
 
-Add a compact Refresh action to the **Additional workspaces** section.
+Use current implementation names where relevant:
 
-Requirements:
+- `PrivacyPresentation.kt`
+- `WorkUiReviewScaffold.kt`
+- `HarborDesignSystem.kt`
+- `PersonalProfileScreen.kt`
+- `WorkProfileScreen.kt`
 
-- invoke the existing `onRefreshWorkspaces` callback;
-- disable while `workspaceBusy`;
-- do not add new state or backend behavior;
-- keep Refresh secondary rather than moving it into the main hero.
+Describe the Work controls bottom sheet as presentation-only relocation of existing Work-side callbacks/controllers.
 
-### 2. Fix system-app taps during selection
+## 2. Cross-check documentation
 
-Use:
+Verify these files agree with the final UI-only scope:
 
-`workAppRowClickIntent(selectionMode, app.isSystem)`
+- `CODEX_START_HERE.md`
+- `PR6_FINAL_CLEANUP_PLAN.md`
+- `PR6_REVIEW_FIX_PLAN.md`
+- `UI_COMPONENT_LIBRARY.md`
+- `UI_PRIVACY_DASHBOARD_PLAN.md`
 
-Dispatch:
+Do not expand the scope while reconciling wording.
 
-- `ToggleSelection` -> `onToggleSelected()`
-- `OpenActions` -> `onOpenActions()`
-- `NoOp` -> do nothing
+## 3. Physical-device validation
 
-Do not let a system app open its action sheet while selection mode is active.
+Complete `PR6_FINAL_VALIDATION_CHECKLIST.md` on the actual build under test.
 
-### 3. Fix app count while searching
+Required primary device:
 
-Use:
+- Samsung Galaxy S24
 
-`workAppCountLabel(uiState.apps.size, visibleApps.size, uiState.query)`
+Optional secondary device:
 
-Requirements:
+- OnePlus 13
 
-- blank query -> total catalog count;
-- non-blank query -> visible result count;
-- do not alter search/filter behavior.
+Record:
 
-### 4. Restore frozen shortcut wording
+- commit SHA;
+- APK/build;
+- Android version/API level;
+- tester/date;
+- PASS / FAIL / NOT TESTED for each relevant item;
+- notes for any item that cannot be exercised safely.
 
-Use:
+Do not make speculative code changes for an untestable state.
 
-`launcherShortcutActionLabel(app.isHidden)`
+## 4. Screenshots
 
-Requirements:
+Only after the physical validation is accepted:
 
-- hidden app -> `Add & unfreeze`;
-- normal app -> `Add to launcher`;
-- keep the existing shortcut callback and behavior unchanged.
+- capture real Personal and Work screens;
+- replace matching files under `docs/screenshots/`;
+- replace matching Fastlane phone screenshots;
+- verify README rendering;
+- do not use the generated concept mockup as release evidence.
 
-### 5. Documentation consistency
+If the existing screenshot filenames remain unchanged, prefer replacing the image files rather than rewriting README references unnecessarily.
 
-Do not implement the older role-aware Settings proposal.
+## 5. Final verification
 
-The current Work controls bottom sheet may stay. It is a presentation change that still calls the existing Work-side callbacks/controllers.
-
-Do not add `HarborSettingsScreen`, a role/capability resolver, or new Settings state as part of this PR.
-
-## Tests
-
-Keep `WorkUiReviewScaffoldTest` green.
-
-Add screen/Compose tests only if they are low-cost and stable. At minimum verify manually that:
-
-- Additional workspaces exposes Refresh;
-- Refresh disables while busy;
-- system app tap during selection is ignored;
-- user app tap during selection toggles selection;
-- normal app tap opens actions;
-- search count reflects visible results;
-- frozen shortcut action says `Add & unfreeze`.
-
-## Validation
-
-Run:
+On the final commit, require:
 
 ```shell
 ./gradlew --no-daemon testDebugUnitTest lintDebug assembleRelease generateSbom
 ```
 
-Also run the repository's prohibited-permission and reproducibility verification.
+Also require:
 
-Inspect the final diff for:
-
-1. removed existing operations;
-2. controller/profile-context drift;
-3. new policy/role state;
-4. false privacy claims;
-5. selection regressions;
-6. shortcut semantic/copy drift;
-7. design-system business logic;
-8. new dependencies or permissions.
+- prohibited-permission verification;
+- reproducibility verification;
+- diff/whitespace validation.
 
 ## Definition of done
 
-- All four UI review findings are fixed.
-- Workspace Refresh is restored.
-- System apps are inert when tapped during selection mode.
-- Search count reflects visible results.
-- Frozen shortcut copy again communicates unfreeze behavior.
-- No new role-aware Settings architecture exists.
-- Existing policy/controller/profile behavior is unchanged.
-- New scaffold tests pass.
-- Full Android CI/reproducibility checks pass.
-- PR remains draft until physical-device visual validation is complete.
+- Historical plan no longer contains misleading Settings-era instructions.
+- Documentation matches the implementation present in PR #6.
+- Physical-device validation is recorded.
+- No unresolved P1/P2 review finding remains.
+- Screenshots are refreshed if this UI is intended to ship immediately.
+- Full CI and reproducibility checks pass on the latest head.
+- PR remains draft until the physical validation checklist is complete.
+
+If device testing exposes a real defect, document it first and make the smallest targeted fix possible. Do not reopen the architecture/design scope.
