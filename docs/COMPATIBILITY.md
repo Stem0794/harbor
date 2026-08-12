@@ -16,10 +16,8 @@
 
 ## Physical devices tested
 
-- Samsung Galaxy S24 (`SM-S921B`), Android 16 (API 36): physical validation has covered Harbor's core work-profile flow. The current README screenshots were captured on this device during the alpha04 validation flow.
-- OnePlus 13, Android 16 (API 36): an external F-Droid tester verified the main screen, Refresh, and Advanced screens with no crashes or ANRs. Core `Create space` provisioning was not exercised because the device already had a managed profile and Android did not allow another work profile for that parent user. Shizuku was installed but not running, so Shizuku-backed Advanced and space-management flows were not exercised.
-
-These entries record observed test coverage, not blanket certification of every Harbor feature on those devices. The full stable-release matrix below still applies.
+- Samsung Galaxy S24
+- OnePlus 13
 
 ## Conservative compatibility behavior
 
