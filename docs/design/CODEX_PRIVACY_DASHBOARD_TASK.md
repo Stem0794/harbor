@@ -1,305 +1,153 @@
-# Codex task: implement Harbor Privacy Dashboard UI
+# Codex task: finish PR #6 UI review fixes
 
-You are implementing the selected Harbor UI redesign on branch `codex/ui-privacy-dashboard`.
+Branch: `codex/ui-privacy-dashboard`
+PR: #6
+Scope: **UI-only follow-up**
 
 ## Read first
 
-1. `docs/design/CODEX_START_HERE.md`
-2. `docs/design/UI_PRIVACY_DASHBOARD_PLAN.md`
-3. `docs/design/PRIVACY_DASHBOARD_REVIEW.md`
-4. `docs/design/UI_COMPONENT_LIBRARY.md`
-5. `docs/design/harbor-ui-direction2-privacy-dashboard.svg`
-6. `app/src/main/java/com/monstera/harbor/ui/HarborRoot.kt`
-7. `app/src/main/java/com/monstera/harbor/ui/PersonalProfileScreen.kt`
-8. `app/src/main/java/com/monstera/harbor/ui/WorkProfileScreen.kt`
-9. `app/src/main/java/com/monstera/harbor/ui/WorkAppsViewModel.kt`
-10. `feature/advanced/src/main/java/com/monstera/harbor/feature/advanced/AdvancedScreen.kt`
-11. `docs/ARCHITECTURE.md`
-12. `docs/THREAT_MODEL.md`
-13. `docs/COMPATIBILITY.md`
+1. `docs/design/PR6_REVIEW_FIX_PLAN.md`
+2. `docs/design/CODEX_START_HERE.md`
+3. `docs/design/UI_COMPONENT_LIBRARY.md`
+4. current `PersonalProfileScreen.kt`
+5. current `WorkProfileScreen.kt`
+6. `app/src/main/java/com/monstera/harbor/ui/privacy/WorkUiReviewScaffold.kt`
+7. `app/src/test/java/com/monstera/harbor/ui/privacy/WorkUiReviewScaffoldTest.kt`
 
-The generated image is a style reference only. The implementation plan and review override it whenever semantics differ.
+The older `UI_PRIVACY_DASHBOARD_PLAN.md` is design history. If it conflicts with the review-fix plan, the review-fix plan is authoritative.
 
-## Hard guardrails
+## Hard boundary
 
-Do not:
+Do not create or refactor Harbor's policy/role architecture for this task.
 
-- add `INTERNET`;
-- add telemetry/analytics/ads/accounts/Firebase/Play Services;
-- add hidden APIs, direct root, arbitrary shell, or automated `dpm set-profile-owner`;
-- change topology/user-ID trust rules;
-- make Shizuku required for core Harbor;
-- add Work→Personal sharing;
-- add destructive full-user deletion;
-- silently enable Advanced;
-- turn failed policy operations into optimistic UI success;
-- claim Work apps have no internet access;
-- invent app descriptions/metadata the catalog does not provide;
-- treat Personal and Work as ordinary same-process tabs;
-- invoke Work-profile DPC policy operations from Personal Harbor;
-- place policy/topology/privileged logic inside reusable design-system components.
+Preserve:
 
-## Existing behavior must remain available
+- existing `HarborRoot` Personal-vs-Work routing;
+- existing callbacks and controller ownership;
+- existing DevicePolicyManager behavior;
+- existing provisioning behavior;
+- existing topology/user-ID trust rules;
+- existing file-sharing behavior;
+- existing APK-install behavior;
+- existing package launch/freeze/unfreeze/details/uninstall behavior;
+- existing shortcut implementation and signer validation;
+- existing Advanced/Shizuku behavior;
+- existing multi-user behavior.
 
-Personal:
+Do not add:
 
-- managed-profile provisioning;
-- open Work Harbor;
-- personal→work file selection/share;
-- optional additional-user workspace list/create/install/switch/alias/icon operations;
-- platform/foreign-profile state reporting.
+- role-aware Settings architecture;
+- capability resolvers;
+- authoritative Personal-side Work policy state;
+- new navigation/state architecture for Settings;
+- new permissions/dependencies/networking/telemetry;
+- hidden APIs, general shell access, or destructive user deletion.
 
-Work:
+## Implement exactly these fixes
 
-- search app catalog;
-- launch;
-- details;
-- freeze/unfreeze;
-- uninstall;
-- signed launcher shortcut;
-- select-all-visible;
-- sequential batch freeze/unfreeze and partial failure reporting;
-- personal-file-sharing policy enable;
-- APK-install policy enable;
-- open Personal Harbor.
+### 1. Restore workspace Refresh
 
-Advanced:
+`PersonalProfileScreen` still accepts `onRefreshWorkspaces` but the redesigned UI no longer exposes it.
 
-- enable confirmation;
-- Shizuku state/permission;
-- diagnostics;
-- package-clone flow;
-- multi-user operations;
-- backend release lifecycle.
+Add a compact Refresh action to the **Additional workspaces** section.
 
-## Reusable UI library
+Requirements:
 
-Use and preserve the app-internal Harbor design-system package:
+- invoke the existing `onRefreshWorkspaces` callback;
+- disable while `workspaceBusy`;
+- do not add new state or backend behavior;
+- keep Refresh secondary rather than moving it into the main hero.
 
-`app/src/main/java/com/monstera/harbor/ui/designsystem/`
+### 2. Fix system-app taps during selection
 
-Current library guide:
+Use:
 
-`docs/design/UI_COMPONENT_LIBRARY.md`
+`workAppRowClickIntent(selectionMode, app.isSystem)`
 
-Reuse or extend these generic primitives rather than creating parallel screen-local versions. Keep them state-light and presentation-only.
+Dispatch:
 
-Feature-specific state and policy mapping stays outside this package, including the pure presentation mappers under `ui/privacy`.
+- `ToggleSelection` -> `onToggleSelected()`
+- `OpenActions` -> `onOpenActions()`
+- `NoOp` -> do nothing
 
-## Implement in this order
+Do not let a system app open its action sheet while selection mode is active.
 
-### 1. Validate scaffold and baseline
+### 3. Fix app count while searching
+
+Use:
+
+`workAppCountLabel(uiState.apps.size, visibleApps.size, uiState.query)`
+
+Requirements:
+
+- blank query -> total catalog count;
+- non-blank query -> visible result count;
+- do not alter search/filter behavior.
+
+### 4. Restore frozen shortcut wording
+
+Use:
+
+`launcherShortcutActionLabel(app.isHidden)`
+
+Requirements:
+
+- hidden app -> `Add & unfreeze`;
+- normal app -> `Add to launcher`;
+- keep the existing shortcut callback and behavior unchanged.
+
+### 5. Documentation consistency
+
+Do not implement the older role-aware Settings proposal.
+
+The current Work controls bottom sheet may stay. It is a presentation change that still calls the existing Work-side callbacks/controllers.
+
+Do not add `HarborSettingsScreen`, a role/capability resolver, or new Settings state as part of this PR.
+
+## Tests
+
+Keep `WorkUiReviewScaffoldTest` green.
+
+Add screen/Compose tests only if they are low-cost and stable. At minimum verify manually that:
+
+- Additional workspaces exposes Refresh;
+- Refresh disables while busy;
+- system app tap during selection is ignored;
+- user app tap during selection toggles selection;
+- normal app tap opens actions;
+- search count reflects visible results;
+- frozen shortcut action says `Add & unfreeze`.
+
+## Validation
 
 Run:
 
 ```shell
-./gradlew testDebugUnitTest lintDebug assembleDebug
+./gradlew --no-daemon testDebugUnitTest lintDebug assembleRelease generateSbom
 ```
 
-If baseline failures exist, document them before changing UI.
+Also run the repository's prohibited-permission and reproducibility verification.
 
-Verify `PrivacyDashboardPresentationTest` and `WorkAppPresentationTest` pass.
+Inspect the final diff for:
 
-### 2. Personal dashboard
+1. removed existing operations;
+2. controller/profile-context drift;
+3. new policy/role state;
+4. false privacy claims;
+5. selection regressions;
+6. shortcut semantic/copy drift;
+7. design-system business logic;
+8. new dependencies or permissions.
 
-Refactor `PersonalProfileScreen` first.
+## Definition of done
 
-Use `resolveWorkSpaceSetupState(...)` instead of duplicating the current setup-state boolean/string logic.
-
-Target presentation:
-
-- top app bar: Harbor + settings/overflow action;
-- hero status card;
-- concise primary action;
-- quick `Send files` action only when primary Work exists;
-- Privacy by default card using `harborPrivacyFacts`;
-- optional additional workspaces below normal content and clearly marked Advanced/experimental;
-- remove the normal always-visible privilege badge;
-- reuse the Harbor design-system primitives where appropriate.
-
-Keep all existing callback signatures unless a small contract refactor materially improves testability.
-
-### 3. Work app manager
-
-Refactor `WorkProfileScreen`.
-
-Target structure:
-
-```text
-Work space
-[search]
-N apps                         Select
-
-[icon] App label        [status] [overflow]
-[icon] App label        [status] [overflow]
-...
-```
-
-Replace `ManagedAppCard` with the reusable compact Harbor app-row pattern.
-
-Opening a row/overflow should show a Material 3 `ModalBottomSheet` or similarly clear standard component with only valid actions for that app. Use `workAppStatus(...)` and `workAppActions(...)` as the semantic baseline; adjust the mapper only if the live pre-refactor behavior proves different.
-
-Do not use an optimistic Freeze switch.
-
-Preserve current callback semantics and snackbars.
-
-### 4. Selection mode
-
-Move selection controls into the top bar/contextual region.
-
-Requirements:
-
-- close selection;
-- selected count;
-- Freeze;
-- Unfreeze;
-- preserve system-app exclusion;
-- preserve select-all-visible;
-- preserve busy/partial-failure behavior.
-
-### 5. Role-aware Settings destination
-
-Extend local root navigation without making profiles ordinary tabs.
-
-Personal and Work instances may each enter a local Settings screen, but Settings capabilities must be derived from actual local profile-owner/topology state.
-
-#### Work Harbor
-
-Work/profile-owner Harbor may expose actionable:
-
-```text
-Work
-  File sharing
-  APK installation
-  Android work settings
-
-Harbor
-  Privacy
-  About Harbor
-
-Advanced
-  Advanced tools
-  Multiple workspaces (only when contextually useful)
-```
-
-Move the existing file-sharing and APK-install policy controls from the Work app screen into Work Settings/detail content. Preserve their existing controllers, consent model, and copy constraints.
-
-#### Personal Harbor
-
-Personal Harbor must not call `allowPersonalFileSharing()` or `allowApkInstalls()` locally.
-
-For those entries either:
-
-- omit the actionable controls; or
-- present an explanatory action that explicitly opens Work Harbor using the existing cross-profile path.
-
-Do not mirror Work policy state into Personal preferences or present Personal-side toggles as authoritative.
-
-Advanced entry must call the same opt-in confirmation path when Advanced is disabled.
-
-### 6. Advanced visual pass
-
-Only after Personal/Work/Settings are stable:
-
-- align surfaces/spacing/typography with the new design;
-- reuse design-system primitives where they fit;
-- do not change privileged operations or backend semantics as part of visual cleanup.
-
-### 7. Tests
-
-At minimum add/retain coverage for:
-
-- provisioning presentation states;
-- app action availability;
-- selection filtering/behavior;
-- role-aware Settings capability/presentation;
-- Personal Settings cannot directly invoke Work DPC policy operations;
-- settings/advanced opt-in presentation;
-- no invalid mutation actions for system apps;
-- no unsafe create action in Android-blocked state.
-
-### 8. Verify
-
-Run at least:
-
-```shell
-./gradlew testDebugUnitTest lintDebug assembleDebug
-```
-
-Also run the repository's release/reproducibility checks before completion.
-
-Inspect the merged manifest and confirm no new network/privileged permissions were introduced.
-
-## UX acceptance criteria
-
-- A non-technical user can tell whether Harbor Work is ready from the first Personal screen without reading DPC terminology.
-- A user opening Work sees their apps before file-sharing/APK setup utilities.
-- At least twice as many app entries should fit vertically compared with the current large `ManagedAppCard` layout on the same device/font scale.
-- Secondary actions no longer dominate every app row.
-- Frozen/Available/Read-only states are communicated by text + visual treatment, not color alone.
-- Error/destructive actions are visually distinct.
-- Light and dark theme both work.
-- 200% font scale does not hide the primary provisioning/manage action.
-- TalkBack has labels for icon-only controls.
-- No generated-mockup-only claim is introduced into production copy.
-- Personal Settings does not present itself as the owner of Work DPC policy.
-
-## Architecture acceptance criteria
-
-- `HarborRoot` still decides Personal-vs-Work content based on real local profile-owner/topology state.
-- Cross-profile launch callbacks remain explicit.
-- Shizuku is still optional.
-- Advanced remains opt-in.
-- No user-ID guessing or privileged target inference is added to UI state.
-- DPM operation results still determine visible success/failure.
-- File-sharing/APK DPC changes are only performed by Work/profile-owner Harbor.
-- Core policy/data/topology modules do not gain UI-specific dependencies.
-- `ui/designsystem` remains presentation-only and reusable.
-
-## Expected file shape
-
-Exact names may change, but a good end state is approximately:
-
-```text
-app/src/main/java/com/monstera/harbor/ui/
-  HarborRoot.kt
-  PersonalProfileScreen.kt
-  WorkProfileScreen.kt
-  HarborSettingsScreen.kt
-  designsystem/
-    HarborUiComponents.kt
-  privacy/
-    PrivacyDashboardPresentation.kt
-    WorkAppPresentation.kt
-  theme/
-    HarborTheme.kt
-
-app/src/test/java/com/monstera/harbor/ui/
-  ...presentation/action/settings mapping tests...
-
-docs/design/
-  UI_COMPONENT_LIBRARY.md
-```
-
-Avoid a single giant composable. Keep behavior callbacks at screen boundaries and visual primitives state-light.
-
-When a genuinely reusable visual pattern is introduced, extend `ui/designsystem` rather than creating a second component family inside a feature screen.
-
-## Final self-review before handing back
-
-Review the diff specifically for:
-
-1. **Semantic drift** — did any UI simplification change policy behavior?
-2. **False privacy claims** — especially network isolation.
-3. **Cross-profile confusion** — did navigation become fake local tabs?
-4. **Settings ownership** — can Personal Harbor incorrectly mutate Work DPC policy?
-5. **Privilege leakage** — did normal UI expose/trigger Advanced operations without opt-in?
-6. **Optimistic policy state** — does Freeze/Share/APK show success before controller success?
-7. **Action availability** — are system/hidden/non-launchable rules preserved?
-8. **Accessibility** — labels, touch targets, font scale, color independence.
-9. **Density** — is the Work app list actually more useful than the old card stack?
-10. **Design-system consistency** — were reusable patterns added to the shared library rather than duplicated?
-11. **Theme** — both system light and dark mode.
-12. **Dependencies/manifest** — no unnecessary new dependency or permission.
-
-If any of these fail, fix them before considering the refactor complete.
+- All four UI review findings are fixed.
+- Workspace Refresh is restored.
+- System apps are inert when tapped during selection mode.
+- Search count reflects visible results.
+- Frozen shortcut copy again communicates unfreeze behavior.
+- No new role-aware Settings architecture exists.
+- Existing policy/controller/profile behavior is unchanged.
+- New scaffold tests pass.
+- Full Android CI/reproducibility checks pass.
+- PR remains draft until physical-device visual validation is complete.
