@@ -1,21 +1,30 @@
 package com.monstera.harbor.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +32,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.monstera.harbor.core.data.WorkspaceIconKey
 import com.monstera.harbor.core.data.WorkspaceMetadata
@@ -32,12 +44,17 @@ import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.ProfileOwnership
 import com.monstera.harbor.core.topology.ProfileTopology
 import com.monstera.harbor.core.topology.SystemUser
-import com.monstera.harbor.ui.designsystem.HarborEmptyState
-import com.monstera.harbor.ui.designsystem.HarborHeroCard
-import com.monstera.harbor.ui.designsystem.HarborInfoCard
-import com.monstera.harbor.ui.designsystem.HarborPrivacyCard
-import com.monstera.harbor.ui.designsystem.HarborSectionTitle
+import com.monstera.harbor.ui.designsystem.HarborBottomBar
+import com.monstera.harbor.ui.designsystem.HarborColors
+import com.monstera.harbor.ui.designsystem.HarborHeroBackground
+import com.monstera.harbor.ui.designsystem.HarborIcon
+import com.monstera.harbor.ui.designsystem.HarborIconKind
+import com.monstera.harbor.ui.designsystem.HarborHeader
+import com.monstera.harbor.ui.designsystem.HarborPrivacyPanel
+import com.monstera.harbor.ui.designsystem.HarborQuickActionTile
+import com.monstera.harbor.ui.designsystem.HarborShapes
 import com.monstera.harbor.ui.designsystem.HarborSpacing
+import com.monstera.harbor.ui.designsystem.PrivacyFact
 import com.monstera.harbor.ui.privacy.privacyFacts
 import com.monstera.harbor.ui.privacy.workSpacePresentation
 
@@ -68,24 +85,18 @@ fun PersonalProfileScreen(
     var newWorkspaceName by remember { mutableStateOf("Harbor Lab") }
     var renameTarget by remember { mutableStateOf<SystemUser?>(null) }
     var alias by remember { mutableStateOf("") }
+    var showSettings by remember { mutableStateOf(false) }
+    val settingsSheet = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (createWorkspace) {
         AlertDialog(
             onDismissRequest = { createWorkspace = false },
             title = { Text("Create workspace") },
             text = {
-                OutlinedTextField(
-                    value = newWorkspaceName,
-                    onValueChange = { newWorkspaceName = it },
-                    label = { Text("Android user name") },
-                    singleLine = true,
-                )
+                OutlinedTextField(value = newWorkspaceName, onValueChange = { newWorkspaceName = it }, label = { Text("Android user name") }, singleLine = true)
             },
             confirmButton = {
-                TextButton(enabled = !workspaceBusy, onClick = {
-                    createWorkspace = false
-                    onCreateWorkspace(newWorkspaceName)
-                }) { Text("Create") }
+                TextButton(enabled = !workspaceBusy, onClick = { createWorkspace = false; onCreateWorkspace(newWorkspaceName) }) { Text("Create") }
             },
             dismissButton = { TextButton(onClick = { createWorkspace = false }) { Text("Cancel") } },
         )
@@ -96,188 +107,207 @@ fun PersonalProfileScreen(
             onDismissRequest = { renameTarget = null },
             title = { Text("Rename workspace") },
             text = {
-                OutlinedTextField(
-                    value = alias,
-                    onValueChange = { alias = it },
-                    label = { Text("Harbor-only name") },
-                    supportingText = { Text("This does not rename the Android user") },
-                    singleLine = true,
-                )
+                OutlinedTextField(value = alias, onValueChange = { alias = it }, label = { Text("Harbor-only name") }, supportingText = { Text("This does not rename the Android user") }, singleLine = true)
             },
-            confirmButton = {
-                TextButton(onClick = {
-                    renameTarget = null
-                    onRenameWorkspace(user, alias)
-                }) { Text("Save") }
-            },
+            confirmButton = { TextButton(onClick = { renameTarget = null; onRenameWorkspace(user, alias) }) { Text("Save") } },
             dismissButton = { TextButton(onClick = { renameTarget = null }) { Text("Cancel") } },
         )
     }
 
-    val associatedHarbor = topology.associatedProfiles.any {
-        !it.isCurrent && it.ownership == ProfileOwnership.HARBOR_INSTALLED_OWNER_UNKNOWN
+    if (showSettings) {
+        PersonalSettingsSheet(
+            sheetState = settingsSheet,
+            onDismiss = { showSettings = false },
+            onAdvanced = { showSettings = false; onAdvanced() },
+        )
     }
-    val hasForeignOrUnknownProfile = topology.associatedProfiles.any {
-        !it.isCurrent && it.ownership == ProfileOwnership.FOREIGN_OR_UNKNOWN
-    }
-    val presentation = workSpacePresentation(
-        harborManagedProfile = associatedHarbor,
-        foreignProfile = hasForeignOrUnknownProfile,
-        provisioningAllowed = provisioningAllowed,
-    )
+
+    val associatedHarbor = topology.associatedProfiles.any { !it.isCurrent && it.ownership == ProfileOwnership.HARBOR_INSTALLED_OWNER_UNKNOWN }
+    val hasForeignOrUnknownProfile = topology.associatedProfiles.any { !it.isCurrent && it.ownership == ProfileOwnership.FOREIGN_OR_UNKNOWN }
+    val presentation = workSpacePresentation(associatedHarbor, hasForeignOrUnknownProfile, provisioningAllowed)
+    val ready = associatedHarbor
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Harbor") },
-                actions = { TextButton(onClick = onAdvanced) { Text("Advanced") } },
+        containerColor = HarborColors.bgPersonal,
+        bottomBar = {
+            HarborBottomBar(
+                active = HarborIconKind.Home,
+                onWork = if (ready) onOpenWorkHarbor else null,
+                onSettings = { showSettings = true },
             )
         },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = HarborSpacing.screen, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(HarborSpacing.section),
+            modifier = Modifier.fillMaxSize().background(HarborColors.bgPersonal).padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = HarborSpacing.screen),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            HarborHeroCard(
+            HarborHeader(title = "Harbor", onAdvanced = onAdvanced, modifier = Modifier.padding(top = 4.dp))
+            Direction2Hero(
                 title = presentation.title,
                 body = presentation.body,
-                tone = presentation.tone,
+                ready = ready,
                 primaryLabel = presentation.primaryAction,
-                onPrimary = if (associatedHarbor) onOpenWorkHarbor else onProvision,
-                secondaryLabel = if (associatedHarbor) "Send files" else null,
-                onSecondary = if (associatedHarbor) onSendFilesToWork else null,
+                onPrimary = if (ready) onOpenWorkHarbor else onProvision,
+                secondaryLabel = if (ready) "Advanced" else "Create Work space",
+                secondaryIcon = if (ready) HarborIconKind.Settings else HarborIconKind.Plus,
+                onSecondary = if (ready) onAdvanced else onProvision,
+                onSendFiles = onSendFilesToWork,
             )
-
-            HarborPrivacyCard(privacyFacts())
-
-            HarborInfoCard(
-                title = "Your spaces",
-                body = "Personal and Work are separate Android spaces. Harbor only manages profiles it owns.",
-            ) {
-                SpaceSummaryRow("Personal", "This Android user")
-                SpaceSummaryRow(
-                    "Work",
-                    if (associatedHarbor) "Ready · managed by Harbor" else "Not set up",
-                    action = if (associatedHarbor) {
-                        { OutlinedButton(onClick = onOpenWorkHarbor) { Text("Open Work") } }
-                    } else if (provisioningAllowed) {
-                        { OutlinedButton(onClick = onProvision) { Text("Create") } }
-                    } else null,
-                )
-            }
-
-            if (associatedHarbor) {
-                HarborInfoCard(
-                    title = "Update Harbor in Work",
-                    body = "Use the browser or Files app inside Work and choose the Harbor icon with the briefcase badge.",
-                )
-            }
-
-            if (workspaceUsers.isNotEmpty() || privilegeState.level != HarborPrivilegeLevel.STANDARD) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    HarborSectionTitle(
-                        title = "Additional workspaces",
-                        supportingText = "Experimental full-user workspaces are managed through Advanced tools.",
-                        modifier = Modifier.weight(1f),
-                    )
-                    TextButton(
-                        enabled = !workspaceBusy,
-                        onClick = onRefreshWorkspaces,
-                    ) {
-                        Text("Refresh")
-                    }
-                }
-                HarborInfoCard(
-                    title = "Optional workspaces",
-                    body = if (workspaceUsers.isEmpty()) {
-                        "Enable Advanced tools to manage additional Android users."
-                    } else null,
-                ) {
-                    workspaceUsers.filter { it.id != workspaceCurrentUserId }.forEach { user ->
-                        val metadata = workspaceMetadata.firstOrNull {
-                            !it.stale && it.androidUserId == user.id && it.lastKnownSystemName == user.name
-                        }
-                        WorkspaceRow(
-                            user = user,
-                            metadata = metadata,
-                            busy = workspaceBusy,
-                            onSwitch = { onSwitchWorkspace(user) },
-                            onInstall = { onInstallWorkspace(user) },
-                            onRename = {
-                                alias = metadata?.alias.orEmpty()
-                                renameTarget = user
-                            },
-                            onChangeIcon = {
-                                val icons = WorkspaceIconKey.entries
-                                val current = metadata?.iconKey ?: WorkspaceIconKey.GENERIC
-                                onChangeWorkspaceIcon(user, icons[(icons.indexOf(current) + 1) % icons.size])
-                            },
-                        )
-                    }
-                    if (privilegeState.level != HarborPrivilegeLevel.STANDARD) {
-                        OutlinedButton(enabled = !workspaceBusy, onClick = { createWorkspace = true }) {
-                            Text("Create workspace")
-                        }
-                    }
-                }
-            }
-
-            workspaceMessage?.let { HarborEmptyState("Workspace update", it) }
-            message?.let { HarborEmptyState("Harbor status", it) }
-            Text(
-                "Remove a Work profile in Android Settings. This permanently deletes its apps and data.",
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            HarborPrivacyPanel(privacyFacts())
+            SecondaryPersonalContent(
+                workspaceUsers = workspaceUsers,
+                workspaceCurrentUserId = workspaceCurrentUserId,
+                workspaceMetadata = workspaceMetadata,
+                workspaceBusy = workspaceBusy,
+                workspaceMessage = workspaceMessage,
+                privilegeState = privilegeState,
+                onRefreshWorkspaces = onRefreshWorkspaces,
+                onSwitchWorkspace = onSwitchWorkspace,
+                onInstallWorkspace = onInstallWorkspace,
+                onCreateWorkspace = { createWorkspace = true },
+                onRenameWorkspace = { user, currentAlias -> alias = currentAlias.orEmpty(); renameTarget = user },
+                onChangeWorkspaceIcon = onChangeWorkspaceIcon,
+                ready = ready,
+                onOpenWorkHarbor = onOpenWorkHarbor,
+                message = message,
             )
+            Spacer(Modifier.height(10.dp))
         }
     }
 }
 
 @Composable
-private fun SpaceSummaryRow(
-    name: String,
-    detail: String,
-    action: (@Composable () -> Unit)? = null,
+private fun Direction2Hero(
+    title: String,
+    body: String,
+    ready: Boolean,
+    primaryLabel: String?,
+    onPrimary: () -> Unit,
+    secondaryLabel: String,
+    secondaryIcon: HarborIconKind,
+    onSecondary: () -> Unit,
+    onSendFiles: () -> Unit,
 ) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(name, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
-            Text(detail, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+    Box(Modifier.fillMaxWidth().height(410.dp).clip(HarborShapes.hero)) {
+        HarborHeroBackground(Modifier.fillMaxSize())
+        Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            HarborIcon(if (ready) HarborIconKind.Shield else HarborIconKind.Plus, Modifier.size(30.dp), HarborColors.accent, "Work profile status")
+            Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(30f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(34f, androidx.compose.ui.unit.TextUnitType.Sp), fontWeight = FontWeight.Bold), modifier = Modifier.fillMaxWidth(.68f))
+            Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(14f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(19f, androidx.compose.ui.unit.TextUnitType.Sp)), modifier = Modifier.fillMaxWidth(.7f))
+            if (primaryLabel != null) {
+                Surface(onClick = onPrimary, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(18.dp), color = HarborColors.accent, contentColor = HarborColors.accentDark) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                        Text(primaryLabel, style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+                        Spacer(Modifier.weight(1f))
+                        HarborIcon(HarborIconKind.ArrowRight, Modifier.size(25.dp), HarborColors.accentDark)
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
+                Text("or", color = HarborColors.textMuted, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
+                HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                HarborQuickActionTile("Send files", HarborIconKind.Send, onSendFiles, Modifier.weight(1f))
+                HarborQuickActionTile(secondaryLabel, secondaryIcon, onSecondary, Modifier.weight(1f))
+            }
         }
-        action?.invoke()
     }
 }
 
 @Composable
-private fun WorkspaceRow(
-    user: SystemUser,
-    metadata: WorkspaceMetadata?,
-    busy: Boolean,
-    onSwitch: () -> Unit,
-    onInstall: () -> Unit,
-    onRename: () -> Unit,
-    onChangeIcon: () -> Unit,
+private fun SecondaryPersonalContent(
+    workspaceUsers: List<SystemUser>,
+    workspaceCurrentUserId: AndroidUserId?,
+    workspaceMetadata: List<WorkspaceMetadata>,
+    workspaceBusy: Boolean,
+    workspaceMessage: String?,
+    privilegeState: HarborPrivilegeState,
+    onRefreshWorkspaces: () -> Unit,
+    onSwitchWorkspace: (SystemUser) -> Unit,
+    onInstallWorkspace: (SystemUser) -> Unit,
+    onCreateWorkspace: () -> Unit,
+    onRenameWorkspace: (SystemUser, String?) -> Unit,
+    onChangeWorkspaceIcon: (SystemUser, WorkspaceIconKey) -> Unit,
+    ready: Boolean,
+    onOpenWorkHarbor: () -> Unit,
+    message: String?,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(metadata?.alias ?: user.name, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
-                Text("Android user · profile state unknown", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
-            }
-            OutlinedButton(enabled = !busy, onClick = onSwitch) { Text("Switch") }
+    Surface(Modifier.fillMaxWidth(), shape = HarborShapes.card, color = HarborColors.surface, border = androidx.compose.foundation.BorderStroke(1.dp, HarborColors.stroke)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Your spaces", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold))
+            Text("Personal and Work are separate Android spaces. Harbor only manages profiles it owns.", color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
+            SpaceSummaryRow("Personal", "This Android user")
+            SpaceSummaryRow("Work", if (ready) "Ready · managed by Harbor" else "Not set up", if (ready) onOpenWorkHarbor else null)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            TextButton(enabled = !busy, onClick = onInstall) { Text("Install Harbor") }
-            TextButton(enabled = !busy, onClick = onRename) { Text("Rename") }
-            TextButton(enabled = !busy, onClick = onChangeIcon) { Text("Icon") }
+    }
+    if (ready) {
+        Surface(Modifier.fillMaxWidth(), shape = HarborShapes.card, color = HarborColors.surface, border = androidx.compose.foundation.BorderStroke(1.dp, HarborColors.stroke)) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("Update Harbor in Work", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+                Text("Use a browser or Files app inside Work and choose the Harbor icon with the briefcase badge.", color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
+            }
+        }
+    }
+    if (workspaceUsers.isNotEmpty() || privilegeState.level != HarborPrivilegeLevel.STANDARD) {
+        Surface(Modifier.fillMaxWidth(), shape = HarborShapes.card, color = HarborColors.surface, border = androidx.compose.foundation.BorderStroke(1.dp, HarborColors.stroke)) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column(Modifier.weight(1f)) { Text("Additional workspaces", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium); Text("Experimental full-user workspaces", color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
+                    TextButton(enabled = !workspaceBusy, onClick = onRefreshWorkspaces) { Text("Refresh") }
+                }
+                workspaceUsers.filter { it.id != workspaceCurrentUserId }.forEach { user ->
+                    val metadata = workspaceMetadata.firstOrNull { !it.stale && it.androidUserId == user.id && it.lastKnownSystemName == user.name }
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Column(Modifier.weight(1f)) { Text(metadata?.alias ?: user.name, color = HarborColors.textPrimary); Text("Android user · profile state unknown", color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
+                        TextButton(enabled = !workspaceBusy, onClick = { onSwitchWorkspace(user) }) { Text("Switch") }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) { TextButton(enabled = !workspaceBusy, onClick = { onInstallWorkspace(user) }) { Text("Install Harbor") }; TextButton(enabled = !workspaceBusy, onClick = { onRenameWorkspace(user, metadata?.alias) }) { Text("Rename") }; TextButton(enabled = !workspaceBusy, onClick = { val icons = WorkspaceIconKey.entries; val current = metadata?.iconKey ?: WorkspaceIconKey.GENERIC; onChangeWorkspaceIcon(user, icons[(icons.indexOf(current) + 1) % icons.size]) }) { Text("Icon") } }
+                }
+                if (privilegeState.level != HarborPrivilegeLevel.STANDARD) TextButton(enabled = !workspaceBusy, onClick = onCreateWorkspace) { Text("Create workspace") }
+            }
+        }
+    }
+    workspaceMessage?.let { LocalMessageCard("Workspace update", it) }
+    message?.let { LocalMessageCard("Harbor status", it) }
+    Text("Remove a Work profile in Android Settings. This permanently deletes its apps and data.", color = HarborColors.textMuted, style = androidx.compose.material3.MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 4.dp))
+}
+
+@Composable
+private fun SpaceSummaryRow(name: String, detail: String, action: (() -> Unit)? = null) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.weight(1f)) { Text(name, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge); Text(detail, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
+        action?.let { TextButton(onClick = it) { Text("Open Work") } }
+    }
+}
+
+@Composable
+private fun LocalMessageCard(title: String, body: String) {
+    Surface(Modifier.fillMaxWidth(), shape = HarborShapes.card, color = HarborColors.surfaceLow) { Column(Modifier.padding(16.dp)) { Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium); Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium) } }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PersonalSettingsSheet(sheetState: SheetState, onDismiss: () -> Unit, onAdvanced: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Harbor", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
+            Text("Local presentation and help", color = HarborColors.textSecondary)
+            Direction2SheetRow(HarborIconKind.Shield, "Advanced tools", "Optional Shizuku developer tools", onAdvanced)
+            Direction2SheetRow(HarborIconKind.Device, "Update Harbor", "Install the Work copy from inside the Work profile", onDismiss)
+            Direction2SheetRow(HarborIconKind.Lock, "Work-profile guidance", "Remove profiles from Android Settings", onDismiss)
+            Spacer(Modifier.height(20.dp))
+        }
+    }
+}
+
+@Composable
+private fun Direction2SheetRow(icon: HarborIconKind, title: String, body: String, onClick: () -> Unit) {
+    Surface(onClick = onClick, color = Color.Transparent, modifier = Modifier.fillMaxWidth().height(62.dp)) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            HarborIcon(icon, Modifier.size(25.dp), HarborColors.textSecondary, title)
+            Column(Modifier.weight(1f)) { Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge); Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
         }
     }
 }

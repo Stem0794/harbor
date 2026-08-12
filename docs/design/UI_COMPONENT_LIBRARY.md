@@ -7,14 +7,19 @@ profile-management layer.
 
 ## Components
 
-- `HarborHeroCard` — status-first setup and ready states with optional primary and secondary actions.
-- `HarborInfoCard` — calm surface for explanatory content and screen-owned slots.
-- `HarborPrivacyCard` — reusable, accurate privacy facts.
+- `HarborHeader` and `HarborBrandMark` — branded Personal/Work chrome and lighthouse/briefcase identity.
+- `HarborHeroBackground` — Direction 2 lighthouse, beam, waves, and accent artwork.
+- `HarborQuickActionTile` — the compact Send files / setup or Advanced tiles.
+- `HarborPrivacyPanel` — structured privacy facts with leading icons, dividers, and confirmation marks.
+- `HarborBottomBar` — presentation-only Personal/Work/Settings navigation shell.
+- `HarborSearchField` — filled rounded Work catalog search surface.
+- `HarborIcon` and `HarborIconButton` — project-owned line icons with accessible descriptions.
 - `HarborStatusPill` — status text with tone and text, never color alone.
-- `HarborSettingsRow` — accessible secondary action row with a 48dp-plus touch target.
-- `HarborEmptyState` — intentional empty and unavailable states.
-- `HarborSectionTitle` — consistent hierarchy for dense screens.
-- `HarborSpacing` and `HarborShapes` — shared layout and surface tokens.
+- `HarborColors`, `HarborSpacing`, and `HarborShapes` — explicit Direction 2 palette, rhythm, and surface tokens.
+
+Work app rows and action sheets remain screen-owned because they bind real
+`ManagedApp` state and callbacks. They use the same Direction 2 primitives and
+must not move policy or package operations into this library.
 
 ## Boundary
 

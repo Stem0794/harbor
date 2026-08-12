@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Commit SHA: `bfd6ae1`
+- Commit SHA: `638cddd`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -27,26 +27,26 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 ## Physical-device execution status
 
 Physical validation is **PARTIAL**. The connected Samsung Galaxy S24 was used
-for a signed alpha04 → alpha05 update, Personal Harbor launch, cross-profile
-Manage navigation into user 12, Work app-catalog rendering, and the Advanced
-confirmation dialog. The remaining unchecked items require deliberate manual
-interaction or a second OEM and are intentionally retained below.
+for a signed alpha05 install, Personal Harbor launch, Open Work navigation,
+Work app-catalog rendering, and an app action-sheet capture. The remaining
+unchecked items require deliberate manual interaction or a second OEM and are
+intentionally retained below.
 
 ## Visual validation
 
 - [ ] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [ ] Large font / approximately 200%: primary actions remain visible and usable.
-- [ ] Long app labels do not break the compact Work app rows.
+- [x] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly.
 - [ ] Status pills remain readable and are not color-only.
-- [ ] Destructive actions are clearly distinguishable.
+- [x] Destructive actions are clearly distinguishable.
 
 Notes:
 
 Samsung Galaxy S24 / Android 16 dark-theme screenshots were clear at 1080×2340.
-Light theme, large-font, long-label, bottom-sheet, and destructive-action cases
-remain untested.
+The Work app action sheet was also captured; light theme, large-font, and
+bottom-sheet dismissal cases remain untested.
 
 ## Accessibility validation
 
@@ -62,12 +62,12 @@ TalkBack and large-font accessibility checks remain untested on the device.
 
 ## Personal dashboard
 
-- [ ] Harbor-ready state clearly shows `Work space is ready`.
+- [x] Harbor-ready state clearly shows `Work space is ready`.
 - [x] Open Work works through the existing cross-profile path.
 - [x] Send files remains available when Work is ready.
 - [ ] Ready-to-create state exposes Create Work space when Android allows provisioning.
 - [ ] Blocked/unavailable state does not expose an unsafe Create action.
-- [ ] Privacy card wording describes Harbor itself and does not claim Work apps are offline.
+- [x] Privacy card wording describes Harbor itself and does not claim Work apps are offline.
 - [ ] Additional workspaces section appears only under the existing conditions.
 - [ ] Additional workspaces Refresh works.
 - [ ] Refresh is disabled while workspace work is busy.
@@ -91,14 +91,14 @@ additional-workspace cases remain untested.
 - [ ] Frozen app status is correct.
 - [ ] Read-only/system status is correct.
 - [ ] Disabled status is correct where observable.
-- [ ] Normal app tap opens the action sheet.
+- [x] Normal app tap opens the action sheet.
 - [ ] System app tap opens valid read-only actions in normal mode.
 
 Notes:
 
-The Work screen rendered `14 available in this profile` and the Search apps
-field on Samsung S24 / Android 16. Search filtering and per-app state/action
-cases remain untested.
+The Work screen rendered `14 apps`, real package labels/icons, and the Search
+apps field on Samsung S24 / Android 16. Search filtering and per-app state
+operations remain untested.
 
 ## App actions
 
@@ -192,9 +192,9 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-Screenshots were re-captured from the current signed alpha05 APK built from
-`bfd6ae1` on Samsung S24 / Android 16, then copied to the matching docs and
-Fastlane paths. README rendering was not exercised here.
+Screenshots were re-captured from the current signed alpha05 APK on Samsung S24
+/ Android 16, then copied to the matching docs and Fastlane paths. README
+rendering was not exercised here.
 
 ## Final repository gate
 
@@ -202,7 +202,7 @@ Fastlane paths. README rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`537eb1a8a197c543d8f48db246b2731c1bff9aabddbd828fbd51bf9670551f55`).
+- [x] Reproducibility verification passes (`406d8accf0d77280d9e156705a32a0b365b4db7e5db425924b0acd8efb35c023`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
@@ -216,5 +216,5 @@ Fastlane paths. README rendering was not exercised here.
 Defects / blockers / untested items:
 
 The OnePlus 13 and the unmarked manual/accessibility/action cases remain
-untested. Automated repository checks passed before this documentation-only
-validation update; no runtime code was changed for the device smoke test.
+untested. The UI-fidelity implementation was exercised on the connected
+Samsung S24; keep the PR draft until the remaining review cases are accepted.

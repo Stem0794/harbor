@@ -1,6 +1,7 @@
 package com.monstera.harbor.ui.privacy
 
 import com.monstera.harbor.core.data.ManagedApp
+import com.monstera.harbor.ui.designsystem.HarborIconKind
 import com.monstera.harbor.ui.designsystem.PrivacyFact
 import com.monstera.harbor.ui.designsystem.StatusTone
 
@@ -49,9 +50,9 @@ fun workSpacePresentation(
 }
 
 fun privacyFacts(): List<PrivacyFact> = listOf(
-    PrivacyFact("No network permission", "Harbor itself cannot access the internet."),
-    PrivacyFact("No analytics", "Harbor does not collect usage or telemetry."),
-    PrivacyFact("Local only", "Harbor's app catalog and diagnostics stay on this device."),
+    PrivacyFact("No network permission", "Harbor itself cannot access the internet.", HarborIconKind.Network),
+    PrivacyFact("No analytics", "Harbor does not collect usage or telemetry.", HarborIconKind.Analytics),
+    PrivacyFact("Local only", "Harbor's app catalog and diagnostics stay on this device.", HarborIconKind.Device),
 )
 
 fun appStatusLabel(app: ManagedApp): String = when {
