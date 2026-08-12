@@ -55,6 +55,10 @@ import com.monstera.harbor.ui.designsystem.HarborSpacing
 import com.monstera.harbor.ui.designsystem.HarborStatusPill
 import com.monstera.harbor.ui.privacy.appStatusLabel
 import com.monstera.harbor.ui.privacy.appStatusTone
+import com.monstera.harbor.ui.privacy.WorkAppRowClickIntent
+import com.monstera.harbor.ui.privacy.launcherShortcutActionLabel
+import com.monstera.harbor.ui.privacy.workAppCountLabel
+import com.monstera.harbor.ui.privacy.workAppRowClickIntent
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -243,7 +247,11 @@ fun WorkProfileScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     HarborSectionTitle(
-                        title = "${uiState.apps.size} apps",
+                        title = workAppCountLabel(
+                            totalCount = uiState.apps.size,
+                            visibleCount = visibleApps.size,
+                            query = uiState.query,
+                        ),
                         supportingText = if (uiState.query.isBlank()) "Installed in this Work space" else "Matching apps",
                     )
                     if (!selectionMode) TextButton(onClick = { selectionMode = true }) { Text("Select") }
@@ -297,7 +305,13 @@ private fun ManagedAppRow(
             .fillMaxWidth()
             .combinedClickable(
                 enabled = !busy,
-                onClick = { if (selectionMode && !app.isSystem) onToggleSelected() else onOpenActions() },
+                onClick = {
+                    when (workAppRowClickIntent(selectionMode, app.isSystem)) {
+                        WorkAppRowClickIntent.ToggleSelection -> onToggleSelected()
+                        WorkAppRowClickIntent.OpenActions -> onOpenActions()
+                        WorkAppRowClickIntent.NoOp -> Unit
+                    }
+                },
                 onLongClick = onLongPress,
             ),
     ) {
@@ -363,8 +377,12 @@ private fun AppActionSheet(
             }
             if (app.isLaunchable) {
                 HarborSettingsRow(
-                    if (app.isHidden) "Add to launcher" else "Add to launcher",
-                    "Create a shortcut that can restore this app",
+                    launcherShortcutActionLabel(app.isHidden),
+                    if (app.isHidden) {
+                        "Create a shortcut that restores and unfreezes this app"
+                    } else {
+                        "Create a shortcut for this app"
+                    },
                     onAddShortcut,
                     !busy,
                 )

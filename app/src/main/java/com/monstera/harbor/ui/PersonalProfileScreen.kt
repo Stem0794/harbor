@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.monstera.harbor.core.data.WorkspaceIconKey
@@ -177,10 +178,23 @@ fun PersonalProfileScreen(
             }
 
             if (workspaceUsers.isNotEmpty() || privilegeState.level != HarborPrivilegeLevel.STANDARD) {
-                HarborSectionTitle(
-                    title = "Additional workspaces",
-                    supportingText = "Experimental full-user workspaces are managed through Advanced tools.",
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    HarborSectionTitle(
+                        title = "Additional workspaces",
+                        supportingText = "Experimental full-user workspaces are managed through Advanced tools.",
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(
+                        enabled = !workspaceBusy,
+                        onClick = onRefreshWorkspaces,
+                    ) {
+                        Text("Refresh")
+                    }
+                }
                 HarborInfoCard(
                     title = "Optional workspaces",
                     body = if (workspaceUsers.isEmpty()) {

@@ -1,5 +1,11 @@
 # Harbor UI refactor: Privacy Dashboard direction
 
+> Historical design context: the current PR follows
+> `docs/design/PR6_REVIEW_FIX_PLAN.md`. Preserve all existing policy ownership,
+> callbacks, controllers, and profile context unchanged. Secondary controls may
+> be visually reorganized, but this refactor must not introduce a new
+> role/capability/settings state model.
+
 Status: implementation plan + scaffold for Codex
 Target branch: `codex/ui-privacy-dashboard`
 Visual reference: `docs/design/harbor-ui-direction2-privacy-dashboard.svg`
@@ -371,65 +377,18 @@ Preserve:
 - partial failure reporting;
 - selection cleared according to current ViewModel behavior.
 
-### 4. Settings
+### 4. Secondary controls
 
-Create a local Settings destination in both Harbor instances, but make the contents and actions **role-aware**.
+This historical plan does not authorize a new Settings destination, role-aware
+capability resolver, or policy state model. Preserve the existing operation
+ownership, callbacks, controllers, and profile context exactly as implemented.
 
-`HarborRoot` must derive local Settings capabilities from the actual profile-owner/topology state. Do not infer role from navigation history or saved preferences.
-
-#### Work Harbor Settings
-
-Work/profile-owner Harbor may expose actionable Work policy controls:
-
-```text
-Work
-  File sharing
-  APK installation
-  Android work settings
-
-Harbor
-  Privacy
-  About Harbor
-
-Advanced
-  Advanced tools / Shizuku
-  Multiple workspaces (only when contextually useful)
-```
-
-`File sharing` and `APK installation` are DPC/profile-owner operations and must call the existing Work-side controllers only from this instance.
-
-#### Personal Harbor Settings
-
-Personal Harbor must **not** call Work-profile DPC policy operations locally.
-
-For File sharing and APK installation in Personal Settings, choose one of these safe presentations:
-
-1. omit the actionable controls entirely; or
-2. show an explanatory row that uses the existing explicit cross-profile action to open Work Harbor for configuration.
-
-Personal Harbor must not:
-
-- call `allowPersonalFileSharing()`;
-- call `allowApkInstalls()`;
-- mirror those policy states optimistically into Personal preferences;
-- imply it is profile owner;
-- make a local Settings toggle appear authoritative for Work policy.
-
-Generic Harbor settings such as Privacy/About remain appropriate in Personal Settings.
-
-Advanced entry remains subject to the existing opt-in confirmation path.
-
-#### File sharing detail
-
-Move the existing Work-screen personal→work disclosure and `allowPersonalFileSharing()` action into **Work Harbor Settings**.
-
-Retain the warning that generic Android cross-profile share filters may expose other compatible Work apps as recipients.
-
-#### APK installation detail
-
-Move `allowApkInstalls()` into **Work Harbor Settings**.
-
-Copy should make clear Harbor only clears its DPC restriction; Android still controls per-source consent and OEM policy may block installation.
+The current UI may reorganize secondary controls visually. In the implemented
+Work screen, the controls bottom sheet keeps the existing Work-side callbacks
+and controller calls for file sharing, APK installation, and Android Settings.
+It must remain presentation-only: do not mirror policy state into new Personal
+preferences, infer profile role from navigation history, or move DPC operations
+to another profile instance.
 
 ### 5. Advanced tools
 
@@ -503,15 +462,14 @@ Before editing live UI:
 - keep search/filter behavior unchanged unless adding a purely local status filter;
 - promote genuinely reusable new visual patterns to `ui/designsystem` rather than duplicating them.
 
-### Phase 4 — role-aware Settings
+### Phase 4 — secondary-control presentation
 
-- add local Settings destination in `HarborRoot`;
-- determine local role from actual topology/profile-owner state;
-- move file-sharing and APK-install controls from Work screen into Work Settings details;
-- do not invoke those DPC controls from Personal Harbor;
-- Personal Settings may omit them or explicitly route to Work Harbor;
-- add privacy/about presentation;
-- link Advanced through existing enable confirmation.
+- keep existing Work-side file-sharing and APK-install callbacks in their
+  existing profile-owner context;
+- visually group secondary controls without adding a role/capability resolver;
+- keep Personal and Work routing, policy ownership, and controller semantics
+  unchanged;
+- retain the existing Advanced opt-in confirmation path.
 
 ### Phase 5 — Advanced visual alignment
 
