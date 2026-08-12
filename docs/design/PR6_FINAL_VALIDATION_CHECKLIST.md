@@ -6,8 +6,8 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated for the recorded physical smoke test: `dba967f`
-- Current PR code head: `74d601c` (hero action/tone polish; not yet installed on the S24)
+- Runtime build validated on S24 Personal user: `74d601c`
+- Current PR head at this validation: `73ded46` (documentation-only commit on top of the runtime code)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -27,41 +27,48 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The connected Samsung Galaxy S24 was used
-for a signed alpha05 install, Personal Harbor launch, Open Work navigation,
-Work app-catalog rendering, and an app action-sheet capture. The remaining
-unchecked items require deliberate manual interaction or a second OEM and are
-intentionally retained below.
+Physical validation is **PARTIAL**. The signed `74d601c` build was installed
+for Personal user `0`; the Personal hero, Open Work navigation, and current
+dark/light/large-font behavior were exercised. The active Work instance also
+showed the app catalog, action sheet, and selection Close icon. Samsung blocks
+ADB shell installation targeted at work-profile user `12`, so Work-specific
+checks are recorded as active-instance observations rather than a claim that
+the final APK was replaced in that user.
 
 ## Visual validation
 
-- [ ] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
+- [x] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [ ] Large font / approximately 200%: primary actions remain visible and usable.
 - [x] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly.
-- [ ] Status pills remain readable and are not color-only.
+- [x] Status pills remain readable and are not color-only.
 - [x] Destructive actions are clearly distinguishable.
 
 Notes:
 
-Samsung Galaxy S24 / Android 16 dark-theme screenshots were clear at 1080×2340.
-The Work app action sheet was also captured; light theme, large-font, and
-bottom-sheet dismissal cases remain untested.
+Samsung Galaxy S24 / Android 16 screenshots were captured at 1080×2340. Harbor
+keeps the Direction 2 surfaces dark when Android switches to light mode; the
+screen remained readable. At approximately 200% font scale, the fixed-height
+hero CTA and bottom navigation text clip, so the large-font gate remains open.
+The Work app action sheet opened and was dismissed, but scrolling was not
+exercised.
 
 Targeted Direction 2 polish validation on the same signed alpha05 build:
 
 - [x] Lighthouse beam apex is at the right-side lantern and fans leftward.
 - [x] Normal Work action sheet shows the corrected launcher-shortcut icon.
+- [x] Active Work selection mode shows the symmetric Close icon.
 - [x] Freeze/unfreeze was exercised on Agenda and the app was restored to Available.
 - [ ] `Add & unfreeze` was not exposed by the device after freezing Agenda because
   Android no longer reported that package as launchable; the same `Shortcut`
   icon path is used by the existing conditional action in source.
 
 The current PR head adds the pure Personal hero-action resolver, selection-mode
-Close icon, state-tone hero treatment, and conditional divider rendering. Those
-changes are covered by unit tests, but the S24 was not connected for a
-final-current-head install during this pass.
+Close icon, state-tone hero treatment, and conditional divider rendering. The
+ready-state tone and hero composition were checked on `74d601c`; blocked and
+foreign-profile warning states were not reproduced because the real Work
+profile was not removed.
 
 ## Accessibility validation
 
@@ -132,12 +139,13 @@ Notes:
 
 On the recorded S24 runtime, Agenda was frozen and then unfrozen; the catalog
 returned it to Available. Open, App details, Uninstall, launcher pinning, and
-the conditional `Add & unfreeze` path remain untested. The current-head
-selection Close icon is unit/build validated but not physically exercised.
+the conditional `Add & unfreeze` path remain untested. The active Work instance
+showed the action sheet and selection Close icon, but Samsung did not allow
+ADB to replace the APK directly in user `12`.
 
 ## Selection mode
 
-- [ ] Entering selection mode works.
+- [x] Entering selection mode works.
 - [ ] User app tap toggles selection.
 - [ ] System app tap is a no-op during selection.
 - [ ] System app checkbox is disabled.
@@ -150,7 +158,8 @@ selection Close icon is unit/build validated but not physically exercised.
 
 Notes:
 
-Selection mode and batch operations remain untested on the physical device.
+Selection mode was entered on the active Work instance and the Close icon was
+visible. Batch operations and checkbox semantics remain untested.
 
 ## Work controls bottom sheet
 
@@ -209,10 +218,10 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-Screenshots were re-captured from the signed alpha05 APK for runtime
-`dba967f` on Samsung S24 / Android 16, then copied to the matching docs and
-Fastlane paths. They do not claim that the later current-head integration
-changes were installed. README rendering was not exercised here.
+The Personal hero was freshly captured from signed runtime `74d601c` on the
+Samsung S24. Existing checked-in Work screenshots remain tied to `dba967f`
+because Samsung blocked direct ADB installation into user `12`; README
+rendering was not exercised here.
 
 ## Final repository gate
 
