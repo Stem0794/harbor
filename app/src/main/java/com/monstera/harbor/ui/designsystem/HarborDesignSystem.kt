@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +37,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -244,7 +245,7 @@ fun HarborHeader(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth().height(if (subtitle == null) 72.dp else 78.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = if (subtitle == null) 72.dp else 78.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -304,7 +305,7 @@ fun HarborQuickActionTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(onClick = onClick, modifier = modifier.height(92.dp), shape = HarborShapes.tile, color = HarborColors.surfaceLow, contentColor = HarborColors.textPrimary) {
+    Surface(onClick = onClick, modifier = modifier.heightIn(min = 92.dp), shape = HarborShapes.tile, color = HarborColors.surfaceLow, contentColor = HarborColors.textPrimary) {
         Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             HarborIcon(icon, Modifier.size(30.dp), HarborColors.accent, label)
             Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium))
@@ -352,19 +353,19 @@ fun HarborBottomBar(
     modifier: Modifier = Modifier,
 ) {
     Surface(modifier = modifier.fillMaxWidth(), color = HarborColors.surface, shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp), tonalElevation = 0.dp) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            HarborBottomItem("Personal", HarborIconKind.Home, active == HarborIconKind.Home, onPersonal)
-            HarborBottomItem("Work", HarborIconKind.Work, active == HarborIconKind.Work, onWork)
-            HarborBottomItem("Settings", HarborIconKind.Settings, active == HarborIconKind.Settings, onSettings)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 10.dp)) {
+            HarborBottomItem("Personal", HarborIconKind.Home, active == HarborIconKind.Home, onPersonal, Modifier.weight(1f))
+            HarborBottomItem("Work", HarborIconKind.Work, active == HarborIconKind.Work, onWork, Modifier.weight(1f))
+            HarborBottomItem("Settings", HarborIconKind.Settings, active == HarborIconKind.Settings, onSettings, Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-private fun HarborBottomItem(label: String, icon: HarborIconKind, selected: Boolean, onClick: (() -> Unit)?) {
-    Column(Modifier.defaultMinSize(minWidth = 88.dp).clip(RoundedCornerShape(16.dp)).clickable(enabled = onClick != null) { onClick?.invoke() }.padding(horizontal = 14.dp, vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun HarborBottomItem(label: String, icon: HarborIconKind, selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable(enabled = onClick != null) { onClick?.invoke() }.padding(horizontal = 4.dp, vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         HarborIcon(icon, Modifier.size(25.dp), if (selected) HarborColors.accent else HarborColors.textSecondary, label)
-        Text(label, color = if (selected) HarborColors.accent else HarborColors.textSecondary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium))
+        Text(label, modifier = Modifier.fillMaxWidth(), color = if (selected) HarborColors.accent else HarborColors.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Visible, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium))
     }
 }
 
@@ -377,7 +378,7 @@ fun HarborSearchField(
     androidx.compose.foundation.text.BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth().height(56.dp).clip(HarborShapes.search).background(HarborColors.surfaceLow).padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).clip(HarborShapes.search).background(HarborColors.surfaceLow).padding(horizontal = 16.dp),
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = HarborColors.textPrimary),
         decorationBox = { inner ->
@@ -397,24 +398,25 @@ fun HarborSearchField(
 fun HarborHeroBackground(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         drawRect(Brush.linearGradient(listOf(HarborColors.heroStart, HarborColors.heroEnd), Offset.Zero, Offset(size.width, size.height)))
+        val designHeight = minOf(size.height, 410.dp.toPx())
         val beam = Path().apply {
-            moveTo(size.width * .82f, size.height * .28f)
-            lineTo(size.width * .34f, size.height * .17f)
-            lineTo(size.width * .34f, size.height * .4f)
+            moveTo(size.width * .82f, designHeight * .28f)
+            lineTo(size.width * .34f, designHeight * .17f)
+            lineTo(size.width * .34f, designHeight * .4f)
             close()
         }
         drawPath(beam, Color(0xFF1BA6A8).copy(alpha = .2f))
-        val rocks = Path().apply { moveTo(size.width * .53f, size.height); cubicTo(size.width * .64f, size.height * .78f, size.width * .77f, size.height * .9f, size.width, size.height * .67f); lineTo(size.width, size.height); close() }
+        val rocks = Path().apply { moveTo(size.width * .53f, designHeight); cubicTo(size.width * .64f, designHeight * .78f, size.width * .77f, designHeight * .9f, size.width, designHeight * .67f); lineTo(size.width, designHeight); close() }
         drawPath(rocks, Color(0xFF031D25))
-        val waves = Path().apply { moveTo(size.width * .48f, size.height * .82f); cubicTo(size.width * .62f, size.height * .72f, size.width * .73f, size.height * .88f, size.width, size.height * .76f); moveTo(size.width * .57f, size.height * .9f); cubicTo(size.width * .7f, size.height * .82f, size.width * .83f, size.height * .96f, size.width, size.height * .86f) }
+        val waves = Path().apply { moveTo(size.width * .48f, designHeight * .82f); cubicTo(size.width * .62f, designHeight * .72f, size.width * .73f, designHeight * .88f, size.width, designHeight * .76f); moveTo(size.width * .57f, designHeight * .9f); cubicTo(size.width * .7f, designHeight * .82f, size.width * .83f, designHeight * .96f, size.width, designHeight * .86f) }
         drawPath(waves, Color(0xFF0D5A64), style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
-        val tower = Path().apply { moveTo(size.width * .72f, size.height * .72f); lineTo(size.width * .77f, size.height * .3f); lineTo(size.width * .88f, size.height * .3f); lineTo(size.width * .91f, size.height * .72f); close() }
+        val tower = Path().apply { moveTo(size.width * .72f, designHeight * .72f); lineTo(size.width * .77f, designHeight * .3f); lineTo(size.width * .88f, designHeight * .3f); lineTo(size.width * .91f, designHeight * .72f); close() }
         drawPath(tower, Color(0xFF02141B))
-        drawRoundRect(Color(0xFFB1E7E4), Offset(size.width * .755f, size.height * .23f), Size(size.width * .14f, size.height * .12f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(8.dp.toPx()))
-        drawRoundRect(Color(0xFF03151B), Offset(size.width * .77f, size.height * .27f), Size(size.width * .11f, size.height * .08f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(5.dp.toPx()))
-        drawCircle(HarborColors.accent, 3.dp.toPx(), Offset(size.width * .25f, size.height * .25f))
-        drawCircle(HarborColors.accent, 2.dp.toPx(), Offset(size.width * .48f, size.height * .16f))
-        drawCircle(HarborColors.accent, 2.dp.toPx(), Offset(size.width * .9f, size.height * .52f))
+        drawRoundRect(Color(0xFFB1E7E4), Offset(size.width * .755f, designHeight * .23f), Size(size.width * .14f, designHeight * .12f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(8.dp.toPx()))
+        drawRoundRect(Color(0xFF03151B), Offset(size.width * .77f, designHeight * .27f), Size(size.width * .11f, designHeight * .08f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(5.dp.toPx()))
+        drawCircle(HarborColors.accent, 3.dp.toPx(), Offset(size.width * .25f, designHeight * .25f))
+        drawCircle(HarborColors.accent, 2.dp.toPx(), Offset(size.width * .48f, designHeight * .16f))
+        drawCircle(HarborColors.accent, 2.dp.toPx(), Offset(size.width * .9f, designHeight * .52f))
     }
 }
 

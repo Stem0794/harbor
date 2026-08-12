@@ -1,4 +1,7 @@
 <resources>
     <color name="harbor_blue_dark">#003544</color>
     <color name="harbor_mist">#D9F1F4</color>
+    <color name="harbor_launcher_background">#081319</color>
+    <color name="harbor_launcher_foreground">#12C8C7</color>
+    <color name="harbor_launcher_monochrome">#FFFFFF</color>
 </resources>

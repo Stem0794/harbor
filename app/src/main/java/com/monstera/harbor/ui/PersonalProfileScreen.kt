@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -199,7 +200,7 @@ private fun Direction2Hero(
     quickLeft: HeroQuickAction?,
     quickRight: HeroQuickAction?,
 ) {
-    Box(Modifier.fillMaxWidth().height(410.dp).clip(HarborShapes.hero)) {
+    Box(Modifier.fillMaxWidth().heightIn(min = 410.dp).clip(HarborShapes.hero)) {
         HarborHeroBackground(Modifier.fillMaxSize())
         Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             val (statusIcon, statusTint) = when (tone) {
@@ -212,7 +213,7 @@ private fun Direction2Hero(
             Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(30f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(34f, androidx.compose.ui.unit.TextUnitType.Sp), fontWeight = FontWeight.Bold), modifier = Modifier.fillMaxWidth(.68f))
             Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(14f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(19f, androidx.compose.ui.unit.TextUnitType.Sp)), modifier = Modifier.fillMaxWidth(.7f))
             primaryAction?.let { action ->
-                Surface(onClick = action.onClick, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(18.dp), color = HarborColors.accent, contentColor = HarborColors.accentDark) {
+                Surface(onClick = action.onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = RoundedCornerShape(18.dp), color = HarborColors.accent, contentColor = HarborColors.accentDark) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                         Text(action.label, style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
                         Spacer(Modifier.weight(1f))

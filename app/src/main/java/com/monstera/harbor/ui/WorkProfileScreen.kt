@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -199,7 +200,7 @@ fun WorkProfileScreen(
 
 @Composable
 private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll: () -> Unit, onFreeze: () -> Unit, onUnfreeze: () -> Unit, busy: Boolean) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).height(64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
         Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
@@ -216,7 +217,7 @@ private fun Direction2ManagedAppRow(app: ManagedApp, iconProvider: AppIconProvid
         shape = HarborShapes.row,
         color = if (selected) HarborColors.surface else HarborColors.surfaceRaised,
     ) {
-        Row(Modifier.fillMaxWidth().height(82.dp).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 82.dp).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(48.dp), contentDescription = app.label)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(app.label, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -263,7 +264,7 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
 
 @Composable
 private fun Direction2ActionRow(icon: HarborIconKind, title: String, body: String?, enabled: Boolean, onClick: () -> Unit, tint: Color = HarborColors.textPrimary, trailing: (@Composable () -> Unit)? = null) {
-    Surface(onClick = onClick, enabled = enabled, color = Color.Transparent, modifier = Modifier.fillMaxWidth().height(if (body == null) 58.dp else 66.dp)) {
+    Surface(onClick = onClick, enabled = enabled, color = Color.Transparent, modifier = Modifier.fillMaxWidth().heightIn(min = if (body == null) 58.dp else 66.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
             HarborIcon(icon, Modifier.size(25.dp), if (title == "Uninstall") HarborColors.danger else HarborColors.textSecondary, title)
             Column(Modifier.weight(1f)) { Text(title, color = tint, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge); body?.let { Text(it, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) } }
