@@ -34,6 +34,76 @@ class PrivacyPresentationTest {
     }
 
     @Test
+    fun readyHasOpenSendAndAdvancedActions() {
+        val result = personalHeroActions(
+            harborManagedProfile = true,
+            foreignProfile = false,
+            provisioningAllowed = false,
+        )
+
+        assertEquals(PersonalHeroAction.OPEN_WORK, result.primary)
+        assertEquals(PersonalHeroAction.SEND_FILES, result.quickLeft)
+        assertEquals(PersonalHeroAction.ADVANCED, result.quickRight)
+        assertEquals(0, listOf(result.primary, result.quickLeft, result.quickRight).count { it == PersonalHeroAction.PROVISION_WORK })
+    }
+
+    @Test
+    fun setupAllowedHasSingleProvisionActionAndNoSendFiles() {
+        val result = personalHeroActions(
+            harborManagedProfile = false,
+            foreignProfile = false,
+            provisioningAllowed = true,
+        )
+
+        assertEquals(PersonalHeroAction.PROVISION_WORK, result.primary)
+        assertNull(result.quickLeft)
+        assertEquals(PersonalHeroAction.ADVANCED, result.quickRight)
+        assertEquals(1, listOf(result.primary, result.quickLeft, result.quickRight).count { it == PersonalHeroAction.PROVISION_WORK })
+    }
+
+    @Test
+    fun foreignProfileAllowedHasSingleProvisionActionAndNoSendFiles() {
+        val result = personalHeroActions(
+            harborManagedProfile = false,
+            foreignProfile = true,
+            provisioningAllowed = true,
+        )
+
+        assertEquals(PersonalHeroAction.PROVISION_WORK, result.primary)
+        assertNull(result.quickLeft)
+        assertEquals(PersonalHeroAction.ADVANCED, result.quickRight)
+        assertEquals(1, listOf(result.primary, result.quickLeft, result.quickRight).count { it == PersonalHeroAction.PROVISION_WORK })
+    }
+
+    @Test
+    fun blockedForeignProfileHasNoProvisionOrSendFiles() {
+        val result = personalHeroActions(
+            harborManagedProfile = false,
+            foreignProfile = true,
+            provisioningAllowed = false,
+        )
+
+        assertNull(result.primary)
+        assertNull(result.quickLeft)
+        assertEquals(PersonalHeroAction.ADVANCED, result.quickRight)
+        assertEquals(0, listOf(result.primary, result.quickLeft, result.quickRight).count { it == PersonalHeroAction.PROVISION_WORK })
+    }
+
+    @Test
+    fun blockedGenericSetupHasNoProvisionOrSendFiles() {
+        val result = personalHeroActions(
+            harborManagedProfile = false,
+            foreignProfile = false,
+            provisioningAllowed = false,
+        )
+
+        assertNull(result.primary)
+        assertNull(result.quickLeft)
+        assertEquals(PersonalHeroAction.ADVANCED, result.quickRight)
+        assertEquals(0, listOf(result.primary, result.quickLeft, result.quickRight).count { it == PersonalHeroAction.PROVISION_WORK })
+    }
+
+    @Test
     fun appStatusMappingIsExplicitAndNotColorOnly() {
         assertEquals("Frozen", appStatusLabel(app(hidden = true)))
         assertEquals("Read-only", appStatusLabel(app(system = true)))

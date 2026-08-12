@@ -12,6 +12,46 @@ data class WorkSpacePresentation(
     val primaryAction: String?,
 )
 
+internal enum class PersonalHeroAction {
+    OPEN_WORK,
+    PROVISION_WORK,
+    SEND_FILES,
+    ADVANCED,
+}
+
+internal data class PersonalHeroActions(
+    val primary: PersonalHeroAction?,
+    val quickLeft: PersonalHeroAction?,
+    val quickRight: PersonalHeroAction?,
+)
+
+internal fun personalHeroActions(
+    harborManagedProfile: Boolean,
+    foreignProfile: Boolean,
+    provisioningAllowed: Boolean,
+): PersonalHeroActions = when {
+    harborManagedProfile -> PersonalHeroActions(
+        primary = PersonalHeroAction.OPEN_WORK,
+        quickLeft = PersonalHeroAction.SEND_FILES,
+        quickRight = PersonalHeroAction.ADVANCED,
+    )
+    foreignProfile && provisioningAllowed -> PersonalHeroActions(
+        primary = PersonalHeroAction.PROVISION_WORK,
+        quickLeft = null,
+        quickRight = PersonalHeroAction.ADVANCED,
+    )
+    !foreignProfile && provisioningAllowed -> PersonalHeroActions(
+        primary = PersonalHeroAction.PROVISION_WORK,
+        quickLeft = null,
+        quickRight = PersonalHeroAction.ADVANCED,
+    )
+    else -> PersonalHeroActions(
+        primary = null,
+        quickLeft = null,
+        quickRight = PersonalHeroAction.ADVANCED,
+    )
+}
+
 fun workSpacePresentation(
     harborManagedProfile: Boolean,
     foreignProfile: Boolean,

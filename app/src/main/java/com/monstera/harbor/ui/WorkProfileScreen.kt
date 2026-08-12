@@ -200,7 +200,7 @@ fun WorkProfileScreen(
 @Composable
 private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll: () -> Unit, onFreeze: () -> Unit, onUnfreeze: () -> Unit, busy: Boolean) {
     Row(Modifier.fillMaxWidth().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).height(64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        HarborIconButton(HarborIconKind.Details, "Exit app selection", onExit, tint = HarborColors.textPrimary)
+        HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
         Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
         TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
         TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }

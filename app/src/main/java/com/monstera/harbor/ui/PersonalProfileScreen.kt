@@ -55,8 +55,16 @@ import com.monstera.harbor.ui.designsystem.HarborQuickActionTile
 import com.monstera.harbor.ui.designsystem.HarborShapes
 import com.monstera.harbor.ui.designsystem.HarborSpacing
 import com.monstera.harbor.ui.designsystem.PrivacyFact
+import com.monstera.harbor.ui.privacy.PersonalHeroAction
+import com.monstera.harbor.ui.privacy.personalHeroActions
 import com.monstera.harbor.ui.privacy.privacyFacts
 import com.monstera.harbor.ui.privacy.workSpacePresentation
+
+private data class HeroQuickAction(
+    val label: String,
+    val icon: HarborIconKind,
+    val onClick: () -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +134,14 @@ fun PersonalProfileScreen(
     val hasForeignOrUnknownProfile = topology.associatedProfiles.any { !it.isCurrent && it.ownership == ProfileOwnership.FOREIGN_OR_UNKNOWN }
     val presentation = workSpacePresentation(associatedHarbor, hasForeignOrUnknownProfile, provisioningAllowed)
     val ready = associatedHarbor
+    val resolvedHeroActions = personalHeroActions(associatedHarbor, hasForeignOrUnknownProfile, provisioningAllowed)
+
+    fun heroAction(action: PersonalHeroAction): HeroQuickAction = when (action) {
+        PersonalHeroAction.OPEN_WORK -> HeroQuickAction("Open Work", HarborIconKind.Work, onOpenWorkHarbor)
+        PersonalHeroAction.PROVISION_WORK -> HeroQuickAction("Create Work space", HarborIconKind.Plus, onProvision)
+        PersonalHeroAction.SEND_FILES -> HeroQuickAction("Send files", HarborIconKind.Send, onSendFilesToWork)
+        PersonalHeroAction.ADVANCED -> HeroQuickAction("Advanced", HarborIconKind.Settings, onAdvanced)
+    }
 
     Scaffold(
         containerColor = HarborColors.bgPersonal,
@@ -146,12 +162,9 @@ fun PersonalProfileScreen(
                 title = presentation.title,
                 body = presentation.body,
                 ready = ready,
-                primaryLabel = presentation.primaryAction,
-                onPrimary = if (ready) onOpenWorkHarbor else onProvision,
-                secondaryLabel = if (ready) "Advanced" else "Create Work space",
-                secondaryIcon = if (ready) HarborIconKind.Settings else HarborIconKind.Plus,
-                onSecondary = if (ready) onAdvanced else onProvision,
-                onSendFiles = onSendFilesToWork,
+                primaryAction = resolvedHeroActions.primary?.let(::heroAction),
+                quickLeft = resolvedHeroActions.quickLeft?.let(::heroAction),
+                quickRight = resolvedHeroActions.quickRight?.let(::heroAction),
             )
             HarborPrivacyPanel(privacyFacts())
             SecondaryPersonalContent(
@@ -181,12 +194,9 @@ private fun Direction2Hero(
     title: String,
     body: String,
     ready: Boolean,
-    primaryLabel: String?,
-    onPrimary: () -> Unit,
-    secondaryLabel: String,
-    secondaryIcon: HarborIconKind,
-    onSecondary: () -> Unit,
-    onSendFiles: () -> Unit,
+    primaryAction: HeroQuickAction?,
+    quickLeft: HeroQuickAction?,
+    quickRight: HeroQuickAction?,
 ) {
     Box(Modifier.fillMaxWidth().height(410.dp).clip(HarborShapes.hero)) {
         HarborHeroBackground(Modifier.fillMaxSize())
@@ -194,23 +204,27 @@ private fun Direction2Hero(
             HarborIcon(if (ready) HarborIconKind.Shield else HarborIconKind.Plus, Modifier.size(30.dp), HarborColors.accent, "Work profile status")
             Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(30f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(34f, androidx.compose.ui.unit.TextUnitType.Sp), fontWeight = FontWeight.Bold), modifier = Modifier.fillMaxWidth(.68f))
             Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(14f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(19f, androidx.compose.ui.unit.TextUnitType.Sp)), modifier = Modifier.fillMaxWidth(.7f))
-            if (primaryLabel != null) {
-                Surface(onClick = onPrimary, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(18.dp), color = HarborColors.accent, contentColor = HarborColors.accentDark) {
+            primaryAction?.let { action ->
+                Surface(onClick = action.onClick, modifier = Modifier.fillMaxWidth().height(56.dp), shape = RoundedCornerShape(18.dp), color = HarborColors.accent, contentColor = HarborColors.accentDark) {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                        Text(primaryLabel, style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
+                        Text(action.label, style = androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
                         Spacer(Modifier.weight(1f))
                         HarborIcon(HarborIconKind.ArrowRight, Modifier.size(25.dp), HarborColors.accentDark)
                     }
                 }
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
-                Text("or", color = HarborColors.textMuted, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
-                HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                HarborQuickActionTile("Send files", HarborIconKind.Send, onSendFiles, Modifier.weight(1f))
-                HarborQuickActionTile(secondaryLabel, secondaryIcon, onSecondary, Modifier.weight(1f))
+            val quickActions = listOfNotNull(quickLeft, quickRight)
+            if (quickActions.isNotEmpty()) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
+                    Text("or", color = HarborColors.textMuted, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
+                    HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    quickActions.forEach { action ->
+                        HarborQuickActionTile(action.label, action.icon, action.onClick, if (quickActions.size == 1) Modifier.fillMaxWidth() else Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

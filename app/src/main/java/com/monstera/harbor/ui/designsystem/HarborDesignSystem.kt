@@ -96,6 +96,7 @@ enum class HarborIconKind {
     Shield,
     Menu,
     Overflow,
+    Close,
     Search,
     Sliders,
     ArrowRight,
@@ -169,6 +170,7 @@ fun HarborIcon(
             }
             HarborIconKind.Menu -> listOf(.3f, .5f, .7f).forEach { y -> line(Offset(w * .18f, h * y), Offset(w * .82f, h * y)) }
             HarborIconKind.Overflow -> listOf(.25f, .5f, .75f).forEach { y -> circle(Offset(w * .5f, h * y), stroke * .75f) }
+            HarborIconKind.Close -> { line(Offset(w * .25f, h * .25f), Offset(w * .75f, h * .75f)); line(Offset(w * .75f, h * .25f), Offset(w * .25f, h * .75f)) }
             HarborIconKind.Search -> {
                 drawCircle(tint, w * .27f, Offset(w * .42f, h * .42f), style = line)
                 line(Offset(w * .61f, h * .61f), Offset(w * .83f, h * .83f))
