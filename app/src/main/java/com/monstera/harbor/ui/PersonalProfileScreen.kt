@@ -55,6 +55,7 @@ import com.monstera.harbor.ui.designsystem.HarborQuickActionTile
 import com.monstera.harbor.ui.designsystem.HarborShapes
 import com.monstera.harbor.ui.designsystem.HarborSpacing
 import com.monstera.harbor.ui.designsystem.PrivacyFact
+import com.monstera.harbor.ui.designsystem.StatusTone
 import com.monstera.harbor.ui.privacy.PersonalHeroAction
 import com.monstera.harbor.ui.privacy.personalHeroActions
 import com.monstera.harbor.ui.privacy.privacyFacts
@@ -161,7 +162,7 @@ fun PersonalProfileScreen(
             Direction2Hero(
                 title = presentation.title,
                 body = presentation.body,
-                ready = ready,
+                tone = presentation.tone,
                 primaryAction = resolvedHeroActions.primary?.let(::heroAction),
                 quickLeft = resolvedHeroActions.quickLeft?.let(::heroAction),
                 quickRight = resolvedHeroActions.quickRight?.let(::heroAction),
@@ -193,7 +194,7 @@ fun PersonalProfileScreen(
 private fun Direction2Hero(
     title: String,
     body: String,
-    ready: Boolean,
+    tone: StatusTone,
     primaryAction: HeroQuickAction?,
     quickLeft: HeroQuickAction?,
     quickRight: HeroQuickAction?,
@@ -201,7 +202,13 @@ private fun Direction2Hero(
     Box(Modifier.fillMaxWidth().height(410.dp).clip(HarborShapes.hero)) {
         HarborHeroBackground(Modifier.fillMaxSize())
         Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            HarborIcon(if (ready) HarborIconKind.Shield else HarborIconKind.Plus, Modifier.size(30.dp), HarborColors.accent, "Work profile status")
+            val (statusIcon, statusTint) = when (tone) {
+                StatusTone.Positive -> HarborIconKind.Shield to HarborColors.accent
+                StatusTone.Neutral -> HarborIconKind.Plus to HarborColors.accent
+                StatusTone.Warning -> HarborIconKind.Warning to HarborColors.warning
+                StatusTone.Critical -> HarborIconKind.Warning to HarborColors.danger
+            }
+            HarborIcon(statusIcon, Modifier.size(30.dp), statusTint, "Work profile status")
             Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(30f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(34f, androidx.compose.ui.unit.TextUnitType.Sp), fontWeight = FontWeight.Bold), modifier = Modifier.fillMaxWidth(.68f))
             Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(14f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(19f, androidx.compose.ui.unit.TextUnitType.Sp)), modifier = Modifier.fillMaxWidth(.7f))
             primaryAction?.let { action ->
@@ -214,12 +221,14 @@ private fun Direction2Hero(
                 }
             }
             val quickActions = listOfNotNull(quickLeft, quickRight)
-            if (quickActions.isNotEmpty()) {
+            if (primaryAction != null && quickActions.isNotEmpty()) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
                     Text("or", color = HarborColors.textMuted, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
                     HorizontalDivider(Modifier.weight(1f), color = HarborColors.stroke)
                 }
+            }
+            if (quickActions.isNotEmpty()) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     quickActions.forEach { action ->
                         HarborQuickActionTile(action.label, action.icon, action.onClick, if (quickActions.size == 1) Modifier.fillMaxWidth() else Modifier.weight(1f))

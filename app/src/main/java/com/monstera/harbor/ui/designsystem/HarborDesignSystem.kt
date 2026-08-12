@@ -94,6 +94,7 @@ enum class HarborIconKind {
     Lighthouse,
     Work,
     Shield,
+    Warning,
     Menu,
     Overflow,
     Close,
@@ -167,6 +168,17 @@ fun HarborIcon(
                 drawPath(shield, tint, style = line)
                 line(Offset(w * .34f, h * .48f), Offset(w * .46f, h * .61f))
                 line(Offset(w * .46f, h * .61f), Offset(w * .7f, h * .34f))
+            }
+            HarborIconKind.Warning -> {
+                val warning = Path().apply {
+                    moveTo(w * .5f, h * .12f)
+                    lineTo(w * .88f, h * .82f)
+                    lineTo(w * .12f, h * .82f)
+                    close()
+                }
+                drawPath(warning, tint, style = line)
+                line(Offset(w * .5f, h * .36f), Offset(w * .5f, h * .6f))
+                circle(Offset(w * .5f, h * .72f), stroke * .7f)
             }
             HarborIconKind.Menu -> listOf(.3f, .5f, .7f).forEach { y -> line(Offset(w * .18f, h * y), Offset(w * .82f, h * y)) }
             HarborIconKind.Overflow -> listOf(.25f, .5f, .75f).forEach { y -> circle(Offset(w * .5f, h * y), stroke * .75f) }

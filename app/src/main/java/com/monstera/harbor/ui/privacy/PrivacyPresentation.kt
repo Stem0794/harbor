@@ -9,7 +9,6 @@ data class WorkSpacePresentation(
     val title: String,
     val body: String,
     val tone: StatusTone,
-    val primaryAction: String?,
 )
 
 internal enum class PersonalHeroAction {
@@ -61,31 +60,26 @@ fun workSpacePresentation(
         title = "Work space is ready",
         body = "Your work apps and data stay separate from your personal apps.",
         tone = StatusTone.Positive,
-        primaryAction = "Open Work",
     )
     foreignProfile && provisioningAllowed -> WorkSpacePresentation(
         title = "Work space setup is available",
         body = "Another profile exists, but Harbor does not manage it.",
         tone = StatusTone.Warning,
-        primaryAction = "Create Work space",
     )
     foreignProfile -> WorkSpacePresentation(
         title = "Work profile setup is unavailable",
         body = "Android has another profile and does not currently allow Harbor to create one.",
         tone = StatusTone.Warning,
-        primaryAction = null,
     )
     provisioningAllowed -> WorkSpacePresentation(
         title = "Set up your Work space",
         body = "Keep selected apps and their data separate from your personal apps.",
         tone = StatusTone.Neutral,
-        primaryAction = "Create Work space",
     )
     else -> WorkSpacePresentation(
         title = "Work profile setup is unavailable",
         body = "Android does not currently allow another Work profile.",
         tone = StatusTone.Warning,
-        primaryAction = null,
     )
 }
 

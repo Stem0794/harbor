@@ -9,7 +9,7 @@ import org.junit.Test
 
 class PrivacyPresentationTest {
     @Test
-    fun readyWorkSpaceUsesOpenAction() {
+    fun readyWorkSpaceUsesPositiveToneAndReadyCopy() {
         val result = workSpacePresentation(
             harborManagedProfile = true,
             foreignProfile = false,
@@ -17,20 +17,31 @@ class PrivacyPresentationTest {
         )
 
         assertEquals("Work space is ready", result.title)
-        assertEquals("Open Work", result.primaryAction)
         assertEquals(StatusTone.Positive, result.tone)
     }
 
     @Test
-    fun blockedSetupDoesNotOfferUnsafeCreateAction() {
+    fun blockedSetupUsesWarningToneAndUnavailableCopy() {
         val result = workSpacePresentation(
             harborManagedProfile = false,
             foreignProfile = true,
             provisioningAllowed = false,
         )
 
-        assertNull(result.primaryAction)
+        assertEquals("Work profile setup is unavailable", result.title)
         assertEquals(StatusTone.Warning, result.tone)
+    }
+
+    @Test
+    fun genericAllowedSetupUsesNeutralTone() {
+        val result = workSpacePresentation(
+            harborManagedProfile = false,
+            foreignProfile = false,
+            provisioningAllowed = true,
+        )
+
+        assertEquals("Set up your Work space", result.title)
+        assertEquals(StatusTone.Neutral, result.tone)
     }
 
     @Test
