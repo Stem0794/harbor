@@ -7,7 +7,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 ## Validation record
 
 - Runtime build validated on S24 Personal user: `74d601c`
-- Current PR head at this validation: `73ded46` (documentation-only commit on top of the runtime code)
+- Current PR code head: `9c44924` (accessibility/icon implementation; final APK build passed, but S24 disconnected before installation)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-12`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -31,15 +31,14 @@ Physical validation is **PARTIAL**. The signed `74d601c` build was installed
 for Personal user `0`; the Personal hero, Open Work navigation, and current
 dark/light/large-font behavior were exercised. The active Work instance also
 showed the app catalog, action sheet, and selection Close icon. Samsung blocks
-ADB shell installation targeted at work-profile user `12`, so Work-specific
-checks are recorded as active-instance observations rather than a claim that
-the final APK was replaced in that user.
+ADB shell installation targeted at work-profile user `12`, and the S24
+disconnected before the final `9c44924` build could be installed.
 
 ## Visual validation
 
 - [x] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
-- [ ] Large font / approximately 200%: primary actions remain visible and usable.
+- [ ] Large font / approximately 200%: primary actions remain visible and usable (final runtime install pending).
 - [x] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly.
 - [x] Status pills remain readable and are not color-only.
@@ -49,8 +48,10 @@ Notes:
 
 Samsung Galaxy S24 / Android 16 screenshots were captured at 1080×2340. Harbor
 keeps the Direction 2 surfaces dark when Android switches to light mode; the
-screen remained readable. At approximately 200% font scale, the fixed-height
-hero CTA and bottom navigation text clip, so the large-font gate remains open.
+screen remained readable. The prior runtime clipped at approximately 200% font
+scale; the current implementation removes those fixed-height constraints, but
+the final runtime check remains open because the S24 disconnected before
+installation.
 The Work app action sheet opened and was dismissed, but scrolling was not
 exercised.
 
@@ -65,10 +66,10 @@ Targeted Direction 2 polish validation on the same signed alpha05 build:
   icon path is used by the existing conditional action in source.
 
 The current PR head adds the pure Personal hero-action resolver, selection-mode
-Close icon, state-tone hero treatment, and conditional divider rendering. The
-ready-state tone and hero composition were checked on `74d601c`; blocked and
-foreign-profile warning states were not reproduced because the real Work
-profile was not removed.
+Close icon, state-tone hero treatment, conditional divider rendering, and
+content-safe large-font layout. The final APK build passed, but it was not
+installed after the S24 disconnected; blocked and foreign-profile warning
+states were not reproduced because the real Work profile was not removed.
 
 ## Accessibility validation
 
@@ -223,13 +224,22 @@ Samsung S24. Existing checked-in Work screenshots remain tied to `dba967f`
 because Samsung blocked direct ADB installation into user `12`; README
 rendering was not exercised here.
 
+## Application identity
+
+- [ ] Harbor launcher icon uses the Direction 2 lighthouse mark (final build not installed after S24 disconnect).
+- [x] No legacy anchor reference remains in the application manifest.
+- [ ] Adaptive icon mask/cropping checked on Samsung One UI.
+- [ ] Round icon checked on Samsung One UI.
+- [ ] Work-profile Harbor shows the new lighthouse identity where observable.
+- [ ] Android 13+ themed icon checked where available.
+
 ## Final repository gate
 
 - [x] Unit tests + lint pass on the final commit.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`1517e27db110c0b3ae6fb59e9f98734a0ee8f83e3714fe49fc1f9426b55bd094`).
+- [x] Reproducibility verification passes (`d9957ced863ebbc00c57dfa454e70d4b7d6e3ff9168b05031bc0c6a96328efdc`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
