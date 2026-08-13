@@ -27,7 +27,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The signed review-fixes build is installed
+Physical validation is **PARTIAL**. The signed blue-header review-fixes build is installed
 for Personal user `0`; the Personal hero, Open Work navigation, normal and
 200% font-scale layouts, and the launcher/app-info icon were exercised. The
 Open Work callback opened the existing Harbor instance as user `12`. Samsung
@@ -41,7 +41,7 @@ are not claims about the final APK.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Large font / approximately 200%: primary actions remain visible and usable after scrolling.
 - [x] Long app labels do not break the compact Work app rows.
-- [ ] Bottom sheets remain scrollable and dismiss correctly.
+- [ ] Bottom sheets remain scrollable and dismiss correctly (final Work build pending).
 - [x] Status pills remain readable and are not color-only.
 - [x] Destructive actions are clearly distinguishable.
 
@@ -104,8 +104,8 @@ Work user through ADB shell.
 
 Persistent-header and Work accessibility checks:
 
-- [x] Personal branded header remains visible while dashboard content scrolls.
-- [ ] Work branded header remains visible while app catalog scrolls.
+- [x] Personal branded header is visible on the full-width blue/teal surface and remains visible while dashboard content scrolls.
+- [ ] Work branded header is visible on the full-width blue/teal surface and remains visible while app catalog scrolls (final Work build pending).
 - [ ] Entering selection replaces the Work header with the selection header.
 - [ ] Exiting selection restores the Work branded header.
 - [ ] Selection header remains usable at approximately 200% font.
@@ -252,8 +252,8 @@ not exercised here.
 - [ ] Round icon checked on Samsung One UI.
 - [ ] Work-profile Harbor shows the new lighthouse identity where observable.
 - [ ] Android 13+ themed icon checked where available.
-- [ ] Lighthouse foreground fits the intended adaptive-icon safe area.
-- [ ] No important geometry is cropped by One UI.
+- [x] Lighthouse foreground fits the intended adaptive-icon safe area.
+- [x] No important geometry is cropped by One UI.
 
 ## Final repository gate
 
@@ -261,7 +261,7 @@ not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`8cbb832d909492c6a40255b5bb61adb5b5e325eee71f58062268030dc8c56fae`).
+- [x] Reproducibility verification passes (`753c989a5dac0cb838d5e53a3d01098ddff78c87a2d6434162aa6dad3c135b4d`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
