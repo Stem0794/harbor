@@ -343,20 +343,38 @@ private fun PersonalSettingsSheet(sheetState: SheetState, onDismiss: () -> Unit,
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("Harbor", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
             Text("Local presentation and help", color = HarborColors.textSecondary)
-            Direction2SheetRow(HarborIconKind.Shield, "Advanced tools", "Optional Shizuku developer tools", onAdvanced)
-            Direction2SheetRow(HarborIconKind.Device, "Update Harbor", "Install the Work copy from inside the Work profile", onDismiss)
-            Direction2SheetRow(HarborIconKind.Lock, "Work-profile guidance", "Remove profiles from Android Settings", onDismiss)
+            Direction2ActionSheetRow(HarborIconKind.Shield, "Advanced tools", "Optional Shizuku developer tools", onAdvanced)
+            Direction2InfoSheetRow(HarborIconKind.Device, "Update Harbor", "Install the Work copy from inside the Work profile")
+            Direction2InfoSheetRow(HarborIconKind.Lock, "Work-profile guidance", "Remove profiles from Android Settings")
             Spacer(Modifier.height(20.dp))
         }
     }
 }
 
 @Composable
-private fun Direction2SheetRow(icon: HarborIconKind, title: String, body: String, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = Color.Transparent, modifier = Modifier.fillMaxWidth().height(62.dp)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            HarborIcon(icon, Modifier.size(25.dp), HarborColors.textSecondary, title)
-            Column(Modifier.weight(1f)) { Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge); Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
+private fun Direction2ActionSheetRow(icon: HarborIconKind, title: String, body: String, onClick: () -> Unit) {
+    Surface(onClick = onClick, color = Color.Transparent, modifier = Modifier.fillMaxWidth().heightIn(min = 62.dp)) {
+        Direction2SheetRowContent(icon, title, body)
+    }
+}
+
+@Composable
+private fun Direction2InfoSheetRow(icon: HarborIconKind, title: String, body: String) {
+    Direction2SheetRowContent(
+        icon = icon,
+        title = title,
+        body = body,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 62.dp).padding(horizontal = 4.dp),
+    )
+}
+
+@Composable
+private fun Direction2SheetRowContent(icon: HarborIconKind, title: String, body: String, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        HarborIcon(icon, Modifier.size(25.dp), HarborColors.textSecondary, title)
+        Column(Modifier.weight(1f)) {
+            Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
+            Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
         }
     }
 }

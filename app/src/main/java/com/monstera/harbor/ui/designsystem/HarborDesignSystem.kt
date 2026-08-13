@@ -407,7 +407,6 @@ fun HarborSearchField(
                     if (value.isEmpty()) Text("Search apps", color = HarborColors.textSecondary, style = MaterialTheme.typography.bodyLarge)
                     inner()
                 }
-                HarborIcon(HarborIconKind.Sliders, Modifier.size(23.dp), HarborColors.textSecondary, "Filter")
             }
         },
     )
