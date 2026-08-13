@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -211,6 +213,7 @@ fun WorkProfileScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll: () -> Unit, onFreeze: () -> Unit, onUnfreeze: () -> Unit, busy: Boolean) {
     val largeFont = LocalDensity.current.fontScale >= 1.4f
@@ -233,7 +236,11 @@ private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll:
                     HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
                     Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
                     TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
                     TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }

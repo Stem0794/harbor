@@ -6,8 +6,9 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated on S24 Personal user: `1ed1123`
-- Previous Work-profile runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
+- Latest final code head: `TBD — record after this narrow fix commit`
+- Latest physically validated Personal runtime: `1ed1123`
+- Latest physically validated Work runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -231,7 +232,8 @@ were not exercised.
 Only complete this section after the UI validation above is accepted.
 
 - [x] Capture final Personal screenshot on a physical device.
-- [x] Capture final Work screenshot on a physical device.
+- [x] Capture a physical Work screenshot from a previously validated runtime.
+- [ ] Capture a final-current-build Work screenshot.
 - [x] Replace matching files under `docs/screenshots/`.
 - [x] Replace matching Fastlane phone screenshots.
 - [ ] Verify README renders the updated screenshots correctly.
@@ -240,7 +242,8 @@ Only complete this section after the UI validation above is accepted.
 Screenshot notes:
 
 The Personal hero was freshly captured from the signed review-fixes runtime on the
-Samsung S24. Existing checked-in Work screenshots remain tied to `dba967f`
+Samsung S24. The checked-in Work screenshots remain historical physical evidence
+tied to `dba967f`, not the final-current Work runtime,
 because Samsung blocked direct ADB installation into user `12`; the final Work
 APK could not be installed for a replacement screenshot. README rendering was
 not exercised here.
@@ -262,7 +265,7 @@ not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`6df72c07fc92f2e6672e955ac4703cc2b8fe32cc1eeb1f4cae2720855185ddc6`).
+- [x] Reproducibility verification passes (`f490a0bd6457a2268c1193c3a67882f0c6f4f3ddf661ac36cf8c39abcc16688f`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.

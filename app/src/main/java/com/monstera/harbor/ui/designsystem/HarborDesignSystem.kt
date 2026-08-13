@@ -263,7 +263,15 @@ fun HarborHeader(
             HarborBrandMark(work = work)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(title, color = HarborColors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium))
-                subtitle?.let { Text(it, color = HarborColors.textMuted, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                subtitle?.let {
+                    Text(
+                        it,
+                        color = HarborColors.textSecondary,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             onOverflow?.let { action -> HarborIconButton(HarborIconKind.Overflow, "Open Harbor controls", action) }
             onAdvanced?.let { action -> HarborIconButton(HarborIconKind.Shield, "Open Advanced tools", action, container = HarborColors.accentDark, tint = HarborColors.accent) }
