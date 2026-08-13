@@ -6,10 +6,10 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated on S24 Personal user: `74d601c`
-- Current PR code head: `9c44924` (accessibility/icon implementation; final APK build passed, but S24 disconnected before installation)
+- Runtime build validated on S24 Personal user: `9c44924`
+- Previous Work-profile runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
-- Date: `2026-08-12`
+- Date: `2026-08-13`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
 
 ### Primary device
@@ -27,18 +27,19 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The signed `74d601c` build was installed
-for Personal user `0`; the Personal hero, Open Work navigation, and current
-dark/light/large-font behavior were exercised. The active Work instance also
-showed the app catalog, action sheet, and selection Close icon. Samsung blocks
-ADB shell installation targeted at work-profile user `12`, and the S24
-disconnected before the final `9c44924` build could be installed.
+Physical validation is **PARTIAL**. The signed `9c44924` build is installed
+for Personal user `0`; the Personal hero, Open Work navigation, normal and
+200% font-scale layouts, and the launcher/app-info icon were exercised. The
+Open Work callback opened the existing Harbor instance as user `12`. Samsung
+blocks ADB shell installation targeted at work-profile user `12`, so the Work
+instance remains on the previously installed runtime and Work-specific checks
+are not claims about the final APK.
 
 ## Visual validation
 
 - [x] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
-- [ ] Large font / approximately 200%: primary actions remain visible and usable (final runtime install pending).
+- [x] Large font / approximately 200%: primary actions remain visible and usable after scrolling.
 - [x] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly.
 - [x] Status pills remain readable and are not color-only.
@@ -48,12 +49,10 @@ Notes:
 
 Samsung Galaxy S24 / Android 16 screenshots were captured at 1080×2340. Harbor
 keeps the Direction 2 surfaces dark when Android switches to light mode; the
-screen remained readable. The prior runtime clipped at approximately 200% font
-scale; the current implementation removes those fixed-height constraints, but
-the final runtime check remains open because the S24 disconnected before
-installation.
-The Work app action sheet opened and was dismissed, but scrolling was not
-exercised.
+screen remained readable. At 200% font scale, the final build's primary CTA and
+quick-action tiles remained reachable by scrolling; the bottom navigation stayed
+usable and labels remained readable. The Work app action sheet was observed on
+the previous Work-profile runtime, not the final APK.
 
 Targeted Direction 2 polish validation on the same signed alpha05 build:
 
@@ -67,9 +66,9 @@ Targeted Direction 2 polish validation on the same signed alpha05 build:
 
 The current PR head adds the pure Personal hero-action resolver, selection-mode
 Close icon, state-tone hero treatment, conditional divider rendering, and
-content-safe large-font layout. The final APK build passed, but it was not
-installed after the S24 disconnected; blocked and foreign-profile warning
-states were not reproduced because the real Work profile was not removed.
+content-safe large-font layout. The final Personal APK was installed and
+checked; blocked and foreign-profile warning states were not reproduced because
+the real Work profile was not removed.
 
 ## Accessibility validation
 
@@ -120,8 +119,9 @@ additional-workspace cases remain untested.
 Notes:
 
 The Work screen rendered `14 apps`, real package labels/icons, and the Search
-apps field on Samsung S24 / Android 16. Search filtering and per-app state
-operations remain untested.
+apps field on Samsung S24 / Android 16. The Work instance was reached through
+the final Personal build's Open Work callback, but it retained the previous
+runtime because Samsung rejected ADB replacement for user `12`.
 
 ## App actions
 
@@ -219,16 +219,17 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-The Personal hero was freshly captured from signed runtime `74d601c` on the
+The Personal hero was freshly captured from signed runtime `9c44924` on the
 Samsung S24. Existing checked-in Work screenshots remain tied to `dba967f`
-because Samsung blocked direct ADB installation into user `12`; README
-rendering was not exercised here.
+because Samsung blocked direct ADB installation into user `12`; the final Work
+APK could not be installed for a replacement screenshot. README rendering was
+not exercised here.
 
 ## Application identity
 
-- [ ] Harbor launcher icon uses the Direction 2 lighthouse mark (final build not installed after S24 disconnect).
+- [x] Harbor launcher icon uses the Direction 2 lighthouse mark (confirmed in Samsung app-info on the final Personal APK).
 - [x] No legacy anchor reference remains in the application manifest.
-- [ ] Adaptive icon mask/cropping checked on Samsung One UI.
+- [x] Adaptive icon mask/cropping checked on Samsung One UI.
 - [ ] Round icon checked on Samsung One UI.
 - [ ] Work-profile Harbor shows the new lighthouse identity where observable.
 - [ ] Android 13+ themed icon checked where available.
