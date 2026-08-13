@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest final code head: `TBD — record after this narrow fix commit`
+- Latest final code head: `1625232`
 - Latest physically validated Personal runtime: `1ed1123`
 - Latest physically validated Work runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
