@@ -8,7 +8,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 - Latest final code head: `1625232`
 - Latest physically validated Personal runtime: `1625232`
-- Latest physically validated Work runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
+- Latest physically validated Work runtime: `1625232`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -28,13 +28,12 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The signed hero-background review-fixes build is installed
-for Personal user `0`; the Personal hero, Open Work navigation, normal and
-200% font-scale layouts, and the launcher/app-info icon were exercised. The
-Open Work callback opened the existing Harbor instance as user `12`. Samsung
-blocks ADB shell installation targeted at work-profile user `12`, so the Work
-instance remains on the previously installed runtime and Work-specific checks
-are not claims about the final APK.
+Physical validation is **PARTIAL**. The final signed build was installed for
+both profiles with `adb install -r <apk>` and no `--user` argument. Personal
+user `0` and Work profile user `12` remained installed, and the real Open Work
+callback opened the final Work instance. The final Personal hero and final Work
+header/catalog were exercised on the Samsung S24. Selection, large-font Work
+actions, and bottom-sheet interaction checks remain pending.
 
 ## Visual validation
 
@@ -42,7 +41,7 @@ are not claims about the final APK.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Large font / approximately 200%: primary actions remain visible and usable after scrolling.
 - [x] Long app labels do not break the compact Work app rows.
-- [ ] Bottom sheets remain scrollable and dismiss correctly (final Work build pending).
+- [ ] Bottom sheets remain scrollable and dismiss correctly (interaction not exercised in this pass).
 - [x] Status pills remain readable and are not color-only.
 - [x] Destructive actions are clearly distinguishable.
 
@@ -52,8 +51,8 @@ Samsung Galaxy S24 / Android 16 screenshots were captured at 1080×2340. Harbor
 keeps the Direction 2 surfaces dark when Android switches to light mode; the
 screen remained readable. At 200% font scale, the final build's primary CTA and
 quick-action tiles remained reachable by scrolling; the bottom navigation stayed
-usable and labels remained readable. The Work app action sheet was observed on
-the previous Work-profile runtime, not the final APK.
+usable and labels remained readable. Work catalog scrolling was exercised on the
+final Work runtime; bottom-sheet interaction remains pending.
 
 Targeted Direction 2 polish validation on the same signed alpha05 build:
 
@@ -87,9 +86,8 @@ validation is recorded below.
 
 Large-font validation was performed on the final Personal runtime and passed
 for the Personal hero, CTA, quick actions, and bottom navigation. TalkBack
-validation remains untested. Final-build Work large-font validation remains
-pending because Samsung does not allow the final APK to be installed into the
-Work user through ADB shell.
+validation remains untested. Final-build Work large-font selection and sheet
+checks remain pending even though the final Work APK is now installed.
 
 ## Personal dashboard
 
@@ -107,7 +105,7 @@ Work user through ADB shell.
 Persistent-header and Work accessibility checks:
 
 - [x] Personal branded header is visible on the full-width blue/teal surface and remains visible while dashboard content scrolls.
-- [ ] Work branded header is visible on the full-width blue/teal surface and remains visible while app catalog scrolls (final Work build pending).
+- [x] Work branded header is visible on the full-width blue/teal surface and remains visible while app catalog scrolls.
 - [ ] Entering selection replaces the Work header with the selection header.
 - [ ] Exiting selection restores the Work branded header.
 - [ ] Selection header remains usable at approximately 200% font.
@@ -119,9 +117,9 @@ Persistent-header and Work accessibility checks:
 Notes / untestable states:
 
 On the Samsung S24, Personal showed the active Harbor-managed Work state and
-the Manage action launched `com.monstera.harbor/.MainActivity` as user 12.
-The Personal file action was visible. Provisioning, blocked states, and
-additional-workspace cases remain untested.
+the Manage action launched the final `com.monstera.harbor/.MainActivity` as
+user 12. The Personal file action was visible. Provisioning, blocked states,
+and additional-workspace cases remain untested.
 
 ## Work app manager
 
@@ -233,7 +231,7 @@ Only complete this section after the UI validation above is accepted.
 
 - [x] Capture final Personal screenshot on a physical device.
 - [x] Capture a physical Work screenshot from a previously validated runtime.
-- [ ] Capture a final-current-build Work screenshot.
+- [x] Capture a final-current-build Work screenshot.
 - [x] Replace matching files under `docs/screenshots/`.
 - [x] Replace matching Fastlane phone screenshots.
 - [ ] Verify README renders the updated screenshots correctly.
@@ -241,12 +239,10 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-The Personal hero was freshly captured from the signed review-fixes runtime on the
-Samsung S24. The checked-in Work screenshots remain historical physical evidence
-tied to `dba967f`, not the final-current Work runtime,
-because Samsung blocked direct ADB installation into user `12`; the final Work
-APK could not be installed for a replacement screenshot. README rendering was
-not exercised here.
+The Personal hero and Work screenshot were captured from the final signed
+runtime on the Samsung S24. The Work screenshot shows the current blue/teal
+header and app catalog after the successful all-user USB replacement. README
+rendering was not exercised here.
 
 ## Application identity
 
