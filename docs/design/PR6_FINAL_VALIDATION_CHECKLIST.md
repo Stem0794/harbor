@@ -6,9 +6,9 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest final code head: `aee9d5c`
-- Latest physically validated Personal runtime: `aee9d5c`
-- Latest physically validated Work runtime: `1625232`
+- Latest final code head: `851e0cc`
+- Latest physically validated Personal runtime: `851e0cc`
+- Latest physically validated Work runtime: `851e0cc`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
 - Tester: `Codex` — automated checks plus Samsung Galaxy S24 smoke test via ADB
@@ -28,12 +28,13 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The final signed build was installed for
-both profiles with `adb install -r <apk>` and no `--user` argument. Personal
-user `0` and Work profile user `12` remained installed, and the real Open Work
-callback opened the final Work instance. The final Personal hero and final Work
-header/catalog were exercised on the Samsung S24. Selection, large-font Work
-actions, and bottom-sheet interaction checks remain pending.
+Physical validation is **PARTIAL**. The final signed build from `851e0cc` was
+installed for both profiles with `adb install -r <apk>` and no `--user`
+argument. Personal user `0` and Work profile user `12` remained installed, and
+the real Open Work callback opened the final Work instance. The final Personal
+hero, Work header/catalog, and search surface were exercised on the Samsung S24.
+Selection, large-font Work actions, and bottom-sheet
+interaction checks remain pending.
 
 ## Visual validation
 
@@ -137,10 +138,10 @@ and additional-workspace cases remain untested.
 
 Notes:
 
-The Work screen rendered `14 apps`, real package labels/icons, and the Search
-apps field on Samsung S24 / Android 16. The Work instance was reached through
-the final Personal build's Open Work callback, but it retained the previous
-runtime because Samsung rejected ADB replacement for user `12`.
+The Work screen rendered `14 apps`, real package labels/icons, and the final
+Search apps field without the removed inert Filter affordance on Samsung S24 /
+Android 16. The Work instance was reached through the final Personal build's
+Open Work callback after the successful all-user replacement.
 
 ## App actions
 
@@ -261,7 +262,7 @@ rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`d38d3d73fab219d238bd189d740fc7c5025d07350494abfd35174f22ce290788`).
+- [x] Reproducibility verification passes (`8a2cc0203837daa319e2ad0871317fb0a665df49c0143f6061cb2b4036608968`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
