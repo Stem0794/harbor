@@ -1,0 +1,1 @@
+Redesigns the Personal and Work interfaces with Harbor's privacy dashboard, persistent profile headers, improved large-font layouts, clearer settings and search, updated lighthouse branding, and more robust Work app shortcuts.
