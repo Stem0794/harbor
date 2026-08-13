@@ -158,10 +158,19 @@ fun WorkProfileScreen(
         WorkNavigationSheet(sheetState = sheetState, onDismiss = { showNavigation = false }, onOpenPersonalHarbor = { if (!onOpenPersonalHarbor()) scope.launch { snackbar.showSnackbar("Open Personal Harbor from the personal profile") }; showNavigation = false }, onAdvanced = { showNavigation = false; onAdvanced() })
     }
 
-    Scaffold(containerColor = HarborColors.bgDeep, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+    Scaffold(
+        containerColor = HarborColors.bgDeep,
+        snackbarHost = { SnackbarHost(snackbar) },
+        topBar = {
             if (selectionMode) {
-                SelectionHeader(selectedCount = uiState.selectedPackages.size, onExit = { selectionMode = false; viewModel.clearSelection() }, onSelectAll = viewModel::selectAllVisible, onFreeze = { viewModel.setSelectedHidden(true) }, onUnfreeze = { viewModel.setSelectedHidden(false) }, busy = uiState.operationInProgress)
+                SelectionHeader(
+                    selectedCount = uiState.selectedPackages.size,
+                    onExit = { selectionMode = false; viewModel.clearSelection() },
+                    onSelectAll = viewModel::selectAllVisible,
+                    onFreeze = { viewModel.setSelectedHidden(true) },
+                    onUnfreeze = { viewModel.setSelectedHidden(false) },
+                    busy = uiState.operationInProgress,
+                )
             } else {
                 HarborHeader(
                     title = "Work space",
@@ -169,9 +178,11 @@ fun WorkProfileScreen(
                     work = true,
                     onMenu = { showNavigation = true },
                     onOverflow = { showControls = true },
-                    modifier = Modifier.statusBarsPadding().padding(horizontal = HarborSpacing.screen),
                 )
             }
+        },
+    ) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding)) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentPadding = PaddingValues(horizontal = HarborSpacing.screen, vertical = 8.dp),
@@ -203,25 +214,31 @@ fun WorkProfileScreen(
 @Composable
 private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll: () -> Unit, onFreeze: () -> Unit, onUnfreeze: () -> Unit, busy: Boolean) {
     val largeFont = LocalDensity.current.fontScale >= 1.4f
-    if (!largeFont) {
-        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
-            Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
-            TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
-            TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
-        }
-        return
-    }
-    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
-        Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
-        TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
-        TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
+    Surface(modifier = Modifier.fillMaxWidth(), color = HarborColors.header) {
+        if (!largeFont) {
+            Row(
+                Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).heightIn(min = 64.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
+                Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
+                TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
+                TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
+            }
+        } else {
+            Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
+                    Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
+                    TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
+                    TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
+                }
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -50,6 +51,7 @@ object HarborColors {
     val surface = Color(0xFF121F27)
     val surfaceRaised = Color(0xFF151E25)
     val sheet = Color(0xFF19232A)
+    val header = Color(0xFF102B35)
     val stroke = Color(0xFF2A373E)
     val heroStart = Color(0xFF003A40)
     val heroEnd = Color(0xFF00282F)
@@ -244,19 +246,28 @@ fun HarborHeader(
     onAdvanced: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth().heightIn(min = if (subtitle == null) 72.dp else 78.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = HarborColors.header,
     ) {
-        onMenu?.let { action -> HarborIconButton(HarborIconKind.Menu, "Open Work navigation", action) }
-        HarborBrandMark(work = work)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, color = HarborColors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium))
-            subtitle?.let { Text(it, color = HarborColors.textMuted, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = HarborSpacing.screen)
+                .heightIn(min = if (subtitle == null) 72.dp else 78.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            onMenu?.let { action -> HarborIconButton(HarborIconKind.Menu, "Open Work navigation", action) }
+            HarborBrandMark(work = work)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(title, color = HarborColors.textPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium))
+                subtitle?.let { Text(it, color = HarborColors.textMuted, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+            onOverflow?.let { action -> HarborIconButton(HarborIconKind.Overflow, "Open Harbor controls", action) }
+            onAdvanced?.let { action -> HarborIconButton(HarborIconKind.Shield, "Open Advanced tools", action, container = HarborColors.accentDark, tint = HarborColors.accent) }
         }
-        onOverflow?.let { action -> HarborIconButton(HarborIconKind.Overflow, "Open Harbor controls", action) }
-        onAdvanced?.let { action -> HarborIconButton(HarborIconKind.Shield, "Open Advanced tools", action, container = HarborColors.accentDark, tint = HarborColors.accent) }
     }
 }
 
