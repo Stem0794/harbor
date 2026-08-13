@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.monstera.harbor.core.data.WorkspaceIconKey
@@ -205,8 +206,21 @@ private fun Direction2Hero(
     quickLeft: HeroQuickAction?,
     quickRight: HeroQuickAction?,
 ) {
-    Box(Modifier.fillMaxWidth().heightIn(min = 410.dp).clip(HarborShapes.hero)) {
-        HarborHeroBackground(Modifier.fillMaxSize())
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 410.dp)
+            .clip(HarborShapes.hero)
+            .background(Brush.horizontalGradient(listOf(HarborColors.heroStart, HarborColors.heroEnd))),
+    ) {
+        // Keep the artwork in a stable 410.dp viewport while the hero surface
+        // itself can grow for large text and accessibility settings.
+        HarborHeroBackground(
+            Modifier
+                .fillMaxWidth()
+                .height(410.dp)
+                .align(Alignment.TopCenter),
+        )
         Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
             val (statusIcon, statusTint) = when (tone) {
                 StatusTone.Positive -> HarborIconKind.Shield to HarborColors.accent
