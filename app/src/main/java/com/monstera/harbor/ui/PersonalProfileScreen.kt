@@ -163,7 +163,13 @@ fun PersonalProfileScreen(
         },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().background(HarborColors.bgPersonal).padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = HarborSpacing.screen),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HarborColors.bgPersonal)
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = HarborSpacing.screen)
+                .padding(top = 12.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Direction2Hero(

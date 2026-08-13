@@ -6,8 +6,8 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest final code head: `1625232`
-- Latest physically validated Personal runtime: `1625232`
+- Latest final code head: `TBD — record after this spacing-fix commit`
+- Latest physically validated Personal runtime: `TBD — reinstall after this spacing-fix commit`
 - Latest physically validated Work runtime: `1625232`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
@@ -261,7 +261,7 @@ rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`f490a0bd6457a2268c1193c3a67882f0c6f4f3ddf661ac36cf8c39abcc16688f`).
+- [x] Reproducibility verification passes (`d38d3d73fab219d238bd189d740fc7c5025d07350494abfd35174f22ce290788`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
