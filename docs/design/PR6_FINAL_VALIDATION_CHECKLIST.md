@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated on S24 Personal user: `2d1e340`
+- Runtime build validated on S24 Personal user: `20df6d3`
 - Previous Work-profile runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
