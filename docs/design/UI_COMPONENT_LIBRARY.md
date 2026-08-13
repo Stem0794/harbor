@@ -33,5 +33,7 @@ mappers belong under the screen's package, such as `ui/privacy`.
 
 Components use Material 3 color roles so light and dark themes inherit contrast
 from `HarborTheme`. Statuses include text labels and do not rely on color alone.
-Icon-only actions must provide a content description. New interactive rows must
-retain at least a 48dp touch target and remain usable at large font scales.
+Icon-only actions must provide a content description. Icons next to an equivalent
+visible text label are decorative and must not repeat that label to TalkBack. New
+interactive rows must retain at least a 48dp touch target and remain usable at
+large font scales.

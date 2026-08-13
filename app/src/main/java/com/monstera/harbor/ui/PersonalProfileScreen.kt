@@ -234,7 +234,7 @@ private fun Direction2Hero(
                 StatusTone.Warning -> HarborIconKind.Warning to HarborColors.warning
                 StatusTone.Critical -> HarborIconKind.Warning to HarborColors.danger
             }
-            HarborIcon(statusIcon, Modifier.size(30.dp), statusTint, "Work profile status")
+            HarborIcon(statusIcon, Modifier.size(30.dp), statusTint)
             Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(30f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(34f, androidx.compose.ui.unit.TextUnitType.Sp), fontWeight = FontWeight.Bold), modifier = Modifier.fillMaxWidth(.68f))
             Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontSize = androidx.compose.ui.unit.TextUnit(14f, androidx.compose.ui.unit.TextUnitType.Sp), lineHeight = androidx.compose.ui.unit.TextUnit(19f, androidx.compose.ui.unit.TextUnitType.Sp)), modifier = Modifier.fillMaxWidth(.7f))
             primaryAction?.let { action ->
@@ -371,7 +371,7 @@ private fun Direction2InfoSheetRow(icon: HarborIconKind, title: String, body: St
 @Composable
 private fun Direction2SheetRowContent(icon: HarborIconKind, title: String, body: String, modifier: Modifier = Modifier) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        HarborIcon(icon, Modifier.size(25.dp), HarborColors.textSecondary, title)
+        HarborIcon(icon, Modifier.size(25.dp), HarborColors.textSecondary)
         Column(Modifier.weight(1f)) {
             Text(title, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge)
             Text(body, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall)

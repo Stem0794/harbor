@@ -231,7 +231,7 @@ fun HarborBrandMark(
 ) {
     Surface(modifier = modifier, shape = RoundedCornerShape(11.dp), color = HarborColors.accentDark) {
         Box(contentAlignment = Alignment.Center) {
-            HarborIcon(if (work) HarborIconKind.Work else HarborIconKind.Lighthouse, Modifier.size(24.dp), HarborColors.accent, "Harbor")
+            HarborIcon(if (work) HarborIconKind.Work else HarborIconKind.Lighthouse, Modifier.size(24.dp), HarborColors.accent)
         }
     }
 }
@@ -326,7 +326,7 @@ fun HarborQuickActionTile(
 ) {
     Surface(onClick = onClick, modifier = modifier.heightIn(min = 92.dp), shape = HarborShapes.tile, color = HarborColors.surfaceLow, contentColor = HarborColors.textPrimary) {
         Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            HarborIcon(icon, Modifier.size(30.dp), HarborColors.accent, label)
+            HarborIcon(icon, Modifier.size(30.dp), HarborColors.accent)
             Text(label, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium))
         }
     }
@@ -342,7 +342,7 @@ fun HarborPrivacyPanel(
     Surface(modifier = modifier.fillMaxWidth(), shape = HarborShapes.card, color = HarborColors.surfaceLow, border = androidx.compose.foundation.BorderStroke(1.dp, HarborColors.stroke)) {
         Column {
             Row(Modifier.padding(horizontal = 18.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                HarborIcon(HarborIconKind.Lock, Modifier.size(25.dp), HarborColors.textSecondary, "Privacy")
+                HarborIcon(HarborIconKind.Lock, Modifier.size(25.dp), HarborColors.textSecondary)
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text("Privacy by default", color = HarborColors.textPrimary, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold))
                     Text("Built for calm. Designed for control.", color = HarborColors.textSecondary, style = MaterialTheme.typography.bodySmall)
@@ -351,7 +351,7 @@ fun HarborPrivacyPanel(
             facts.forEachIndexed { index, fact ->
                 if (index > 0) androidx.compose.material3.HorizontalDivider(color = HarborColors.stroke)
                 Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    HarborIcon(fact.icon, Modifier.size(28.dp), HarborColors.textPrimary, fact.title)
+                    HarborIcon(fact.icon, Modifier.size(28.dp), HarborColors.textPrimary)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(fact.title, color = HarborColors.textPrimary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium))
                         Text(fact.body, color = HarborColors.textSecondary, style = MaterialTheme.typography.bodySmall)
@@ -383,7 +383,7 @@ fun HarborBottomBar(
 @Composable
 private fun HarborBottomItem(label: String, icon: HarborIconKind, selected: Boolean, onClick: (() -> Unit)?, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable(enabled = onClick != null) { onClick?.invoke() }.padding(horizontal = 4.dp, vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        HarborIcon(icon, Modifier.size(25.dp), if (selected) HarborColors.accent else HarborColors.textSecondary, label)
+        HarborIcon(icon, Modifier.size(25.dp), if (selected) HarborColors.accent else HarborColors.textSecondary)
         Text(label, modifier = Modifier.fillMaxWidth(), color = if (selected) HarborColors.accent else HarborColors.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Visible, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium))
     }
 }
@@ -402,7 +402,7 @@ fun HarborSearchField(
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = HarborColors.textPrimary),
         decorationBox = { inner ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                HarborIcon(HarborIconKind.Search, Modifier.size(23.dp), HarborColors.textSecondary, "Search")
+                HarborIcon(HarborIconKind.Search, Modifier.size(23.dp), HarborColors.textSecondary)
                 Box(Modifier.weight(1f)) {
                     if (value.isEmpty()) Text("Search apps", color = HarborColors.textSecondary, style = MaterialTheme.typography.bodyLarge)
                     inner()

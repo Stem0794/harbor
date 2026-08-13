@@ -261,7 +261,7 @@ private fun ClonePanel(
                             Modifier.fillMaxWidth().clickable { selected = candidate }.padding(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
-                            HarborAppIcon(iconProvider, candidate.packageName, contentDescription = candidate.label)
+                            HarborAppIcon(iconProvider, candidate.packageName)
                             Column(Modifier.weight(1f)) {
                                 Text(candidate.label, fontWeight = if (selected == candidate) FontWeight.Bold else FontWeight.Normal)
                                 Text(candidate.packageName.value, style = MaterialTheme.typography.bodySmall)

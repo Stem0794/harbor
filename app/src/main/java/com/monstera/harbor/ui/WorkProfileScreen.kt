@@ -259,7 +259,7 @@ private fun Direction2ManagedAppRow(app: ManagedApp, iconProvider: AppIconProvid
         color = if (selected) HarborColors.surface else HarborColors.surfaceRaised,
     ) {
         Row(Modifier.fillMaxWidth().heightIn(min = 82.dp).padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(48.dp), contentDescription = app.label)
+            HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(48.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(app.label, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(app.packageName.value, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -290,7 +290,7 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(52.dp), contentDescription = app.label)
+                HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(52.dp))
                 Column(Modifier.weight(1f)) { Text(app.label, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)); Text(app.packageName.value, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
             if (app.isLaunchable && !app.isHidden) Direction2ActionRow(HarborIconKind.Open, "Open", null, !busy, onLaunch)
@@ -307,7 +307,7 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
 private fun Direction2ActionRow(icon: HarborIconKind, title: String, body: String?, enabled: Boolean, onClick: () -> Unit, tint: Color = HarborColors.textPrimary, trailing: (@Composable () -> Unit)? = null) {
     Surface(onClick = onClick, enabled = enabled, color = Color.Transparent, modifier = Modifier.fillMaxWidth().heightIn(min = if (body == null) 58.dp else 66.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 2.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            HarborIcon(icon, Modifier.size(25.dp), if (title == "Uninstall") HarborColors.danger else HarborColors.textSecondary, title)
+            HarborIcon(icon, Modifier.size(25.dp), if (title == "Uninstall") HarborColors.danger else HarborColors.textSecondary)
             Column(Modifier.weight(1f)) { Text(title, color = tint, style = androidx.compose.material3.MaterialTheme.typography.bodyLarge); body?.let { Text(it, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall) } }
             trailing?.invoke()
         }
