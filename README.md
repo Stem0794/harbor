@@ -99,7 +99,7 @@ See [Compatibility](docs/COMPATIBILITY.md) for emulator results and device-speci
 
 ## Current release
 
-Current release line: **0.2.0-alpha05**
+Current release line: **0.2.0-alpha06**
 
 The core path includes managed-profile provisioning, local profile-owner detection, the searchable Work app catalog, app launch/details/uninstall, freeze/unfreeze, batch operations, Work-app shortcuts, Personal-to-Work file sharing, and local lifecycle/recovery handling.
 
