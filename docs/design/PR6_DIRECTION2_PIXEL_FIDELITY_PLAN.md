@@ -1,8 +1,8 @@
 # PR #6 — Direction 2 pixel-fidelity implementation plan
 
-Status: authoritative implementation plan for the next PR #6 pass  
-Branch: `codex/ui-privacy-dashboard`  
-Scope: **UI-only visual fidelity pass**  
+Status: authoritative implementation plan for the next PR #6 pass
+Branch: `codex/ui-privacy-dashboard`
+Scope: **UI-only visual fidelity pass**
 Reference: the user-supplied raster mockup `harbor-direction2-reference.png` (1122×1402)
 
 ## 0. Authority and required input
@@ -85,18 +85,18 @@ Do not add a role-aware Settings architecture, capability resolver, new policy s
 
 The visual layout should remain the same, but these mockup semantics must not be copied literally:
 
-1. **`No internet`**  
+1. **`No internet`**
    Do not claim Work apps are offline. Render the same privacy row visually, but use:
    - title: `No network permission`
    - detail: `Harbor itself cannot access the internet.`
 
-2. **Ready-state `Create Work space` tile**  
+2. **Ready-state `Create Work space` tile**
    Do not offer primary Work-profile creation when Harbor's primary Work profile already exists. Preserve the two-tile visual geometry, but map the second tile to an existing safe action such as `Advanced`/local secondary UI. In a not-yet-provisioned state, the same tile geometry may show `Create Work space` and invoke the existing provisioning callback.
 
-3. **Personal / Work navigation**  
+3. **Personal / Work navigation**
    They are separate Android profile instances. A mockup-style `Work` navigation affordance may exist, but it must invoke the existing explicit cross-profile launch callback rather than changing a same-process tab.
 
-4. **Freeze switch**  
+4. **Freeze switch**
    The Work action sheet may visually use the switch shown in the mockup, but its checked state must come from authoritative `app.isHidden`. Trigger the existing ViewModel/controller on user action and do **not** flip local UI state optimistically before success.
 
 No other visual simplification should be justified by these semantic corrections.
@@ -315,11 +315,11 @@ Match the raster structure, not the current simple stacked text:
 
 Copy:
 
-1. `No network permission`  
+1. `No network permission`
    `Harbor itself cannot access the internet.`
-2. `No analytics`  
+2. `No analytics`
    `Harbor does not collect usage or telemetry.`
-3. `Local only`  
+3. `Local only`
    `Harbor's app catalog and diagnostics stay on this device.`
 
 ### 9.5 Bottom navigation shell

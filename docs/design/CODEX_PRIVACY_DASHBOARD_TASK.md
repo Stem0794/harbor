@@ -1,7 +1,7 @@
 # Codex task: implement Direction 2 visual fidelity on PR #6
 
-Branch: `codex/ui-privacy-dashboard`  
-PR: #6  
+Branch: `codex/ui-privacy-dashboard`
+PR: #6
 Scope: **UI-only visual-fidelity pass**
 
 ## Authoritative inputs

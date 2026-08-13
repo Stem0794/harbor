@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest runtime-changing code head: `851e0cc`
+- Latest runtime-changing code head: `36fc9f0`
 - Latest physically validated Personal runtime: `851e0cc`
 - Latest physically validated Work runtime: `851e0cc`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
@@ -82,8 +82,10 @@ the real Work profile was not removed.
 
 Notes:
 
-TalkBack validation remains untested on the device; large-font Personal
-validation is recorded below.
+Automated Compose semantics tests passed on the Samsung S24 for quick actions,
+privacy facts, and bottom navigation without duplicate icon descriptions.
+An actual TalkBack walkthrough remains untested; large-font Personal validation
+is recorded below.
 
 Large-font validation was performed on the final Personal runtime and passed
 for the Personal hero, CTA, quick actions, and bottom navigation. TalkBack
@@ -262,7 +264,7 @@ rendering was not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`8a2cc0203837daa319e2ad0871317fb0a665df49c0143f6061cb2b4036608968`).
+- [x] Reproducibility verification passes (`e5fbc957eed20f17e9e051ff7b9e8709484ef7aad66323bc3894f450dea58767`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
