@@ -55,7 +55,7 @@ Harbor intentionally respects this platform limit instead of trying to bypass it
 
 1. Install Harbor.
 2. Open Harbor on the personal side of the phone.
-3. Tap **Create space**.
+3. Tap **Create Work space**.
 4. Follow Android's work-profile setup screens.
 5. Open the work-badged Harbor app to manage apps inside the new profile.
 
@@ -143,7 +143,8 @@ Harbor targets Android 10 through Android 16 (API 29-36), but work-profile provi
 ### Physical devices tested
 
 - Samsung Galaxy S24
-- OnePlus 13
+
+The OnePlus 13 remains planned secondary coverage and has not been tested yet.
 
 See [Compatibility](docs/COMPATIBILITY.md) for emulator results, device-specific limitations, and the remaining physical-device test matrix.
 

@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest final code head: `851e0cc`
+- Latest runtime-changing code head: `851e0cc`
 - Latest physically validated Personal runtime: `851e0cc`
 - Latest physically validated Work runtime: `851e0cc`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
@@ -40,7 +40,7 @@ interaction checks remain pending.
 
 - [x] Light theme: no clipping, overlap, illegible contrast, or broken surfaces.
 - [x] Dark theme: no clipping, overlap, illegible contrast, or broken surfaces.
-- [x] Large font / approximately 200%: primary actions remain visible and usable after scrolling.
+- [x] Personal large font / approximately 200%: primary actions remain visible and usable after scrolling.
 - [x] Long app labels do not break the compact Work app rows.
 - [ ] Bottom sheets remain scrollable and dismiss correctly (interaction not exercised in this pass).
 - [x] Status pills remain readable and are not color-only.
@@ -160,9 +160,9 @@ Notes:
 
 On the recorded S24 runtime, Agenda was frozen and then unfrozen; the catalog
 returned it to Available. Open, App details, Uninstall, launcher pinning, and
-the conditional `Add & unfreeze` path remain untested. The active Work instance
-showed the action sheet and selection Close icon, but Samsung did not allow
-ADB to replace the APK directly in user `12`.
+the conditional `Add & unfreeze` path remain untested. Samsung rejected a
+direct per-user replacement for user `12`, but the later all-user
+`adb install -r` replacement succeeded and the final Work instance was opened.
 
 ## Selection mode
 

@@ -17,7 +17,8 @@
 ## Physical devices tested
 
 - Samsung Galaxy S24
-- OnePlus 13
+
+Planned but not yet tested: OnePlus 13.
 
 ## Conservative compatibility behavior
 
