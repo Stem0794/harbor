@@ -6,20 +6,20 @@
 
     <path
         android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M43,24h22v7h6v13H37V31h6z" />
+        android:pathData="M46,30h16v6h5v11H41V36h5z" />
     <path
         android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M46,44h16l8,42H38z" />
+        android:pathData="M48,47h12l7,33H41z" />
     <path
         android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M27,84h54v8H27z" />
+        android:pathData="M31,80h46v7H31z" />
     <path
         android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M50,16h8v8h-8z" />
+        android:pathData="M51,22h6v8h-6z" />
     <path
         android:fillColor="@color/harbor_launcher_background"
-        android:pathData="M49,48h10v11H49z" />
+        android:pathData="M49,51h10v10H49z" />
     <path
         android:fillColor="@color/harbor_launcher_background"
-        android:pathData="M41,34h26v5H41z" />
+        android:pathData="M44,39h20v4H44z" />
 </vector>

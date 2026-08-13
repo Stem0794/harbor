@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -147,6 +148,13 @@ fun PersonalProfileScreen(
 
     Scaffold(
         containerColor = HarborColors.bgPersonal,
+        topBar = {
+            HarborHeader(
+                title = "Harbor",
+                onAdvanced = onAdvanced,
+                modifier = Modifier.statusBarsPadding().padding(horizontal = HarborSpacing.screen),
+            )
+        },
         bottomBar = {
             HarborBottomBar(
                 active = HarborIconKind.Home,
@@ -159,7 +167,6 @@ fun PersonalProfileScreen(
             modifier = Modifier.fillMaxSize().background(HarborColors.bgPersonal).padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = HarborSpacing.screen),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            HarborHeader(title = "Harbor", onAdvanced = onAdvanced, modifier = Modifier.padding(top = 4.dp))
             Direction2Hero(
                 title = presentation.title,
                 body = presentation.body,

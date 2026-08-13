@@ -6,5 +6,5 @@
 
     <path
         android:fillColor="@color/harbor_launcher_monochrome"
-        android:pathData="M43,24h22v7h6v13H37V31h6zM46,44h16l8,42H38zM27,84h54v8H27zM50,16h8v8h-8z" />
+        android:pathData="M46,30h16v6h5v11H41V36h5zM48,47h12l7,33H41zM31,80h46v7H31zM51,22h6v8h-6z" />
 </vector>

@@ -105,8 +105,10 @@ The Work screen is app-list-first:
 
 The Work controls bottom sheet is only a visual relocation of existing Work-side
 controls for file sharing, APK installation, Personal Harbor navigation, and
-Android Work settings. It does not introduce a Settings destination, role
-resolver, capability model, or new policy state.
+Android Work settings. Preserve all existing policy ownership, callbacks,
+controllers, and profile context unchanged. Secondary controls may be visually
+reorganized, but this refactor must not introduce a new role/capability/settings
+state model.
 
 ## Design-system boundary
 
@@ -122,10 +124,10 @@ remain usable at large font scales.
 
 ## Historical decisions and exclusions
 
-The visual direction originally explored local Settings navigation and
-role-aware capability presentation. Those ideas are intentionally not part of
-PR #6 and must not be implemented as follow-up architecture. The current PR
-keeps existing root routing and operation ownership unchanged.
+Earlier drafts explored local Settings navigation and role-aware capability
+presentation. Those are historical context only, not implementation
+requirements for PR #6. The current UI-only work keeps existing root routing,
+operation ownership, callbacks, controllers, and profile context unchanged.
 
 Likewise, generated mockups are not release screenshots. Real Personal and Work
 screenshots may replace the existing evidence only after physical-device

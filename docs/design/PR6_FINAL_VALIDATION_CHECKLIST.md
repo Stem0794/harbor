@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated on S24 Personal user: `9c44924`
+- Runtime build validated on S24 Personal user: `pending review-fixes commit`
 - Previous Work-profile runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
@@ -27,7 +27,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The signed `9c44924` build is installed
+Physical validation is **PARTIAL**. The signed review-fixes build is installed
 for Personal user `0`; the Personal hero, Open Work navigation, normal and
 200% font-scale layouts, and the launcher/app-info icon were exercised. The
 Open Work callback opened the existing Harbor instance as user `12`. Samsung
@@ -80,7 +80,14 @@ the real Work profile was not removed.
 
 Notes:
 
-TalkBack and large-font accessibility checks remain untested on the device.
+TalkBack validation remains untested on the device; large-font Personal
+validation is recorded below.
+
+Large-font validation was performed on the final Personal runtime and passed
+for the Personal hero, CTA, quick actions, and bottom navigation. TalkBack
+validation remains untested. Final-build Work large-font validation remains
+pending because Samsung does not allow the final APK to be installed into the
+Work user through ADB shell.
 
 ## Personal dashboard
 
@@ -94,6 +101,18 @@ TalkBack and large-font accessibility checks remain untested on the device.
 - [ ] Additional workspaces Refresh works.
 - [ ] Refresh is disabled while workspace work is busy.
 - [ ] Workspace Switch / Install Harbor / Rename / Icon actions remain available where previously available.
+
+Persistent-header and Work accessibility checks:
+
+- [x] Personal branded header remains visible while dashboard content scrolls.
+- [ ] Work branded header remains visible while app catalog scrolls.
+- [ ] Entering selection replaces the Work header with the selection header.
+- [ ] Exiting selection restores the Work branded header.
+- [ ] Selection header remains usable at approximately 200% font.
+- [ ] All selection actions remain visible/reachable.
+- [ ] App action sheet remains scrollable at approximately 200% font.
+- [ ] Work controls sheet remains scrollable at approximately 200% font.
+- [ ] Work navigation sheet remains scrollable at approximately 200% font.
 
 Notes / untestable states:
 
@@ -219,7 +238,7 @@ Only complete this section after the UI validation above is accepted.
 
 Screenshot notes:
 
-The Personal hero was freshly captured from signed runtime `9c44924` on the
+The Personal hero was freshly captured from the signed review-fixes runtime on the
 Samsung S24. Existing checked-in Work screenshots remain tied to `dba967f`
 because Samsung blocked direct ADB installation into user `12`; the final Work
 APK could not be installed for a replacement screenshot. README rendering was
@@ -233,6 +252,8 @@ not exercised here.
 - [ ] Round icon checked on Samsung One UI.
 - [ ] Work-profile Harbor shows the new lighthouse identity where observable.
 - [ ] Android 13+ themed icon checked where available.
+- [ ] Lighthouse foreground fits the intended adaptive-icon safe area.
+- [ ] No important geometry is cropped by One UI.
 
 ## Final repository gate
 
@@ -240,7 +261,7 @@ not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`d9957ced863ebbc00c57dfa454e70d4b7d6e3ff9168b05031bc0c6a96328efdc`).
+- [x] Reproducibility verification passes (`8cbb832d909492c6a40255b5bb61adb5b5e325eee71f58062268030dc8c56fae`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.

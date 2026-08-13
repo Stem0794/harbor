@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -158,23 +162,21 @@ fun WorkProfileScreen(
         Column(Modifier.fillMaxSize().padding(padding)) {
             if (selectionMode) {
                 SelectionHeader(selectedCount = uiState.selectedPackages.size, onExit = { selectionMode = false; viewModel.clearSelection() }, onSelectAll = viewModel::selectAllVisible, onFreeze = { viewModel.setSelectedHidden(true) }, onUnfreeze = { viewModel.setSelectedHidden(false) }, busy = uiState.operationInProgress)
+            } else {
+                HarborHeader(
+                    title = "Work space",
+                    subtitle = "Managed by Harbor",
+                    work = true,
+                    onMenu = { showNavigation = true },
+                    onOverflow = { showControls = true },
+                    modifier = Modifier.statusBarsPadding().padding(horizontal = HarborSpacing.screen),
+                )
             }
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
                 contentPadding = PaddingValues(horizontal = HarborSpacing.screen, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (!selectionMode) {
-                    item {
-                        HarborHeader(
-                            title = "Work space",
-                            subtitle = "Managed by Harbor",
-                            work = true,
-                            onMenu = { showNavigation = true },
-                            onOverflow = { showControls = true },
-                        )
-                    }
-                }
             item { HarborSearchField(value = uiState.query, onValueChange = viewModel::setQuery) }
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -200,12 +202,27 @@ fun WorkProfileScreen(
 
 @Composable
 private fun SelectionHeader(selectedCount: Int, onExit: () -> Unit, onSelectAll: () -> Unit, onFreeze: () -> Unit, onUnfreeze: () -> Unit, busy: Boolean) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    val largeFont = LocalDensity.current.fontScale >= 1.4f
+    if (!largeFont) {
+        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp).heightIn(min = 64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
+            Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+            TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
+            TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
+            TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
+        }
+        return
+    }
+    Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = HarborSpacing.screen, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         HarborIconButton(HarborIconKind.Close, "Exit app selection", onExit, tint = HarborColors.textPrimary)
         Text("$selectedCount selected", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         TextButton(enabled = !busy, onClick = onSelectAll) { Text("All", color = HarborColors.accent) }
         TextButton(enabled = !busy && selectedCount > 0, onClick = onFreeze) { Text("Freeze", color = HarborColors.accent) }
         TextButton(enabled = !busy && selectedCount > 0, onClick = onUnfreeze) { Text("Unfreeze", color = HarborColors.accent) }
+        }
     }
 }
 
@@ -247,7 +264,7 @@ private fun EmptyWorkState(queryBlank: Boolean) {
 @Composable
 private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheetState: SheetState, busy: Boolean, onDismiss: () -> Unit, onLaunch: () -> Unit, onToggleHidden: () -> Unit, onDetails: () -> Unit, onUninstall: () -> Unit, onAddShortcut: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 HarborAppIcon(provider = iconProvider, packageName = app.packageName, modifier = Modifier.size(52.dp), contentDescription = app.label)
                 Column(Modifier.weight(1f)) { Text(app.label, color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)); Text(app.packageName.value, color = HarborColors.textSecondary, style = androidx.compose.material3.MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
@@ -278,7 +295,7 @@ private fun Direction2ActionRow(icon: HarborIconKind, title: String, body: Strin
 @Composable
 private fun WorkNavigationSheet(sheetState: SheetState, onDismiss: () -> Unit, onOpenPersonalHarbor: () -> Unit, onAdvanced: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp)) {
             Text("Work space", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
             Text("Managed by Harbor · Local catalog", color = HarborColors.textSecondary)
             Spacer(Modifier.height(10.dp))
@@ -293,7 +310,7 @@ private fun WorkNavigationSheet(sheetState: SheetState, onDismiss: () -> Unit, o
 @Composable
 private fun WorkControlsSheet(sheetState: SheetState, sharingBusy: Boolean, sharingRequested: Boolean, onDismiss: () -> Unit, onOpenPersonalHarbor: () -> Unit, onEnableSharing: () -> Unit, onAllowApkInstalls: () -> Unit, onOpenSettings: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 10.dp)) {
+        Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp)) {
             Text("Work controls", color = HarborColors.textPrimary, style = androidx.compose.material3.MaterialTheme.typography.headlineSmall)
             Text("Profile actions stay connected to Android policy", color = HarborColors.textSecondary)
             Spacer(Modifier.height(10.dp))
