@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.monstera.harbor.core.data.ShortcutIdValidator
-import com.monstera.harbor.core.policy.PolicyResult
 import kotlinx.coroutines.launch
 
 /**
@@ -37,23 +36,15 @@ class ShortcutEntryActivity : ComponentActivity() {
                 finishWithMessage("The target app identity changed; create a new shortcut")
                 return@launch
             }
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName.value)
-            if (launchIntent == null) {
-                graph.preferences.removeShortcut(shortcutId)
-                finishWithMessage("The target app is no longer installed")
-                return@launch
-            }
-            when (val hidden = graph.policyController.isApplicationHidden(packageName)) {
-                is PolicyResult.Failure -> finishWithMessage(hidden.reason)
-                is PolicyResult.Success -> {
-                    if (hidden.value) {
-                        when (val result = graph.policyController.setApplicationHidden(packageName, false)) {
-                            is PolicyResult.Failure -> finishWithMessage(result.reason)
-                            is PolicyResult.Success -> launchTarget(launchIntent)
-                        }
-                    } else {
-                        launchTarget(launchIntent)
-                    }
+            when (val result = resolveShortcutLaunch(
+                hiddenResult = graph.policyController.isApplicationHidden(packageName),
+                unfreeze = { graph.policyController.setApplicationHidden(packageName, false) },
+                resolveLaunchIntent = { packageManager.getLaunchIntentForPackage(packageName.value) },
+            )) {
+                is ShortcutLaunchResult.Launch -> launchTarget(result.target)
+                is ShortcutLaunchResult.Failure -> {
+                    if (result.removeShortcut) graph.preferences.removeShortcut(shortcutId)
+                    finishWithMessage(result.message)
                 }
             }
         }

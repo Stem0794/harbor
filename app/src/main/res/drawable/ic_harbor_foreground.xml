@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="@color/harbor_launcher_foreground"
+        android:pathData="M46,30h16v6h5v11H41V36h5z" />
+    <path
+        android:fillColor="@color/harbor_launcher_foreground"
+        android:pathData="M48,47h12l7,33H41z" />
+    <path
+        android:fillColor="@color/harbor_launcher_foreground"
+        android:pathData="M31,80h46v7H31z" />
+    <path
+        android:fillColor="@color/harbor_launcher_foreground"
+        android:pathData="M51,22h6v8h-6z" />
+    <path
+        android:fillColor="@color/harbor_launcher_background"
+        android:pathData="M49,51h10v10H49z" />
+    <path
+        android:fillColor="@color/harbor_launcher_background"
+        android:pathData="M44,39h20v4H44z" />
+</vector>
