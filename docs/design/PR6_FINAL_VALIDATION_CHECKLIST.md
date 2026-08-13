@@ -6,8 +6,8 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Latest final code head: `TBD — record after this spacing-fix commit`
-- Latest physically validated Personal runtime: `TBD — reinstall after this spacing-fix commit`
+- Latest final code head: `aee9d5c`
+- Latest physically validated Personal runtime: `aee9d5c`
 - Latest physically validated Work runtime: `1625232`
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
