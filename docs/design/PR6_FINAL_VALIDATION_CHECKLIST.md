@@ -6,7 +6,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Validation record
 
-- Runtime build validated on S24 Personal user: `20df6d3`
+- Runtime build validated on S24 Personal user: `1ed1123`
 - Previous Work-profile runtime: `74d601c` (Samsung does not permit replacing the Work APK with ADB shell)
 - APK/build: `app/build/outputs/apk/release/app-release-unsigned.apk` — version `0.2.0-alpha05` (versionCode `7`)
 - Date: `2026-08-13`
@@ -27,7 +27,7 @@ Do not mark an item as passed unless it was actually exercised on the recorded b
 
 ## Physical-device execution status
 
-Physical validation is **PARTIAL**. The signed blue-header review-fixes build is installed
+Physical validation is **PARTIAL**. The signed hero-background review-fixes build is installed
 for Personal user `0`; the Personal hero, Open Work navigation, normal and
 200% font-scale layouts, and the launcher/app-info icon were exercised. The
 Open Work callback opened the existing Harbor instance as user `12`. Samsung
@@ -57,6 +57,7 @@ the previous Work-profile runtime, not the final APK.
 Targeted Direction 2 polish validation on the same signed alpha05 build:
 
 - [x] Lighthouse beam apex is at the right-side lantern and fans leftward.
+- [x] Personal `Work space is ready` hero restores the blue/teal lighthouse artwork surface.
 - [x] Normal Work action sheet shows the corrected launcher-shortcut icon.
 - [x] Active Work selection mode shows the symmetric Close icon.
 - [x] Freeze/unfreeze was exercised on Agenda and the app was restored to Available.
@@ -261,7 +262,7 @@ not exercised here.
 - [x] Release build passes.
 - [x] SBOM generation passes.
 - [x] Prohibited-permission verification passes.
-- [x] Reproducibility verification passes (`753c989a5dac0cb838d5e53a3d01098ddff78c87a2d6434162aa6dad3c135b4d`).
+- [x] Reproducibility verification passes (`6df72c07fc92f2e6672e955ac4703cc2b8fe32cc1eeb1f4cae2720855185ddc6`).
 - [x] Diff/whitespace validation passes.
 - [x] No unresolved P1/P2 review finding remains in the reviewed scope.
 - [x] Documentation matches the implementation actually present in PR #6.
