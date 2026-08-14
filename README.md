@@ -29,7 +29,7 @@ The normal Work-profile features do **not** require Shizuku.
 ## Screenshots
 
 <p align="center">
-  <img src="docs/screenshots/harbor-personal-current.jpg" alt="Harbor Personal privacy dashboard" width="45%" />
+  <img src="docs/screenshots/harbor-personal-samsung-api36.png" alt="Harbor Personal privacy dashboard" width="45%" />
   <img src="docs/screenshots/harbor-work-current.webp" alt="Harbor Work app manager" width="45%" />
 </p>
 
