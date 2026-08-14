@@ -49,9 +49,9 @@ Harbor uses Android's supported `DevicePolicyManager` APIs. The Harbor copy insi
 4. Follow Android's Work-profile setup screens.
 5. Open the work-badged Harbor app to manage apps inside Work.
 
-Harbor is intended for distribution through **F-Droid**. Until the F-Droid build is accepted, alpha builds are available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
+Harbor is available on **F-Droid**: [Install Harbor from F-Droid](https://f-droid.org/packages/com.monstera.harbor/). Alpha builds are also available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
 
-The GitHub release uses the Monstera signing identity for testing. A future F-Droid build will use F-Droid's signing key, so a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
+The F-Droid build is signed by F-Droid, while GitHub releases use the Monstera signing identity. Because the signing keys differ, a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
 
 ## Personal to Work file sharing
 
