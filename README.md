@@ -1,10 +1,6 @@
 <p align="center">
-  <img src="docs/branding/harbor-logo.svg" alt="Harbor lighthouse logo" width="128" />
+  <img src="docs/branding/harbor-banner.png" alt="Harbor — Private Android work spaces" width="100%" />
 </p>
-
-<h1 align="center">Harbor</h1>
-
-<p align="center"><strong>A private space for Android apps, built on Android's work-profile system.</strong></p>
 
 <p align="center">
   <a href="https://f-droid.org/packages/com.monstera.harbor/"><img alt="F-Droid" src="https://img.shields.io/badge/F--Droid-Get%20Harbor-1976D2?logo=fdroid" /></a>
@@ -149,17 +145,18 @@ Harbor needs real-device testing across more Android versions and manufacturers 
 Testing is especially useful on:
 
 - Google Pixel running Android 16.
-- A physical, encrypted Android 10 device.
-- Xiaomi / HyperOS devices.
+- A physical encrypted Android 10 device.
+- Xiaomi / HyperOS.
 - Oppo, Realme, or Vivo devices.
-- GMS-free LineageOS or similar Android builds.
-- OnePlus and other manufacturers not yet represented in the test matrix.
+- OnePlus devices.
+- LineageOS or another GMS-free Android build.
+- Any other manufacturer or Android version not listed below.
 
-For the core compatibility check, install Harbor, create a Work profile, confirm Harbor opens inside Work, then try app discovery, freeze/unfreeze, reboot, launcher shortcuts, uninstall, and Personal-to-Work file sharing.
+Please test the normal Harbor flow where possible: Work-profile provisioning, opening the Work Harbor instance, app listing, freeze/unfreeze, uninstall, launcher shortcuts, Personal-to-Work file sharing, reboot, and Harbor updates.
 
-[**Open a compatibility report**](https://github.com/Stem0794/harbor/issues/new) with your device model, manufacturer, Android version, Harbor version, and what passed or failed. Please do not include personal files, account information, or other sensitive data.
+[**Open a device compatibility report**](https://github.com/Stem0794/harbor/issues/new) and include your device model, manufacturer, Android version, Harbor version, and what worked or failed. Do not include personal data or sensitive app information.
 
-See the full [compatibility and test matrix](docs/COMPATIBILITY.md) for the detailed validation scope.
+For the detailed test matrix, see [Compatibility](docs/COMPATIBILITY.md).
 
 ### Physical devices tested
 
