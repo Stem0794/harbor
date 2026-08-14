@@ -4,22 +4,50 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
+    <!-- Teal halo from the approved Harbor logo. -->
     <path
-        android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M46,30h16v6h5v11H41V36h5z" />
+        android:fillColor="#00000000"
+        android:strokeColor="#12C8C7"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:pathData="M29,78 C19,68 19,44 30,31 C41,18 61,17 75,26 C88,35 93,54 87,69 C85,73 83,76 80,79" />
+
+    <!-- Lighthouse beam. -->
     <path
-        android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M48,47h12l7,33H41z" />
+        android:fillColor="#0FAFBD"
+        android:fillAlpha="0.88"
+        android:pathData="M61,39 L91,31 L91,50 L61,44 Z" />
+
+    <!-- Lighthouse roof and lantern room. -->
     <path
-        android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M31,80h46v7H31z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M45,36 L54,28 L63,36 Z" />
     <path
-        android:fillColor="@color/harbor_launcher_foreground"
-        android:pathData="M51,22h6v8h-6z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M47,36 H61 V47 H47 Z" />
     <path
-        android:fillColor="@color/harbor_launcher_background"
-        android:pathData="M49,51h10v10H49z" />
+        android:fillColor="#081319"
+        android:pathData="M50,38 H53 V45 H50 Z M55,38 H58 V45 H55 Z" />
     <path
-        android:fillColor="@color/harbor_launcher_background"
-        android:pathData="M44,39h20v4H44z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,46 H64 V50 H44 Z" />
+
+    <!-- Lighthouse tower. -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M47,50 H61 L65,76 C61,75 58,74 54,72 C50,74 47,75 43,76 Z" />
+    <path
+        android:fillColor="#081319"
+        android:pathData="M51,62 C51,59 57,59 57,62 V71 H51 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52.5,25 H55.5 V29 H52.5 Z" />
+
+    <!-- Layered waves. -->
+    <path
+        android:fillColor="#12C8C7"
+        android:pathData="M27,78 C36,73 43,73 52,77 C62,82 70,84 82,78 C75,88 61,89 50,84 C40,79 34,80 27,82 Z" />
+    <path
+        android:fillColor="#0C8798"
+        android:pathData="M31,84 C40,81 47,82 55,86 C63,90 70,90 77,87 C69,94 57,94 48,90 C41,87 36,86 31,87 Z" />
 </vector>
