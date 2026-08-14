@@ -6,25 +6,24 @@
 
 <p align="center"><strong>A private space for Android apps, built on Android's work-profile system.</strong></p>
 
-Harbor is a free and open-source Android app that creates and manages a standard Android work profile. It keeps selected apps and their data separate from the personal side of the phone.
+<p align="center">
+  <a href="https://f-droid.org/packages/com.monstera.harbor/"><img alt="F-Droid" src="https://img.shields.io/badge/F--Droid-Get%20Harbor-1976D2?logo=fdroid" /></a>
+  <a href="https://github.com/Stem0794/harbor/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/Stem0794/harbor?include_prereleases&label=GitHub" /></a>
+  <img alt="Android 10+" src="https://img.shields.io/badge/Android-10%2B-3DDC84?logo=android&logoColor=white" />
+  <a href="LICENSE"><img alt="Apache License 2.0" src="https://img.shields.io/badge/License-Apache--2.0-blue" /></a>
+</p>
 
-Harbor does **not** require Google Play services, root, a cloud account, analytics, advertising, or Internet access for its core features.
+<p align="center">
+  <a href="https://f-droid.org/packages/com.monstera.harbor/"><strong>Install from F-Droid</strong></a>
+  ·
+  <a href="https://github.com/Stem0794/harbor/releases/latest">GitHub Releases</a>
+</p>
+
+Harbor is a free and open-source Android work-profile manager. It creates an isolated Work space where apps keep separate data from the Personal side of the phone.
+
+Harbor does **not** require Google Play services, root, an account, analytics, advertising, or the `INTERNET` permission for its core features.
 
 > **Harbor is alpha software.** Use it for testing and non-critical data while device compatibility is still being expanded.
-
-## What Harbor does
-
-- Creates a standard Android work profile.
-- Shows and searches apps installed inside Work.
-- Launches apps and opens Android app details.
-- Freezes and unfreezes eligible apps.
-- Uses Android's confirmation flow for uninstall.
-- Creates launcher shortcuts for Work apps.
-- Sends selected files from Personal to Work.
-- Prepares APK installation while Android keeps its normal source-consent prompts.
-- Optionally uses Shizuku for advanced diagnostics, package cloning, and experimental additional workspaces.
-
-The normal Work-profile features do **not** require Shizuku.
 
 ## Screenshots
 
@@ -33,25 +32,89 @@ The normal Work-profile features do **not** require Shizuku.
   <img src="docs/screenshots/harbor-work-current.webp" alt="Harbor Work app manager" width="45%" />
 </p>
 
-<p align="center"><sub>Current Harbor Personal and Work interfaces.</sub></p>
+<p align="center"><sub>Harbor Personal and Work interfaces.</sub></p>
 
-## How it works
+## Why Harbor
 
-Android work profiles are separate spaces managed by the operating system. Apps inside the Work profile have their own app data and appear with Android's work badge.
+Harbor is designed to keep its normal Work-profile path local and based on Android's supported APIs.
+
+| | Harbor |
+|---|---|
+| Internet permission | No |
+| Analytics or telemetry | No |
+| Advertising | No |
+| Account required | No |
+| Google Play services required | No |
+| Root required | No |
+| Shizuku required for core features | No |
+| Core management API | Android `DevicePolicyManager` |
+
+## Core features
+
+- Create a standard Android work profile.
+- Show and search apps installed inside Work.
+- Launch apps and open Android app details.
+- Freeze and unfreeze eligible apps.
+- Perform batch app-management actions.
+- Use Android's confirmation flow for uninstall.
+- Create launcher shortcuts for Work apps.
+- Send selected files from Personal to Work.
+- Prepare APK installation while Android keeps its normal source-consent prompts.
+
+Shizuku is **not required** for these normal Work-profile features.
+
+## Optional advanced tools
+
+Shizuku can be enabled separately for advanced functionality, including:
+
+- Local diagnostics.
+- Package cloning.
+- Android-user discovery.
+- Secondary-user creation where supported.
+- Harbor installation for those users.
+- User switching.
+- Experimental additional workspaces.
+
+Additional workspaces depend on Android and OEM support. Harbor intentionally does not provide destructive full-user deletion.
+
+## How Harbor works
+
+Android work profiles are separate spaces managed by the operating system. Apps inside Work have their own app data and appear with Android's work badge.
+
+```text
+Your phone
+├── Personal
+│   ├── Harbor
+│   └── Personal apps
+│
+└── Work
+    ├── Harbor (profile owner)
+    └── Isolated Work apps
+```
 
 Harbor uses Android's supported `DevicePolicyManager` APIs. The Harbor copy inside Work becomes the profile owner and performs management actions locally. Harbor respects Android's one-managed-profile-per-parent-user model rather than trying to bypass it.
 
-## Getting started
+## Install
 
-1. Install Harbor.
-2. Open Harbor on the Personal side.
-3. Tap **Create Work space**.
-4. Follow Android's Work-profile setup screens.
-5. Open the work-badged Harbor app to manage apps inside Work.
+### F-Droid
 
-Harbor is available on **F-Droid**: [Install Harbor from F-Droid](https://f-droid.org/packages/com.monstera.harbor/). Alpha builds are also available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
+[**Install Harbor from F-Droid**](https://f-droid.org/packages/com.monstera.harbor/)
 
-The F-Droid build is signed by F-Droid, while GitHub releases use the Monstera signing identity. Because the signing keys differ, a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
+F-Droid is the recommended installation source.
+
+### GitHub Releases
+
+Alpha APKs are also available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
+
+> **Signing note:** the F-Droid build is signed by F-Droid, while GitHub releases use the Monstera signing identity. Because the signing keys differ, a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
+
+## Create your Work space
+
+1. Install and open Harbor on the Personal side.
+2. Tap **Create Work space**.
+3. Follow Android's Work-profile setup screens.
+4. Open the work-badged Harbor app.
+5. Manage apps inside Work from there.
 
 ## Personal to Work file sharing
 
@@ -63,7 +126,31 @@ Downloads/Harbor
 
 inside Work. The original Personal file is not deleted. Harbor does not provide a Work-to-Personal export flow.
 
-## Privacy
+## Current limitations
+
+Harbor is still alpha software, and some behavior remains device-dependent.
+
+- Work-profile provisioning and device-policy behavior can differ by manufacturer.
+- Additional Shizuku workspaces are experimental.
+- Some launcher behavior remains device-dependent.
+- Harbor supports Personal-to-Work file transfer, not Work-to-Personal export.
+- Android generally permits one managed profile per parent user.
+
+See [Compatibility](docs/COMPATIBILITY.md) for tested configurations and device-specific limitations.
+
+## Compatibility
+
+Harbor targets Android 10 through Android 16 (API 29-36).
+
+### Physical devices tested
+
+- Samsung Galaxy S24
+
+The OnePlus 13 remains planned secondary coverage and has not been tested yet.
+
+See [Compatibility](docs/COMPATIBILITY.md) for emulator results and device-specific limitations.
+
+## Privacy and security
 
 Harbor is designed to work locally:
 
@@ -77,33 +164,33 @@ Harbor is designed to work locally:
 
 Harbor declares `QUERY_ALL_PACKAGES` because its local Work app catalog needs to enumerate installed applications. This permission does not grant access to another app's private data, Internet access, or arbitrary cross-user access.
 
-See [Privacy](docs/PRIVACY.md) and [Threat model](docs/THREAT_MODEL.md).
+For the security model and design boundaries, see [Privacy](docs/PRIVACY.md), [Threat model](docs/THREAT_MODEL.md), and [Architecture](docs/ARCHITECTURE.md).
 
-## Advanced tools and additional workspaces
+## FAQ
 
-Shizuku is optional and must be installed and started separately by the user. Advanced tools can provide local diagnostics, package cloning, Android-user discovery, secondary-user creation where supported, Harbor installation for those users, and user switching.
+### Does Harbor require root?
 
-Additional workspaces are experimental and depend on Android/OEM support. Harbor intentionally does not implement destructive full-user deletion.
+No.
 
-## Compatibility
+### Does Harbor require Shizuku?
 
-Harbor targets Android 10 through Android 16 (API 29-36). Work-profile provisioning and device-policy behavior can differ by manufacturer.
+No. Shizuku is optional and only used for advanced functionality.
 
-### Physical devices tested
+### Does Harbor require Google Play services?
 
-- Samsung Galaxy S24
+No.
 
-The OnePlus 13 remains planned secondary coverage and has not been tested yet.
+### Does Harbor access the Internet?
 
-See [Compatibility](docs/COMPATIBILITY.md) for emulator results and device-specific limitations.
+The core app does not declare the `INTERNET` permission.
 
-## Current release
+### Can Harbor send files from Work back to Personal?
 
-Current release line: **0.2.0-alpha06**
+No. Harbor currently provides Personal-to-Work file transfer only.
 
-The core path includes managed-profile provisioning, local profile-owner detection, the searchable Work app catalog, app launch/details/uninstall, freeze/unfreeze, batch operations, Work-app shortcuts, Personal-to-Work file sharing, and local lifecycle/recovery handling.
+### Can I switch directly from a GitHub APK to the F-Droid build?
 
-Advanced Shizuku operations, secondary-user workspaces, some launcher behavior, and some OEM-specific flows remain experimental.
+A normal in-place upgrade may not work because the GitHub and F-Droid builds use different signing keys.
 
 ## For developers
 
