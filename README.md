@@ -142,6 +142,25 @@ See [Compatibility](docs/COMPATIBILITY.md) for tested configurations and device-
 
 Harbor targets Android 10 through Android 16 (API 29-36).
 
+### Help test Harbor on more devices
+
+Harbor needs real-device testing across more Android versions and manufacturers before it can move beyond alpha. If you have an untested device, compatibility reports are useful even when everything works correctly.
+
+Testing is especially useful on:
+
+- Google Pixel running Android 16.
+- A physical, encrypted Android 10 device.
+- Xiaomi / HyperOS devices.
+- Oppo, Realme, or Vivo devices.
+- GMS-free LineageOS or similar Android builds.
+- OnePlus and other manufacturers not yet represented in the test matrix.
+
+For the core compatibility check, install Harbor, create a Work profile, confirm Harbor opens inside Work, then try app discovery, freeze/unfreeze, reboot, launcher shortcuts, uninstall, and Personal-to-Work file sharing.
+
+[**Open a compatibility report**](https://github.com/Stem0794/harbor/issues/new) with your device model, manufacturer, Android version, Harbor version, and what passed or failed. Please do not include personal files, account information, or other sensitive data.
+
+See the full [compatibility and test matrix](docs/COMPATIBILITY.md) for the detailed validation scope.
+
 ### Physical devices tested
 
 - Samsung Galaxy S24
