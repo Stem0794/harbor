@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/branding/harbor-banner.png" alt="Harbor — Private Android work spaces" width="100%" />
+  <img src="docs/branding/harbor-banner.jpg" alt="Harbor — Private Android work spaces" width="100%" />
 </p>
 
 <p align="center">
