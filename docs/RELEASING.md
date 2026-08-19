@@ -3,13 +3,13 @@
 1. Confirm the production application ID and DPC receiver component are unchanged.
 2. Update `versionCode`, `versionName`, the Fastlane changelog, and any affected compatibility notes.
 3. Run unit tests, lint, release assembly, manifest permission audit, and `./gradlew generateSbom`; review the generated inventory against `DEPENDENCIES.md`.
-4. Run `scripts/verify-reproducible.sh` as a same-environment deterministic-build smoke test. F-Droid's independent rebuild is the authoritative reproducibility check.
+4. Run `sh scripts/verify-reproducible.sh` as a same-environment deterministic-build smoke test. F-Droid's independent rebuild is the authoritative reproducibility check.
 5. Test an update from the previous published Harbor release while Harbor remains profile owner.
 6. Complete the physical-device release matrix.
 7. Create and sign an immutable source tag named `v<versionName>` and verify it points to the intended release commit.
 8. From a clean checkout of that exact tag, build the unsigned release APK with the documented JDK and Android SDK versions.
 9. Sign the APK with the Monstera release key using an F-Droid-compatible `apksigner`, producing the exact asset name `app-release-signed.apk`.
-10. Run `scripts/verify-release-signing.sh app-release-signed.apk` and confirm the expected signing certificate before upload.
+10. Run `sh scripts/verify-release-signing.sh app-release-signed.apk` and confirm the expected signing certificate before upload.
 11. Publish the GitHub release with `app-release-signed.apk` attached.
 12. Verify that F-Droid detects the tag, independently rebuilds it, and successfully completes its reproducibility check before treating the F-Droid release as complete.
 
@@ -43,7 +43,7 @@ Before uploading a signed release APK, verify it with:
 
 ```shell
 APKSIGNER_BIN=/path/to/android-sdk/build-tools/34.0.0/apksigner \
-  scripts/verify-release-signing.sh app-release-signed.apk
+  sh scripts/verify-release-signing.sh app-release-signed.apk
 ```
 
 For versions that F-Droid successfully reproduces and publishes through the configured upstream-signed flow, GitHub and F-Droid use the same application signing identity, so signature compatibility permits in-place updates between those sources subject to Android's normal version rules.
