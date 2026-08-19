@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#060c10">
+  <meta name="description" content="Harbor is a free and open-source Android work-profile manager for private, isolated app spaces.">
+  <title>Harbor — Private Android work spaces</title>
+  <link rel="icon" type="image/png" href="assets/harbor-app-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="#top" aria-label="Harbor home">
+        <img src="assets/harbor-app-icon.png" width="36" height="36" alt="">
+        <span>Harbor</span>
+      </a>
+      <div class="nav-actions">
+        <a class="nav-link" href="https://github.com/Stem0794/harbor/tree/harbor/docs" target="_blank" rel="noreferrer">Docs</a>
+        <a class="nav-link" href="https://github.com/Stem0794/harbor" target="_blank" rel="noreferrer">GitHub</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch color theme" title="Switch color theme">
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.6A8.5 8.5 0 0 1 8.4 4a8.5 8.5 0 1 0 11.6 11.6Z"></path></svg>
+        </button>
+        <a class="button button-primary nav-download" href="https://f-droid.org/packages/com.monstera.harbor/" target="_blank" rel="noreferrer">Get Harbor</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="shell hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="status-dot"></span> Open source · Android 10–16</div>
+          <h1>A private Work space<br><span>on your Android.</span></h1>
+          <p class="hero-lede">Harbor creates a standard Android work profile so selected apps run with separate data from your Personal space.</p>
+          <div class="hero-actions">
+            <a class="button button-primary button-large" href="https://f-droid.org/packages/com.monstera.harbor/" target="_blank" rel="noreferrer">Install from F-Droid</a>
+            <a class="button button-secondary button-large" href="https://github.com/Stem0794/harbor/releases/latest" target="_blank" rel="noreferrer">GitHub release</a>
+          </div>
+          <p class="alpha-note"><span>Alpha</span> Real-device compatibility is still being expanded.</p>
+        </div>
+
+        <div class="hero-phone" aria-label="Harbor Work interface">
+          <div class="phone-shell">
+            <img src="assets/harbor-work-samsung-api36.png" alt="Harbor Work app manager on Android">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="shell quiet-facts" aria-label="Harbor privacy facts">
+      <span>No account</span>
+      <span>No telemetry</span>
+      <span>No root required</span>
+      <span>No Play Services required</span>
+    </div>
+
+    <section class="section" id="features">
+      <div class="shell">
+        <div class="section-heading">
+          <span class="kicker">What Harbor does</span>
+          <h2>Keep Work apps separate and under control.</h2>
+        </div>
+        <div class="feature-list">
+          <article>
+            <span class="feature-number">01</span>
+            <h3>Create a Work profile</h3>
+            <p>Use Android's supported managed-profile flow. No root or hidden APIs are needed for the normal path.</p>
+          </article>
+          <article>
+            <span class="feature-number">02</span>
+            <h3>Manage Work apps</h3>
+            <p>Launch, freeze, unfreeze, inspect, uninstall, and create shortcuts for apps inside Work.</p>
+          </article>
+          <article>
+            <span class="feature-number">03</span>
+            <h3>Send files into Work</h3>
+            <p>Copy selected files from Personal into <code>Downloads/Harbor</code> inside the Work profile.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section privacy-section" id="privacy">
+      <div class="shell privacy-grid">
+        <div class="privacy-copy">
+          <span class="kicker">Privacy by architecture</span>
+          <h2>Local by default.</h2>
+          <p>Harbor's core app does not request Android's <code>INTERNET</code> permission. There is no account system, analytics SDK, advertising, Firebase, or remote configuration.</p>
+          <a class="text-link" href="https://github.com/Stem0794/harbor/blob/harbor/docs/PRIVACY.md" target="_blank" rel="noreferrer">Read the privacy documentation →</a>
+        </div>
+        <div class="privacy-facts">
+          <div><span>Internet permission</span><strong>None</strong></div>
+          <div><span>Analytics / telemetry</span><strong>None</strong></div>
+          <div><span>Account</span><strong>None</strong></div>
+          <div><span>Core API</span><strong>DevicePolicyManager</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section install-section" id="install">
+      <div class="shell install-card">
+        <img src="assets/harbor-app-icon.png" width="76" height="76" alt="">
+        <div>
+          <span class="kicker">Harbor</span>
+          <h2>Ready to create your Work space?</h2>
+          <p>F-Droid is the recommended installation source. Alpha APKs are also available from GitHub Releases.</p>
+        </div>
+        <div class="install-actions">
+          <a class="button button-primary" href="https://f-droid.org/packages/com.monstera.harbor/" target="_blank" rel="noreferrer">F-Droid</a>
+          <a class="button button-secondary" href="https://github.com/Stem0794/harbor/releases/latest" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-row">
+      <div class="footer-brand"><img src="assets/harbor-app-icon.png" width="28" height="28" alt=""><strong>Harbor</strong></div>
+      <div class="footer-links">
+        <a href="https://github.com/Stem0794/harbor/blob/harbor/docs/COMPATIBILITY.md" target="_blank" rel="noreferrer">Compatibility</a>
+        <a href="https://github.com/Stem0794/harbor/blob/harbor/SECURITY.md" target="_blank" rel="noreferrer">Security</a>
+        <a href="https://github.com/Stem0794/harbor" target="_blank" rel="noreferrer">Source</a>
+      </div>
+      <span class="footer-meta">Apache-2.0 · Free and open source</span>
+    </div>
+  </footer>
+</body>
+</html>
