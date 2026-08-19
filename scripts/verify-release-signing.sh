@@ -4,6 +4,7 @@ set -eu
 apk_path=${1:?Usage: verify-release-signing.sh path-to-signed-apk}
 apksigner_bin=${APKSIGNER_BIN:-apksigner}
 expected_sha256=${HARBOR_ALLOWED_SIGNING_SHA256:-1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d}
+expected_sha256=$(printf '%s' "$expected_sha256" | tr '[:upper:]' '[:lower:]' | tr -d ':')
 
 if [ -x "$apksigner_bin" ]; then
   :
@@ -15,7 +16,7 @@ else
   exit 1
 fi
 
-cert_output=$($apksigner_bin verify --print-certs "$apk_path")
+cert_output=$("$apksigner_bin" verify --print-certs "$apk_path")
 digests=$(printf '%s\n' "$cert_output" | sed -n 's/^Signer #[0-9][0-9]* certificate SHA-256 digest: //p' | tr '[:upper:]' '[:lower:]' | tr -d ':')
 signer_count=$(printf '%s\n' "$digests" | sed '/^$/d' | wc -l | tr -d ' ')
 
