@@ -1,1 +1,0 @@
-Local, FOSS work-profile isolation and app management

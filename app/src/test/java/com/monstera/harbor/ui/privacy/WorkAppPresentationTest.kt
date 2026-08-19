@@ -3,7 +3,7 @@ package com.monstera.harbor.ui.privacy
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class WorkUiReviewScaffoldTest {
+class WorkAppPresentationTest {
     @Test
     fun systemAppTapIsIgnoredDuringSelection() {
         assertEquals(

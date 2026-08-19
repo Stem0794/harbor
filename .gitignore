@@ -20,3 +20,16 @@ harbor-release-password.txt
 keystore.properties
 
 **/build/
+
+# Private/local implementation notes
+plan.md
+PLAN.md
+.private/
+docs/design/CODEX_*.md
+docs/design/*_PLAN.md
+docs/design/*_REVIEW.md
+docs/design/*_CHECKLIST.md
+docs/design/*_TASK.md
+docs/design/*_HANDOFF.md
+docs/design/*_SCAFFOLD.md
+docs/design/*START_HERE*.md

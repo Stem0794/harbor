@@ -234,9 +234,8 @@ core/data/              Local app catalog and preferences
 core/topology/          Users, profiles, ownership, capabilities
 privileged/shizuku/     Isolated Shizuku backend
 feature/advanced/       Shizuku and multiple-user UI
-build-logic/            Shared Gradle conventions
+fastlane/metadata/      F-Droid listing metadata, changelogs, and images
 docs/                   Architecture, privacy, threat model, release guidance
-packaging/fdroid/       F-Droid metadata and build recipe
 ```
 
 Before contributing, read [Architecture](docs/ARCHITECTURE.md), [Threat model](docs/THREAT_MODEL.md), [Compatibility](docs/COMPATIBILITY.md), [Dependencies](docs/DEPENDENCIES.md), and [Releasing](docs/RELEASING.md).

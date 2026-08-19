@@ -1,7 +1,7 @@
 package com.monstera.harbor.ui.privacy
 
 /**
- * Pure presentation helpers for the PR #6 UI-review follow-up.
+ * Pure presentation helpers for Work app interaction and copy.
  *
  * These helpers intentionally encode interaction/copy rules only. They must not own policy,
  * topology, profile, package-manager, or privileged behavior.

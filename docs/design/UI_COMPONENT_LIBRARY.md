@@ -8,18 +8,18 @@ profile-management layer.
 ## Components
 
 - `HarborHeader` and `HarborBrandMark` — branded Personal/Work chrome and lighthouse/briefcase identity.
-- `HarborHeroBackground` — Direction 2 lighthouse, beam, waves, and accent artwork.
+- `HarborHeroBackground` — lighthouse, beam, waves, and accent artwork.
 - `HarborQuickActionTile` — the compact Send files / setup or Advanced tiles.
 - `HarborPrivacyPanel` — structured privacy facts with leading icons, dividers, and confirmation marks.
 - `HarborBottomBar` — presentation-only Personal/Work/Settings navigation shell.
 - `HarborSearchField` — filled rounded Work catalog search surface.
 - `HarborIcon` and `HarborIconButton` — project-owned line icons with accessible descriptions.
 - `HarborStatusPill` — status text with tone and text, never color alone.
-- `HarborColors`, `HarborSpacing`, and `HarborShapes` — explicit Direction 2 palette, rhythm, and surface tokens.
+- `HarborColors`, `HarborSpacing`, and `HarborShapes` — Harbor's palette, rhythm, and surface tokens.
 
 Work app rows and action sheets remain screen-owned because they bind real
-`ManagedApp` state and callbacks. They use the same Direction 2 primitives and
-must not move policy or package operations into this library.
+`ManagedApp` state and callbacks. They use the same Harbor primitives and must
+not move policy or package operations into this library.
 
 ## Boundary
 

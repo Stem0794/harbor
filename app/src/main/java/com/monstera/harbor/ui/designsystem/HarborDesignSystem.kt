@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Explicit Direction 2 visual tokens. Keep these independent from Material defaults. */
+/** Harbor visual tokens. Keep these independent from Material defaults. */
 object HarborColors {
     val bgDeep = Color(0xFF060C10)
     val bgPersonal = Color(0xFF081319)

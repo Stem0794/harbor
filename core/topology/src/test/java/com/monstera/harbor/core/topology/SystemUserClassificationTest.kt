@@ -4,12 +4,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Regression scaffold for plan.md P1.4.
- *
- * Regression coverage for plan.md P1.4.
- */
-class UserClassificationRemediationTest {
+/** Regression coverage for Android user classification and switchability. */
+class SystemUserClassificationTest {
     @Test
     fun normalSystemOwnerFullUserRemainsSwitchable() {
         val owner = SystemUser(
