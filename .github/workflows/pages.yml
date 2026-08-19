@@ -6,7 +6,6 @@ on:
     paths:
       - "site/**"
       - "docs/branding/harbor-app-icon.png"
-      - "docs/screenshots/harbor-personal-samsung-api36.png"
       - "docs/screenshots/harbor-work-samsung-api36.png"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -36,13 +35,12 @@ jobs:
       - name: Assemble static site
         shell: bash
         run: |
-          mkdir -p _site/assets
+          mkdir -p _site/docs/branding _site/docs/screenshots
           cp site/index.html _site/index.html
           cp site/styles.css _site/styles.css
           cp site/script.js _site/script.js
-          cp docs/branding/harbor-app-icon.png _site/assets/harbor-app-icon.png
-          cp docs/screenshots/harbor-personal-samsung-api36.png _site/assets/harbor-personal-samsung-api36.png
-          cp docs/screenshots/harbor-work-samsung-api36.png _site/assets/harbor-work-samsung-api36.png
+          cp docs/branding/harbor-app-icon.png _site/docs/branding/harbor-app-icon.png
+          cp docs/screenshots/harbor-work-samsung-api36.png _site/docs/screenshots/harbor-work-samsung-api36.png
           touch _site/.nojekyll
 
       - name: Upload Pages artifact
