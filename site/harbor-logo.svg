@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-label="Harbor">
+  <rect width="108" height="108" rx="24" fill="#081319"/>
+  <path d="M29 78C19 68 19 44 30 31C41 18 61 17 75 26C88 35 93 54 87 69C85 73 83 76 80 79" fill="none" stroke="#12C8C7" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M61 39L91 31V50L61 44Z" fill="#0FAFBD" fill-opacity=".88"/>
+  <path d="M45 36L54 28L63 36Z" fill="#fff"/>
+  <path d="M47 36H61V47H47Z" fill="#fff"/>
+  <path d="M50 38H53V45H50ZM55 38H58V45H55Z" fill="#081319"/>
+  <path d="M44 46H64V50H44Z" fill="#fff"/>
+  <path d="M47 50H61L65 76C61 75 58 74 54 72C50 74 47 75 43 76Z" fill="#fff"/>
+  <path d="M51 62C51 59 57 59 57 62V71H51Z" fill="#081319"/>
+  <path d="M52.5 25H55.5V29H52.5Z" fill="#fff"/>
+  <path d="M27 78C36 73 43 73 52 77C62 82 70 84 82 78C75 88 61 89 50 84C40 79 34 80 27 82Z" fill="#12C8C7"/>
+  <path d="M31 84C40 81 47 82 55 86C63 90 70 90 77 87C69 94 57 94 48 90C41 87 36 86 31 87Z" fill="#0C8798"/>
+</svg>
