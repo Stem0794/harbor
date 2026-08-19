@@ -98,11 +98,13 @@ Harbor uses Android's supported `DevicePolicyManager` APIs. The Harbor copy insi
 
 F-Droid is the recommended installation source.
 
+Harbor's F-Droid recipe is configured for reproducible upstream-signed APKs. F-Droid independently rebuilds each tagged release and publishes Harbor's developer-signed APK only when that rebuild matches the upstream release artifact.
+
 ### GitHub Releases
 
 Alpha APKs are also available from [GitHub Releases](https://github.com/Stem0794/harbor/releases/latest).
 
-> **Signing note:** the F-Droid build is signed by F-Droid, while GitHub releases use the Monstera signing identity. Because the signing keys differ, a GitHub-signed installation may not upgrade directly to the F-Droid-signed package.
+> **Signing note:** for releases that F-Droid successfully reproduces and publishes through the configured upstream-signed flow, the GitHub and F-Droid APKs use the same Harbor signing identity. If F-Droid cannot reproduce a release, that version is skipped rather than published with a separate F-Droid signing key.
 
 ## Create your Work space
 
@@ -204,9 +206,9 @@ The core app does not declare the `INTERNET` permission.
 
 No. Harbor currently provides Personal-to-Work file transfer only.
 
-### Can I switch directly from a GitHub APK to the F-Droid build?
+### Can I switch directly between a GitHub APK and the F-Droid build?
 
-A normal in-place upgrade may not work because the GitHub and F-Droid builds use different signing keys.
+For versions published through F-Droid's reproducible upstream-signed flow, the APKs use the same signing identity, so signature compatibility permits normal in-place updates between those sources subject to Android's version rules. A release that F-Droid cannot reproduce is not published there.
 
 ## For developers
 
