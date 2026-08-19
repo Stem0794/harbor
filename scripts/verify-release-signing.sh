@@ -2,17 +2,33 @@
 set -eu
 
 apk_path=${1:?Usage: verify-release-signing.sh path-to-signed-apk}
-apksigner_bin=${APKSIGNER_BIN:-apksigner}
 expected_sha256=${HARBOR_ALLOWED_SIGNING_SHA256:-1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d}
 expected_sha256=$(printf '%s' "$expected_sha256" | tr '[:upper:]' '[:lower:]' | tr -d ':')
 
-if [ -x "$apksigner_bin" ]; then
-  :
-elif command -v "$apksigner_bin" >/dev/null 2>&1; then
-  :
-else
-  printf 'apksigner not found: %s\n' "$apksigner_bin" >&2
-  printf 'Set APKSIGNER_BIN to the intended Android Build Tools 34 apksigner path.\n' >&2
+resolve_apksigner() {
+  if [ -n "${APKSIGNER_BIN:-}" ]; then
+    printf '%s\n' "$APKSIGNER_BIN"
+    return
+  fi
+
+  if [ -n "${ANDROID_SDK_ROOT:-}" ] && [ -x "$ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner" ]; then
+    printf '%s\n' "$ANDROID_SDK_ROOT/build-tools/34.0.0/apksigner"
+    return
+  fi
+
+  if [ -n "${ANDROID_HOME:-}" ] && [ -x "$ANDROID_HOME/build-tools/34.0.0/apksigner" ]; then
+    printf '%s\n' "$ANDROID_HOME/build-tools/34.0.0/apksigner"
+    return
+  fi
+
+  printf 'Android Build Tools 34 apksigner not found.\n' >&2
+  printf 'Install build-tools;34.0.0 or set APKSIGNER_BIN explicitly.\n' >&2
+  exit 1
+}
+
+apksigner_bin=$(resolve_apksigner)
+if [ ! -x "$apksigner_bin" ]; then
+  printf 'apksigner is not executable: %s\n' "$apksigner_bin" >&2
   exit 1
 fi
 
