@@ -10,6 +10,8 @@
 </p>
 
 <p align="center">
+  <a href="https://stem0794.github.io/harbor/"><strong>Website</strong></a>
+  ·
   <a href="https://f-droid.org/packages/com.monstera.harbor/"><strong>Install from F-Droid</strong></a>
   ·
   <a href="https://github.com/Stem0794/harbor/releases/latest">GitHub Releases</a>
