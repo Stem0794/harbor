@@ -2,8 +2,7 @@
 set -eu
 
 apk_path=${1:?Usage: verify-release-signing.sh path-to-signed-apk}
-expected_sha256=${HARBOR_ALLOWED_SIGNING_SHA256:-1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d}
-expected_sha256=$(printf '%s' "$expected_sha256" | tr '[:upper:]' '[:lower:]' | tr -d ':')
+expected_sha256=1f68efbefd07ea0c1aa7d79d9fd720c3dda74ac5524dcf398efea0d379b3494d
 
 resolve_apksigner() {
   if [ -n "${APKSIGNER_BIN:-}" ]; then
