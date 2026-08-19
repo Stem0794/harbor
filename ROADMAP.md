@@ -18,6 +18,13 @@ This roadmap outlines Harbor's current development priorities. It is directional
 - Expand testing across major OEM Android variants.
 - Harden behavior across reboots, profile restarts, and application upgrades.
 
+### Release integrity
+
+- Standardize reproducible upstream-signed releases for F-Droid.
+- Keep GitHub and F-Droid distribution on the same verified signing identity where F-Droid's independent rebuild succeeds.
+- Verify release signing identity and deterministic build output as part of the release process.
+- Align release documentation and tooling with F-Droid's reproducibility checks.
+
 ### App-management polish
 
 - Improve freeze and unfreeze reliability.
