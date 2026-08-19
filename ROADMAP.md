@@ -14,6 +14,7 @@ This roadmap outlines Harbor's current development priorities. It is directional
 ### Compatibility hardening
 
 - Improve managed-profile provisioning and recovery across supported Android versions.
+- Detect unsupported device-management states before starting managed-profile provisioning and provide clear error messages when Android blocks setup.
 - Expand testing across major OEM Android variants.
 - Harden behavior across reboots, profile restarts, and application upgrades.
 
