@@ -21,6 +21,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@748248ddd2a24f49513d8f472f81c3a07d4d50e1 # v4.4.4
       - name: Install pinned Android SDK packages
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Validate release shell tooling
+        run: |
+          for script in \
+            scripts/sign-release.sh \
+            scripts/verify-release-signing.sh \
+            scripts/verify-deterministic-build.sh \
+            scripts/verify-manifest.sh; do
+            sh -n "$script"
+          done
       - name: Unit tests and lint
         run: ./gradlew --no-daemon testDebugUnitTest lintDebug
       - name: Release build
