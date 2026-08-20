@@ -13,6 +13,7 @@ import com.monstera.harbor.core.data.HarborPreferences
 import com.monstera.harbor.core.data.WorkspaceMetadataStore
 import com.monstera.harbor.core.policy.AndroidWorkProfileController
 import com.monstera.harbor.core.policy.AndroidManagedProfileProvisioningPolicy
+import com.monstera.harbor.core.policy.AndroidCrossProfilePackagePolicy
 import com.monstera.harbor.core.topology.ProfileTopologyDetector
 import com.monstera.harbor.privileged.shizuku.ShizukuPrivilegedBackend
 
@@ -51,6 +52,7 @@ class HarborGraph(application: Application) {
     val provisioningPolicy = AndroidManagedProfileProvisioningPolicy(
         application.getSystemService(DevicePolicyManager::class.java),
     )
+    val crossProfilePackagePolicy = AndroidCrossProfilePackagePolicy(application, admin)
     val policyController = AndroidWorkProfileController(
         context = application,
         admin = admin,

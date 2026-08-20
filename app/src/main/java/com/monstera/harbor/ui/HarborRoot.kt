@@ -140,6 +140,7 @@ fun HarborRoot(
         WorkProfileScreen(
             catalog = graph.appCatalog,
             controller = graph.policyController,
+            crossProfilePackagePolicy = graph.crossProfilePackagePolicy,
             ownPackage = context.packageName,
             privilegeState = privilegeState,
             iconProvider = graph.iconProvider,
