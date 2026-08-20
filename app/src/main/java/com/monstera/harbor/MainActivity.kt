@@ -21,6 +21,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import com.monstera.harbor.ui.HarborRoot
 import com.monstera.harbor.ui.theme.HarborTheme
+import com.monstera.harbor.core.policy.ManagedProfileProvisioningPreflight
+import com.monstera.harbor.core.policy.ManagedProfileProvisioningStartResult
 
 class MainActivity : ComponentActivity() {
     private val provisioningLauncher = registerForActivityResult(
@@ -57,11 +59,12 @@ class MainActivity : ComponentActivity() {
         (application as HarborApplication).graph.privilegedBackend.refresh()
     }
 
-    private fun beginProvisioning(graph: HarborGraph) {
-        val intent = Intent(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE)
-            .putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME, graph.admin)
-        provisioningLauncher.launch(intent)
-    }
+    private fun beginProvisioning(graph: HarborGraph): ManagedProfileProvisioningStartResult =
+        ManagedProfileProvisioningPreflight(graph.provisioningPolicy).start {
+            val intent = Intent(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE)
+                .putExtra(DevicePolicyManager.EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME, graph.admin)
+            provisioningLauncher.launch(intent)
+        }
 
     private fun openWorkHarbor(): Boolean {
         // CrossProfileApps exposes the profiles that this app can reach, rather than

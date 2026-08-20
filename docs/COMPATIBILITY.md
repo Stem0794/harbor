@@ -23,6 +23,7 @@ Planned but not yet tested: OnePlus 13.
 ## Conservative compatibility behavior
 
 - Freeze/unfreeze treats a `false` result from Android as a failed policy update and leaves the displayed state unchanged.
+- Managed-profile setup uses `DevicePolicyManager.isProvisioningAllowed()` before offering setup and re-checks immediately before launching Android's provisioning activity. This public API predates Harbor's API 29 minimum, so the same fail-closed preflight applies across the supported range. It cannot make an unsupported device-owner or OEM management state compatible.
 - The work-profile catalog includes installed user apps and launchable system apps, while filtering non-launchable system components that are not user-facing applications.
 - Public profile discovery does not expose numeric user IDs. Shizuku commands accept only IDs parsed from a fresh system user listing or from the result of the allowlisted user-creation command and then revalidate them before use.
 - Package cloning is enabled only when the current full user and one active managed profile can be resolved unambiguously. A sibling profile, Private Space, malformed user-list output, or an unrecognized topology disables cloning with an explanation.

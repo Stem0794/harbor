@@ -12,6 +12,7 @@ import com.monstera.harbor.core.data.AndroidPackageMetadataProvider
 import com.monstera.harbor.core.data.HarborPreferences
 import com.monstera.harbor.core.data.WorkspaceMetadataStore
 import com.monstera.harbor.core.policy.AndroidWorkProfileController
+import com.monstera.harbor.core.policy.AndroidManagedProfileProvisioningPolicy
 import com.monstera.harbor.core.topology.ProfileTopologyDetector
 import com.monstera.harbor.privileged.shizuku.ShizukuPrivilegedBackend
 
@@ -47,6 +48,9 @@ internal object FileImportReceiverAvailability {
 class HarborGraph(application: Application) {
     val admin = ComponentName(application, HarborDeviceAdminReceiver::class.java)
     val topologyDetector = ProfileTopologyDetector(application)
+    val provisioningPolicy = AndroidManagedProfileProvisioningPolicy(
+        application.getSystemService(DevicePolicyManager::class.java),
+    )
     val policyController = AndroidWorkProfileController(
         context = application,
         admin = admin,

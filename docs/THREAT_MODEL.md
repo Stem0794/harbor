@@ -26,6 +26,7 @@
 - Partially recognized user-list output cannot authorize a privileged operation.
 - Package cloning requires an unambiguous current full-user/active managed-profile pair. Additional profiles disable cloning instead of being guessed as a parent or target.
 - Harbor and recovery-critical system packages cannot be frozen; system-app freezing is disabled in the MVP UI.
+- Managed-profile setup is fail-closed: Harbor checks Android's public provisioning capability before showing setup as available and re-checks immediately before launching the system provisioning flow.
 - Full-user creation requires explicit confirmation. Full-user deletion is not implemented.
 - Root-backed Shizuku receives the same operation allowlist as ADB-backed Shizuku.
 - Disabling Advanced tools clears the local opt-in and releases Harbor's Shizuku UserService without changing global Shizuku permission.
@@ -37,6 +38,7 @@
 ## Residual risks
 
 - OEM package-manager commands can behave differently or expose undocumented failures.
+- Android or an OEM can refuse managed-profile provisioning because of an existing device-management state; Harbor reports that state but does not bypass it.
 - OEM user-list formats that Harbor cannot fully parse disable privileged user/profile operations until explicitly supported.
 - Harbor's conservative clone resolver can reject a legitimate work profile when any additional profile is visible because supported APIs do not expose a reliable parent mapping to the ordinary app.
 - A compromised Shizuku service already has privileges outside Harbor's control.

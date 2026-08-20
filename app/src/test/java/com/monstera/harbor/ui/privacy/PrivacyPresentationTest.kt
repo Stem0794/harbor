@@ -1,6 +1,8 @@
 package com.monstera.harbor.ui.privacy
 
 import com.monstera.harbor.core.data.ManagedApp
+import com.monstera.harbor.core.policy.ManagedProfileProvisioningBlockReason
+import com.monstera.harbor.core.policy.ManagedProfileProvisioningCapability
 import com.monstera.harbor.core.topology.PackageName
 import com.monstera.harbor.ui.designsystem.StatusTone
 import org.junit.Assert.assertEquals
@@ -13,7 +15,7 @@ class PrivacyPresentationTest {
         val result = workSpacePresentation(
             harborManagedProfile = true,
             foreignProfile = false,
-            provisioningAllowed = false,
+            provisioningCapability = blockedProvisioning,
         )
 
         assertEquals("Work space is ready", result.title)
@@ -25,7 +27,7 @@ class PrivacyPresentationTest {
         val result = workSpacePresentation(
             harborManagedProfile = false,
             foreignProfile = true,
-            provisioningAllowed = false,
+            provisioningCapability = blockedProvisioning,
         )
 
         assertEquals("Work profile setup is unavailable", result.title)
@@ -37,7 +39,7 @@ class PrivacyPresentationTest {
         val result = workSpacePresentation(
             harborManagedProfile = false,
             foreignProfile = false,
-            provisioningAllowed = true,
+            provisioningCapability = ManagedProfileProvisioningCapability.Allowed,
         )
 
         assertEquals("Set up your Work space", result.title)
@@ -49,7 +51,7 @@ class PrivacyPresentationTest {
         val result = personalHeroActions(
             harborManagedProfile = true,
             foreignProfile = false,
-            provisioningAllowed = false,
+            provisioningCapability = blockedProvisioning,
         )
 
         assertEquals(PersonalHeroAction.OPEN_WORK, result.primary)
@@ -63,7 +65,7 @@ class PrivacyPresentationTest {
         val result = personalHeroActions(
             harborManagedProfile = false,
             foreignProfile = false,
-            provisioningAllowed = true,
+            provisioningCapability = ManagedProfileProvisioningCapability.Allowed,
         )
 
         assertEquals(PersonalHeroAction.PROVISION_WORK, result.primary)
@@ -77,7 +79,7 @@ class PrivacyPresentationTest {
         val result = personalHeroActions(
             harborManagedProfile = false,
             foreignProfile = true,
-            provisioningAllowed = true,
+            provisioningCapability = ManagedProfileProvisioningCapability.Allowed,
         )
 
         assertEquals(PersonalHeroAction.PROVISION_WORK, result.primary)
@@ -91,7 +93,7 @@ class PrivacyPresentationTest {
         val result = personalHeroActions(
             harborManagedProfile = false,
             foreignProfile = true,
-            provisioningAllowed = false,
+            provisioningCapability = blockedProvisioning,
         )
 
         assertNull(result.primary)
@@ -105,7 +107,7 @@ class PrivacyPresentationTest {
         val result = personalHeroActions(
             harborManagedProfile = false,
             foreignProfile = false,
-            provisioningAllowed = false,
+            provisioningCapability = blockedProvisioning,
         )
 
         assertNull(result.primary)
@@ -134,4 +136,10 @@ class PrivacyPresentationTest {
         isHidden = hidden,
         isLaunchable = true,
     )
+
+    private companion object {
+        val blockedProvisioning = ManagedProfileProvisioningCapability.Blocked(
+            ManagedProfileProvisioningBlockReason.ANDROID_MANAGEMENT_STATE,
+        )
+    }
 }
