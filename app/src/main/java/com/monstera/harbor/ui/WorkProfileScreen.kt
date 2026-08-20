@@ -334,7 +334,7 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
     val crossProfilePresentation = crossProfileAccessPresentation(
         access = crossProfileAccess,
         error = crossProfileAccessError,
-        busy = crossProfileAccessBusy,
+        busy = busy,
     )
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {

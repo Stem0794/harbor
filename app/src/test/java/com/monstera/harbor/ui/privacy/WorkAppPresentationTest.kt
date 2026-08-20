@@ -94,4 +94,16 @@ class WorkAppPresentationTest {
         assertEquals("Requires Android 11 or newer", result.body)
         assertFalse(result.toggleEnabled)
     }
+
+    @Test
+    fun crossProfileAccessCannotBeToggledDuringAnotherPolicyOperation() {
+        val result = crossProfileAccessPresentation(
+            access = CrossProfilePackageAccess.Disabled,
+            error = null,
+            busy = true,
+        )
+
+        assertFalse(result.checked)
+        assertFalse(result.toggleEnabled)
+    }
 }
