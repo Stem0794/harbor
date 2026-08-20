@@ -46,6 +46,7 @@ import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.ProfileOwnership
 import com.monstera.harbor.core.topology.ProfileTopology
 import com.monstera.harbor.core.topology.SystemUser
+import com.monstera.harbor.core.policy.ManagedProfileProvisioningCapability
 import com.monstera.harbor.ui.designsystem.HarborBottomBar
 import com.monstera.harbor.ui.designsystem.HarborColors
 import com.monstera.harbor.ui.designsystem.HarborHeroBackground
@@ -85,7 +86,7 @@ fun PersonalProfileScreen(
     onCreateWorkspace: (String) -> Unit,
     onRenameWorkspace: (SystemUser, String?) -> Unit,
     onChangeWorkspaceIcon: (SystemUser, WorkspaceIconKey) -> Unit,
-    provisioningAllowed: Boolean,
+    provisioningCapability: ManagedProfileProvisioningCapability,
     message: String?,
     onProvision: () -> Unit,
     onOpenWorkHarbor: () -> Unit,
@@ -135,9 +136,9 @@ fun PersonalProfileScreen(
 
     val associatedHarbor = topology.associatedProfiles.any { !it.isCurrent && it.ownership == ProfileOwnership.HARBOR_INSTALLED_OWNER_UNKNOWN }
     val hasForeignOrUnknownProfile = topology.associatedProfiles.any { !it.isCurrent && it.ownership == ProfileOwnership.FOREIGN_OR_UNKNOWN }
-    val presentation = workSpacePresentation(associatedHarbor, hasForeignOrUnknownProfile, provisioningAllowed)
+    val presentation = workSpacePresentation(associatedHarbor, hasForeignOrUnknownProfile, provisioningCapability)
     val ready = associatedHarbor
-    val resolvedHeroActions = personalHeroActions(associatedHarbor, hasForeignOrUnknownProfile, provisioningAllowed)
+    val resolvedHeroActions = personalHeroActions(associatedHarbor, hasForeignOrUnknownProfile, provisioningCapability)
 
     fun heroAction(action: PersonalHeroAction): HeroQuickAction = when (action) {
         PersonalHeroAction.OPEN_WORK -> HeroQuickAction("Open Work", HarborIconKind.Work, onOpenWorkHarbor)

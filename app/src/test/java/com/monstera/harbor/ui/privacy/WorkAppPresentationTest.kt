@@ -1,6 +1,9 @@
 package com.monstera.harbor.ui.privacy
 
+import com.monstera.harbor.core.policy.CrossProfilePackageAccess
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkAppPresentationTest {
@@ -52,5 +55,55 @@ class WorkAppPresentationTest {
     @Test
     fun normalShortcutCopyUsesStandardLabel() {
         assertEquals("Add to launcher", launcherShortcutActionLabel(isHidden = false))
+    }
+
+    @Test
+    fun crossProfileAccessDefaultsToExplicitlyOff() {
+        val result = crossProfileAccessPresentation(
+            access = CrossProfilePackageAccess.Disabled,
+            error = null,
+            busy = false,
+        )
+
+        assertEquals("Off · Android consent is still required", result.body)
+        assertFalse(result.checked)
+        assertTrue(result.toggleEnabled)
+    }
+
+    @Test
+    fun crossProfileAccessExplainsAndroidConsentWhenEnabled() {
+        val result = crossProfileAccessPresentation(
+            access = CrossProfilePackageAccess.Enabled,
+            error = null,
+            busy = false,
+        )
+
+        assertEquals("Allowed by Harbor · Android consent is still required", result.body)
+        assertTrue(result.checked)
+        assertTrue(result.toggleEnabled)
+    }
+
+    @Test
+    fun unsupportedCrossProfileAccessCannotBeToggled() {
+        val result = crossProfileAccessPresentation(
+            access = CrossProfilePackageAccess.Unsupported,
+            error = null,
+            busy = false,
+        )
+
+        assertEquals("Requires Android 11 or newer", result.body)
+        assertFalse(result.toggleEnabled)
+    }
+
+    @Test
+    fun crossProfileAccessCannotBeToggledDuringAnotherPolicyOperation() {
+        val result = crossProfileAccessPresentation(
+            access = CrossProfilePackageAccess.Disabled,
+            error = null,
+            busy = true,
+        )
+
+        assertFalse(result.checked)
+        assertFalse(result.toggleEnabled)
     }
 }

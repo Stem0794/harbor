@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,6 +58,8 @@ import com.monstera.harbor.core.data.AppCatalogRepository
 import com.monstera.harbor.core.data.AppIconProvider
 import com.monstera.harbor.core.data.ManagedApp
 import com.monstera.harbor.core.policy.PolicyResult
+import com.monstera.harbor.core.policy.CrossProfilePackageAccess
+import com.monstera.harbor.core.policy.CrossProfilePackagePolicy
 import com.monstera.harbor.core.policy.WorkProfileController
 import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.PackageName
@@ -74,6 +77,7 @@ import com.monstera.harbor.ui.designsystem.StatusTone
 import com.monstera.harbor.ui.privacy.WorkAppRowClickIntent
 import com.monstera.harbor.ui.privacy.appStatusLabel
 import com.monstera.harbor.ui.privacy.appStatusTone
+import com.monstera.harbor.ui.privacy.crossProfileAccessPresentation
 import com.monstera.harbor.ui.privacy.launcherShortcutActionLabel
 import com.monstera.harbor.ui.privacy.workAppCountLabel
 import com.monstera.harbor.ui.privacy.workAppRowClickIntent
@@ -84,6 +88,7 @@ import kotlinx.coroutines.launch
 fun WorkProfileScreen(
     catalog: AppCatalogRepository,
     controller: WorkProfileController,
+    crossProfilePackagePolicy: CrossProfilePackagePolicy,
     ownPackage: String,
     privilegeState: HarborPrivilegeState,
     iconProvider: AppIconProvider,
@@ -103,6 +108,9 @@ fun WorkProfileScreen(
     var sharingBusy by remember { mutableStateOf(false) }
     var sharingRequested by remember { mutableStateOf(false) }
     var selectedPackage by remember { mutableStateOf<PackageName?>(null) }
+    var crossProfileAccess by remember { mutableStateOf<CrossProfilePackageAccess?>(null) }
+    var crossProfileAccessError by remember { mutableStateOf<String?>(null) }
+    var crossProfileAccessBusy by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(false) }
     var showNavigation by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -111,13 +119,27 @@ fun WorkProfileScreen(
 
     LaunchedEffect(uiState.message) { uiState.message?.let { snackbar.showSnackbar(it); viewModel.clearMessage() } }
     LaunchedEffect(uiState.operationInProgress, uiState.selectedPackages) { if (!uiState.operationInProgress && uiState.selectedPackages.isEmpty()) selectionMode = false }
+    LaunchedEffect(selectedPackage) {
+        crossProfileAccess = null
+        crossProfileAccessError = null
+        crossProfileAccessBusy = false
+        selectedPackage?.let { packageName ->
+            when (val result = crossProfilePackagePolicy.accessFor(packageName)) {
+                is PolicyResult.Success -> crossProfileAccess = result.value
+                is PolicyResult.Failure -> crossProfileAccessError = result.reason
+            }
+        }
+    }
 
     selectedApp?.let { app ->
         AppActionSheet(
             app = app,
             iconProvider = iconProvider,
             sheetState = sheetState,
-            busy = uiState.operationInProgress,
+            busy = uiState.operationInProgress || crossProfileAccessBusy,
+            crossProfileAccess = crossProfileAccess,
+            crossProfileAccessError = crossProfileAccessError,
+            crossProfileAccessBusy = crossProfileAccessBusy,
             onDismiss = { selectedPackage = null },
             onLaunch = {
                 if (!onLaunchPackage(app.packageName.value)) scope.launch { snackbar.showSnackbar("No launchable activity is available") }
@@ -129,6 +151,28 @@ fun WorkProfileScreen(
             onAddShortcut = {
                 scope.launch { if (!onAddShortcut(app.packageName.value)) snackbar.showSnackbar("This launcher cannot pin Harbor shortcuts") }
                 selectedPackage = null
+            },
+            onToggleCrossProfileAccess = {
+                val enabled = crossProfileAccess != CrossProfilePackageAccess.Enabled
+                crossProfileAccessBusy = true
+                scope.launch {
+                    when (val result = crossProfilePackagePolicy.setAccess(app.packageName, enabled)) {
+                        is PolicyResult.Success -> {
+                            crossProfileAccess = result.value
+                            snackbar.showSnackbar(
+                                if (enabled) {
+                                    "Allowed for ${app.label}; Android still requires user consent"
+                                } else {
+                                    "Cross-profile access is off for ${app.label}"
+                                },
+                            )
+                        }
+                        is PolicyResult.Failure -> {
+                            snackbar.showSnackbar(result.reason)
+                        }
+                    }
+                    crossProfileAccessBusy = false
+                }
             },
         )
     }
@@ -286,7 +330,12 @@ private fun EmptyWorkState(queryBlank: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheetState: SheetState, busy: Boolean, onDismiss: () -> Unit, onLaunch: () -> Unit, onToggleHidden: () -> Unit, onDetails: () -> Unit, onUninstall: () -> Unit, onAddShortcut: () -> Unit) {
+private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheetState: SheetState, busy: Boolean, crossProfileAccess: CrossProfilePackageAccess?, crossProfileAccessError: String?, crossProfileAccessBusy: Boolean, onDismiss: () -> Unit, onLaunch: () -> Unit, onToggleHidden: () -> Unit, onDetails: () -> Unit, onUninstall: () -> Unit, onAddShortcut: () -> Unit, onToggleCrossProfileAccess: () -> Unit) {
+    val crossProfilePresentation = crossProfileAccessPresentation(
+        access = crossProfileAccess,
+        error = crossProfileAccessError,
+        busy = busy,
+    )
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
         Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
             Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -295,6 +344,21 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
             }
             if (app.isLaunchable && !app.isHidden) Direction2ActionRow(HarborIconKind.Open, "Open", null, !busy, onLaunch)
             if (!app.isSystem) Direction2ActionRow(HarborIconKind.Freeze, if (app.isHidden) "Unfreeze" else "Freeze", if (app.isHidden) "Make the app available again" else "Prevent the app from running", !busy, onToggleHidden, trailing = { Switch(checked = app.isHidden, onCheckedChange = { onToggleHidden() }, enabled = !busy) })
+            Direction2ActionRow(
+                icon = HarborIconKind.Work,
+                title = "Cross-profile access",
+                body = crossProfilePresentation.body,
+                enabled = crossProfilePresentation.toggleEnabled,
+                onClick = onToggleCrossProfileAccess,
+                trailing = {
+                    Switch(
+                        checked = crossProfilePresentation.checked,
+                        onCheckedChange = null,
+                        enabled = crossProfilePresentation.toggleEnabled,
+                        modifier = Modifier.clearAndSetSemantics { },
+                    )
+                },
+            )
             if (app.isLaunchable) Direction2ActionRow(HarborIconKind.Shortcut, launcherShortcutActionLabel(app.isHidden), null, !busy, onAddShortcut)
             Direction2ActionRow(HarborIconKind.Details, "App details", null, !busy, onDetails)
             if (!app.isSystem) Direction2ActionRow(HarborIconKind.Uninstall, "Uninstall", null, !busy, onUninstall, tint = HarborColors.danger)
