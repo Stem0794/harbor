@@ -7,7 +7,7 @@
 5. Test an update from the previous published Harbor release while Harbor remains profile owner.
 6. Complete the physical-device release matrix.
 7. Create an immutable annotated source tag named `v<versionName>` and verify it points to the intended release commit.
-8. From a clean checkout of that exact tag, build the unsigned release APK with the documented JDK and Android SDK versions.
+8. From a fresh `git clone` of the repository, check out that exact tag and build the unsigned release APK with the documented JDK and Android SDK versions.
 9. Sign the APK with `sh scripts/sign-release.sh`. The script uses an F-Droid-compatible Android Build Tools 34 `apksigner`, writes the exact asset name `app-release-signed.apk` by default, and verifies the resulting certificate before returning success.
 10. Publish the GitHub release with `app-release-signed.apk` attached.
 11. Verify that F-Droid detects the tag, independently rebuilds it, and successfully completes its reproducibility check before treating the F-Droid release as complete.
@@ -47,7 +47,7 @@ Before signing, provide these environment variables through the release environm
 
 The signing script passes password references to `apksigner` using its `env:` input mode; it does not put password values in the command arguments.
 
-From a clean checkout of the release tag:
+From a fresh `git clone` of the repository, check out the release tag and run:
 
 ```shell
 ./gradlew --no-daemon clean assembleRelease
