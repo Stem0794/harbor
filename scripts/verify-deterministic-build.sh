@@ -13,7 +13,12 @@ fi
 
 verify_vcs_metadata() {
   apk=$1
-  if unzip -p "$apk" META-INF/version-control-info.textproto 2>/dev/null | grep -Fq 'NO_VALID_GIT_FOUND'; then
+  if ! metadata=$(unzip -p "$apk" META-INF/version-control-info.textproto 2>/dev/null); then
+    printf 'Release APK is missing valid VCS metadata\n' >&2
+    exit 1
+  fi
+
+  if printf '%s\n' "$metadata" | grep -Fq 'NO_VALID_GIT_FOUND'; then
     printf 'Release APK contains invalid Git metadata: NO_VALID_GIT_FOUND\n' >&2
     exit 1
   fi
