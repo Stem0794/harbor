@@ -20,6 +20,12 @@
 
 Planned but not yet tested: OnePlus 13.
 
+## Feature-specific user confirmations
+
+These reports confirm a specific workflow only; they are not full-device compatibility passes.
+
+- Xiaomi Lisa running LineageOS 23.2: a user confirmed that microG Services can complete Android's Personal/Work connection flow with Harbor `0.2.0-alpha06` after enabling microG's per-app cross-profile access in Work Harbor. This validates the end-to-end microG use case for that reported setup, including Android's final consent step.
+
 ## Conservative compatibility behavior
 
 - Freeze/unfreeze treats a `false` result from Android as a failed policy update and leaves the displayed state unchanged.
