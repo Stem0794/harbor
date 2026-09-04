@@ -58,6 +58,7 @@ Harbor is designed to keep its normal Work-profile path local and based on Andro
 - Create launcher shortcuts for Work apps.
 - Send selected files from Personal to Work.
 - Prepare APK installation while Android keeps its normal source-consent prompts.
+- On Android 11+, manage each Work app's eligibility for Android's cross-profile connection flow while leaving final consent to Android.
 
 Shizuku is **not required** for these normal Work-profile features.
 
@@ -135,6 +136,7 @@ Harbor is still alpha software, and some behavior remains device-dependent.
 - Some launcher behavior remains device-dependent.
 - Harbor supports Personal-to-Work file transfer, not Work-to-Personal export.
 - Android generally permits one managed profile per parent user.
+- Per-app cross-profile access requires Android 11 or newer and only controls app eligibility; Android still owns the final connection-consent flow.
 
 See [Compatibility](docs/COMPATIBILITY.md) for tested configurations and device-specific limitations.
 
@@ -168,7 +170,7 @@ For the detailed test matrix, see [Compatibility](docs/COMPATIBILITY.md).
 
 The OnePlus 13 remains planned secondary coverage and has not been tested yet.
 
-See [Compatibility](docs/COMPATIBILITY.md) for emulator results and device-specific limitations.
+See [Compatibility](docs/COMPATIBILITY.md) for emulator results, feature-specific user reports, and device-specific limitations.
 
 ## Privacy and security
 
@@ -207,6 +209,10 @@ The core app does not declare the `INTERNET` permission.
 ### Can Harbor send files from Work back to Personal?
 
 No. Harbor currently provides Personal-to-Work file transfer only.
+
+### How do I let an app such as microG connect across Personal and Work?
+
+On Android 11+, open Harbor inside the Work profile, open the app's action sheet, and enable its cross-profile access control. Harbor adds that package to Android's profile-owner eligibility allowlist without removing unrelated entries. Return to the app and complete Android's own connection-consent flow. Android 10 does not provide this public DPC API.
 
 ### Can I switch directly between a GitHub APK and the F-Droid build?
 
