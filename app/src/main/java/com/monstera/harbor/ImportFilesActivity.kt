@@ -1,5 +1,6 @@
 package com.monstera.harbor
 
+import android.content.ClipData
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
@@ -8,9 +9,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import com.monstera.harbor.ui.theme.HarborTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /** Receives a user-selected personal file through Android's supported share flow. */
 class ImportFilesActivity : ComponentActivity() {
@@ -45,28 +47,53 @@ class ImportFilesActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             HarborTheme {
-                ImportFilesScreen(state = state, onDone = ::finish)
+                ImportFilesScreen(
+                    state = state,
+                    onDone = ::finish,
+                    onOpenInstaller = ::openInstaller,
+                )
             }
         }
         lifecycleScope.launch {
-            state = withContext(Dispatchers.IO) {
+            val imported = withContext(Dispatchers.IO) {
                 SharedFileImporter(contentResolver).import(intent)
             }
+            state = imported
+            if (imported is ImportState.Success) {
+                imported.installerIntent?.let(::openInstaller)
+            }
         }
+    }
+
+    private fun openInstaller(installerIntent: Intent) {
+        runCatching { startActivity(installerIntent) }
+            .onFailure { error ->
+                state = (state as? ImportState.Success)?.copy(
+                    installerError = error.message ?: "Android could not open the package installer",
+                ) ?: state
+            }
     }
 }
 
 internal sealed interface ImportState {
     data object Loading : ImportState
 
-    data class Success(val names: List<String>) : ImportState
+    data class Success(
+        val names: List<String>,
+        val installerIntent: Intent? = null,
+        val installerError: String? = null,
+    ) : ImportState
 
     data class Failure(val message: String) : ImportState
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ImportFilesScreen(state: ImportState, onDone: () -> Unit) {
+private fun ImportFilesScreen(
+    state: ImportState,
+    onDone: () -> Unit,
+    onOpenInstaller: (Intent) -> Unit,
+) {
     Scaffold(topBar = { TopAppBar(title = { Text("Send to Harbor work profile") }) }) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp),
@@ -81,10 +108,23 @@ private fun ImportFilesScreen(state: ImportState, onDone: () -> Unit) {
                 is ImportState.Success -> {
                     Text("File copied to work Downloads", style = MaterialTheme.typography.headlineSmall)
                     Text(
-                        "The personal original was not deleted. Open the work-profile Files app and look in Downloads/Harbor.",
+                        if (state.installerIntent != null) {
+                            "The APK is in Downloads/Harbor. Android's installer opens in Work and keeps the final confirmation with you."
+                        } else {
+                            "The personal original was not deleted. Open the work-profile Files app and look in Downloads/Harbor."
+                        },
                     )
+                    state.installerError?.let { error ->
+                        Text("The APK was copied, but Android could not open its package installer: $error")
+                    }
                     state.names.forEach { name ->
                         Text(name, style = MaterialTheme.typography.bodySmall)
+                    }
+                    state.installerIntent?.let { installerIntent ->
+                        Button(
+                            onClick = { onOpenInstaller(installerIntent) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("Open package installer") }
                     }
                     Button(onClick = onDone, modifier = Modifier.fillMaxWidth()) { Text("Done") }
                 }
@@ -110,7 +150,13 @@ internal class SharedFileImporter(private val resolver: ContentResolver) {
 
         val result = copyUris(uris, intent.type)
         return when {
-            result.names.isNotEmpty() -> ImportState.Success(result.names)
+            result.files.isNotEmpty() -> ImportState.Success(
+                names = result.files.map(CopiedFile::name),
+                installerIntent = ApkInstallIntentFactory.create(
+                    sharedUriCount = uris.size,
+                    copiedFiles = result.files,
+                ),
+            )
             else -> ImportState.Failure(
                 "This source did not provide a readable Android content URI. Try Share instead of the OEM Move action.",
             )
@@ -118,21 +164,22 @@ internal class SharedFileImporter(private val resolver: ContentResolver) {
     }
 
     internal fun copyUris(uris: List<Uri>, sharedMimeType: String?): CopyResult {
-        val names = mutableListOf<String>()
+        val files = mutableListOf<CopiedFile>()
         uris.take(MAX_SHARED_FILES).forEachIndexed { index, uri ->
             if (uri.scheme != ContentResolver.SCHEME_CONTENT) return@forEachIndexed
             runCatching { copyToWorkDownloads(uri, sharedMimeType, index) }
-                .onSuccess(names::add)
+                .onSuccess(files::add)
         }
-        return CopyResult(names)
+        return CopyResult(files)
     }
 
-    private fun copyToWorkDownloads(uri: Uri, sharedMimeType: String?, index: Int): String {
+    private fun copyToWorkDownloads(uri: Uri, sharedMimeType: String?, index: Int): CopiedFile {
         val sourceName = queryDisplayName(uri)
         val displayName = uniqueDisplayName(sourceName, index)
+        val mimeType = resolver.getType(uri) ?: sharedMimeType ?: "application/octet-stream"
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, displayName)
-            put(MediaStore.MediaColumns.MIME_TYPE, resolver.getType(uri) ?: sharedMimeType ?: "application/octet-stream")
+            put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
             put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/Harbor")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
@@ -149,7 +196,7 @@ internal class SharedFileImporter(private val resolver: ContentResolver) {
                 null,
                 null,
             )
-            return displayName
+            return CopiedFile(name = displayName, uri = destination, mimeType = mimeType)
         } catch (error: Throwable) {
             resolver.delete(destination, null, null)
             throw error
@@ -201,4 +248,37 @@ internal class SharedFileImporter(private val resolver: ContentResolver) {
     }
 }
 
-internal data class CopyResult(val names: List<String>)
+internal data class CopyResult(val files: List<CopiedFile>)
+
+internal data class CopiedFile(
+    val name: String,
+    val uri: Uri,
+    val mimeType: String,
+)
+
+internal object ApkInstallIntentFactory {
+    const val APK_MIME_TYPE = "application/vnd.android.package-archive"
+
+    fun create(sharedUriCount: Int, copiedFiles: List<CopiedFile>): Intent? {
+        val file = copiedFiles.singleOrNull() ?: return null
+        if (
+            sharedUriCount != 1 ||
+            file.uri.scheme != ContentResolver.SCHEME_CONTENT ||
+            !isApk(file)
+        ) return null
+        return Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(file.uri, APK_MIME_TYPE)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            clipData = ClipData.newRawUri("Harbor APK", file.uri)
+        }
+    }
+
+    internal fun isApk(file: CopiedFile): Boolean {
+        return isApk(file.name, file.mimeType)
+    }
+
+    internal fun isApk(fileName: String, mimeType: String): Boolean {
+        return mimeType.equals(APK_MIME_TYPE, ignoreCase = true) ||
+            fileName.lowercase(Locale.ROOT).endsWith(".apk")
+    }
+}

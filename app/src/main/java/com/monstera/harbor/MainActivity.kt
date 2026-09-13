@@ -23,6 +23,10 @@ import com.monstera.harbor.ui.HarborRoot
 import com.monstera.harbor.ui.theme.HarborTheme
 import com.monstera.harbor.core.policy.ManagedProfileProvisioningPreflight
 import com.monstera.harbor.core.policy.ManagedProfileProvisioningStartResult
+import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     private val provisioningLauncher = registerForActivityResult(
@@ -152,7 +156,7 @@ class MainActivity : ComponentActivity() {
             ?: return false
         val signerDigests = PackageSigner.fingerprints(packageManager, packageName)
         if (signerDigests.isEmpty()) return false
-        val shortcutId = java.util.UUID.randomUUID().toString()
+        val shortcutId = launcherShortcutId(packageName)
         val graph = (application as HarborApplication).graph
         graph.preferences.saveShortcut(
             shortcutId,
@@ -167,6 +171,7 @@ class MainActivity : ComponentActivity() {
             drawable.draw(canvas)
         }
         val shortcut = ShortcutInfo.Builder(this, shortcutId)
+            .setActivity(ComponentName(this, MainActivity::class.java))
             .setShortLabel(applicationInfo.loadLabel(packageManager).toString().ifBlank { packageName })
             .setLongLabel("Launch ${applicationInfo.loadLabel(packageManager)}")
             .setIcon(Icon.createWithBitmap(bitmap))
@@ -175,16 +180,27 @@ class MainActivity : ComponentActivity() {
                     .putExtra(Intent.EXTRA_SHORTCUT_ID, shortcutId),
             )
             .build()
-        val requested = runCatching { shortcutManager.requestPinShortcut(shortcut, null) }.getOrDefault(false)
-        if (!requested) {
+        val requestAccepted = runCatching { shortcutManager.requestPinShortcut(shortcut, null) }.getOrDefault(false)
+        if (!requestAccepted) {
             graph.preferences.removeShortcut(shortcutId)
         } else {
-            Toast.makeText(this, "Choose where to add the Harbor shortcut", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Pin request sent; your launcher controls the confirmation",
+                Toast.LENGTH_LONG,
+            ).show()
         }
-        return requested
+        return requestAccepted
     }
 
     private companion object {
         const val MAX_SHARED_FILES = 50
     }
+}
+
+internal fun launcherShortcutId(packageName: String): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+        .digest(packageName.toByteArray(StandardCharsets.UTF_8))
+    val buffer = ByteBuffer.wrap(digest)
+    return UUID(buffer.long, buffer.long).toString()
 }

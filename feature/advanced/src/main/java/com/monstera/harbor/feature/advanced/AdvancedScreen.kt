@@ -144,6 +144,9 @@ fun AdvancedScreen(
                         )
                     }
                 } else {
+                    if (topology.localKind == LocalProfileKind.FULL_USER) {
+                        item { PersonalWorkspaceGuidance() }
+                    }
                     item {
                         MultiUserPanel(
                             controller = multiUserController,
@@ -155,6 +158,18 @@ fun AdvancedScreen(
                 }
             }
             item { Spacer(Modifier.height(24.dp)) }
+        }
+    }
+}
+
+@Composable
+private fun PersonalWorkspaceGuidance() {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Clone apps into Work", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "To clone an app installed in Personal into the managed Work profile, open the work-badged Harbor app and then Advanced tools there.",
+            )
         }
     }
 }

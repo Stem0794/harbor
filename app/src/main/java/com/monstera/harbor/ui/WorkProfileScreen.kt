@@ -113,6 +113,7 @@ fun WorkProfileScreen(
     var crossProfileAccessBusy by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(false) }
     var showNavigation by remember { mutableStateOf(false) }
+    var shortcutNotice by remember { mutableStateOf<ShortcutRequestNotice?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedApp = selectedPackage?.let { packageName -> uiState.apps.firstOrNull { it.packageName == packageName } }
     val visibleApps = remember(uiState.apps, uiState.query) { WorkAppsSelection.filter(uiState.apps, uiState.query) }
@@ -149,7 +150,13 @@ fun WorkProfileScreen(
             onDetails = { onOpenPackageDetails(app.packageName.value); selectedPackage = null },
             onUninstall = { onUninstallPackage(app.packageName.value); selectedPackage = null },
             onAddShortcut = {
-                scope.launch { if (!onAddShortcut(app.packageName.value)) snackbar.showSnackbar("This launcher cannot pin Harbor shortcuts") }
+                scope.launch {
+                    shortcutNotice = ShortcutRequestNotice(
+                        packageName = app.packageName.value,
+                        appLabel = app.label,
+                        presentation = shortcutRequestPresentation(onAddShortcut(app.packageName.value)),
+                    )
+                }
                 selectedPackage = null
             },
             onToggleCrossProfileAccess = {
@@ -235,6 +242,21 @@ fun WorkProfileScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
             item { HarborSearchField(value = uiState.query, onValueChange = viewModel::setQuery) }
+            shortcutNotice?.let { notice ->
+                item {
+                    ShortcutRequestNoticeCard(
+                        notice = notice,
+                        onRetry = {
+                            scope.launch {
+                                shortcutNotice = notice.copy(
+                                    presentation = shortcutRequestPresentation(onAddShortcut(notice.packageName)),
+                                )
+                            }
+                        },
+                        onDismiss = { shortcutNotice = null },
+                    )
+                }
+            }
             item {
                 Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -252,6 +274,66 @@ fun WorkProfileScreen(
                 }
             }
                 item { Spacer(Modifier.height(12.dp)) }
+            }
+        }
+    }
+}
+
+internal data class ShortcutRequestPresentation(
+    val title: String,
+    val body: String,
+    val actionLabel: String?,
+)
+
+internal fun shortcutRequestPresentation(requestAccepted: Boolean): ShortcutRequestPresentation =
+    if (requestAccepted) {
+        ShortcutRequestPresentation(
+            title = "Pin request sent",
+            body = "Android accepted the request. If your launcher shows no confirmation, it may have ignored the request; try again or use a different launcher.",
+            actionLabel = "Try again",
+        )
+    } else {
+        ShortcutRequestPresentation(
+            title = "Shortcut request unavailable",
+            body = "Harbor could not ask this launcher to pin the shortcut. Check the launcher settings or try again.",
+            actionLabel = "Try again",
+        )
+    }
+
+private data class ShortcutRequestNotice(
+    val packageName: String,
+    val appLabel: String,
+    val presentation: ShortcutRequestPresentation,
+)
+
+@Composable
+private fun ShortcutRequestNoticeCard(
+    notice: ShortcutRequestNotice,
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = HarborShapes.card,
+        color = HarborColors.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, HarborColors.stroke),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                "${notice.presentation.title}: ${notice.appLabel}",
+                color = HarborColors.textPrimary,
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+            )
+            Text(
+                notice.presentation.body,
+                color = HarborColors.textSecondary,
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                notice.presentation.actionLabel?.let { label ->
+                    TextButton(onClick = onRetry) { Text(label, color = HarborColors.accent) }
+                }
+                TextButton(onClick = onDismiss) { Text("Dismiss", color = HarborColors.accent) }
             }
         }
     }
