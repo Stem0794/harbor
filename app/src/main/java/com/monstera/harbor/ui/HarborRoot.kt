@@ -139,6 +139,7 @@ fun HarborRoot(
     if (profileState.status == WorkProfileStatus.ACTIVE && topology.harborIsProfileOwner) {
         WorkProfileScreen(
             catalog = graph.appCatalog,
+            preferences = graph.preferences,
             controller = graph.policyController,
             crossProfilePackagePolicy = graph.crossProfilePackagePolicy,
             ownPackage = context.packageName,

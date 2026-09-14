@@ -27,6 +27,8 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.util.UUID
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val provisioningLauncher = registerForActivityResult(
@@ -150,17 +152,23 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun addShortcut(packageName: String): Boolean {
-        val shortcutManager = getSystemService(ShortcutManager::class.java)
-        if (!shortcutManager.isRequestPinShortcutSupported) return false
-        val applicationInfo = runCatching { packageManager.getApplicationInfo(packageName, 0) }.getOrNull()
-            ?: return false
-        val signerDigests = PackageSigner.fingerprints(packageManager, packageName)
-        if (signerDigests.isEmpty()) return false
-        val shortcutId = launcherShortcutId(packageName)
         val graph = (application as HarborApplication).graph
+        val targetPackage = com.monstera.harbor.core.topology.PackageName(packageName)
+        suspend fun unavailable(appLabel: String = packageName): Boolean {
+            graph.preferences.saveShortcutRequestNotice(targetPackage, appLabel, false)
+            return false
+        }
+        val shortcutManager = getSystemService(ShortcutManager::class.java)
+        if (!shortcutManager.isRequestPinShortcutSupported) return unavailable()
+        val applicationInfo = runCatching { packageManager.getApplicationInfo(packageName, 0) }.getOrNull()
+            ?: return unavailable()
+        val appLabel = applicationInfo.loadLabel(packageManager).toString().ifBlank { packageName }
+        val signerDigests = PackageSigner.fingerprints(packageManager, packageName)
+        if (signerDigests.isEmpty()) return unavailable(appLabel)
+        val shortcutId = launcherShortcutId(packageName)
         graph.preferences.saveShortcut(
             shortcutId,
-            com.monstera.harbor.core.topology.PackageName(packageName),
+            targetPackage,
             signerDigests,
         )
         val drawable = applicationInfo.loadIcon(packageManager)
@@ -172,18 +180,21 @@ class MainActivity : ComponentActivity() {
         }
         val shortcut = ShortcutInfo.Builder(this, shortcutId)
             .setActivity(ComponentName(this, MainActivity::class.java))
-            .setShortLabel(applicationInfo.loadLabel(packageManager).toString().ifBlank { packageName })
-            .setLongLabel("Launch ${applicationInfo.loadLabel(packageManager)}")
+            .setShortLabel(appLabel)
+            .setLongLabel("Launch $appLabel")
             .setIcon(Icon.createWithBitmap(bitmap))
             .setIntent(
                 Intent(this, ShortcutEntryActivity::class.java)
+                    .setAction(Intent.ACTION_VIEW)
                     .putExtra(Intent.EXTRA_SHORTCUT_ID, shortcutId),
             )
             .build()
         val requestAccepted = runCatching { shortcutManager.requestPinShortcut(shortcut, null) }.getOrDefault(false)
-        if (!requestAccepted) {
-            graph.preferences.removeShortcut(shortcutId)
-        } else {
+        withContext(NonCancellable) {
+            if (!requestAccepted) graph.preferences.removeShortcut(shortcutId)
+            graph.preferences.saveShortcutRequestNotice(targetPackage, appLabel, requestAccepted)
+        }
+        if (requestAccepted) {
             Toast.makeText(
                 this,
                 "Pin request sent; your launcher controls the confirmation",

@@ -56,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.monstera.harbor.core.data.AppCatalogRepository
 import com.monstera.harbor.core.data.AppIconProvider
+import com.monstera.harbor.core.data.HarborPreferences
 import com.monstera.harbor.core.data.ManagedApp
 import com.monstera.harbor.core.policy.PolicyResult
 import com.monstera.harbor.core.policy.CrossProfilePackageAccess
@@ -87,6 +88,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun WorkProfileScreen(
     catalog: AppCatalogRepository,
+    preferences: HarborPreferences,
     controller: WorkProfileController,
     crossProfilePackagePolicy: CrossProfilePackagePolicy,
     ownPackage: String,
@@ -113,7 +115,14 @@ fun WorkProfileScreen(
     var crossProfileAccessBusy by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(false) }
     var showNavigation by remember { mutableStateOf(false) }
-    var shortcutNotice by remember { mutableStateOf<ShortcutRequestNotice?>(null) }
+    val shortcutRequestNotice by preferences.shortcutRequestNotice.collectAsStateWithLifecycle(initialValue = null)
+    val shortcutNotice = shortcutRequestNotice?.let { notice ->
+        ShortcutRequestNotice(
+            packageName = notice.packageName.value,
+            appLabel = notice.appLabel,
+            presentation = shortcutRequestPresentation(notice.requestAccepted),
+        )
+    }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedApp = selectedPackage?.let { packageName -> uiState.apps.firstOrNull { it.packageName == packageName } }
     val visibleApps = remember(uiState.apps, uiState.query) { WorkAppsSelection.filter(uiState.apps, uiState.query) }
@@ -150,13 +159,7 @@ fun WorkProfileScreen(
             onDetails = { onOpenPackageDetails(app.packageName.value); selectedPackage = null },
             onUninstall = { onUninstallPackage(app.packageName.value); selectedPackage = null },
             onAddShortcut = {
-                scope.launch {
-                    shortcutNotice = ShortcutRequestNotice(
-                        packageName = app.packageName.value,
-                        appLabel = app.label,
-                        presentation = shortcutRequestPresentation(onAddShortcut(app.packageName.value)),
-                    )
-                }
+                scope.launch { onAddShortcut(app.packageName.value) }
                 selectedPackage = null
             },
             onToggleCrossProfileAccess = {
@@ -247,13 +250,9 @@ fun WorkProfileScreen(
                     ShortcutRequestNoticeCard(
                         notice = notice,
                         onRetry = {
-                            scope.launch {
-                                shortcutNotice = notice.copy(
-                                    presentation = shortcutRequestPresentation(onAddShortcut(notice.packageName)),
-                                )
-                            }
+                            scope.launch { onAddShortcut(notice.packageName) }
                         },
-                        onDismiss = { shortcutNotice = null },
+                        onDismiss = { scope.launch { preferences.clearShortcutRequestNotice() } },
                     )
                 }
             }

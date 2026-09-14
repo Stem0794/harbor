@@ -3,6 +3,7 @@ package com.monstera.harbor.core.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -16,13 +17,49 @@ data class ShortcutTarget(
     val signerDigests: Set<String>,
 )
 
+data class ShortcutRequestNoticeState(
+    val packageName: PackageName,
+    val appLabel: String,
+    val requestAccepted: Boolean,
+)
+
 class HarborPreferences(private val context: Context) {
     val advancedToolsEnabled: Flow<Boolean> = context.harborDataStore.data.map { preferences ->
         preferences[ADVANCED_TOOLS_ENABLED] ?: false
     }
 
+    val shortcutRequestNotice: Flow<ShortcutRequestNoticeState?> =
+        context.harborDataStore.data.map { preferences ->
+            val packageName = preferences[SHORTCUT_REQUEST_PACKAGE]
+                ?.let { value -> runCatching { PackageName(value) }.getOrNull() }
+            val appLabel = preferences[SHORTCUT_REQUEST_LABEL]
+            val requestAccepted = preferences[SHORTCUT_REQUEST_ACCEPTED]
+            if (packageName == null || appLabel == null || requestAccepted == null) null
+            else ShortcutRequestNoticeState(packageName, appLabel, requestAccepted)
+        }
+
     suspend fun setAdvancedToolsEnabled(enabled: Boolean) {
         context.harborDataStore.edit { it[ADVANCED_TOOLS_ENABLED] = enabled }
+    }
+
+    suspend fun saveShortcutRequestNotice(
+        packageName: PackageName,
+        appLabel: String,
+        requestAccepted: Boolean,
+    ) {
+        context.harborDataStore.edit {
+            it[SHORTCUT_REQUEST_PACKAGE] = packageName.value
+            it[SHORTCUT_REQUEST_LABEL] = appLabel.ifBlank { packageName.value }
+            it[SHORTCUT_REQUEST_ACCEPTED] = requestAccepted
+        }
+    }
+
+    suspend fun clearShortcutRequestNotice() {
+        context.harborDataStore.edit {
+            it.remove(SHORTCUT_REQUEST_PACKAGE)
+            it.remove(SHORTCUT_REQUEST_LABEL)
+            it.remove(SHORTCUT_REQUEST_ACCEPTED)
+        }
     }
 
     suspend fun saveShortcut(
@@ -66,6 +103,9 @@ class HarborPreferences(private val context: Context) {
 
     private companion object {
         val ADVANCED_TOOLS_ENABLED = booleanPreferencesKey("advanced_tools_enabled")
+        val SHORTCUT_REQUEST_PACKAGE = stringPreferencesKey("shortcut_request_package")
+        val SHORTCUT_REQUEST_LABEL = stringPreferencesKey("shortcut_request_label")
+        val SHORTCUT_REQUEST_ACCEPTED = booleanPreferencesKey("shortcut_request_accepted")
         val SIGNER_DIGEST = Regex("[0-9a-fA-F]{64}")
 
         fun shortcutKey(id: String) = androidx.datastore.preferences.core.stringPreferencesKey("shortcut_$id")
