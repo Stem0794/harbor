@@ -1,6 +1,7 @@
 package com.monstera.harbor.ui.privacy
 
 import com.monstera.harbor.core.policy.CrossProfilePackageAccess
+import com.monstera.harbor.core.policy.CrossProfileWidgetAccess
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -104,6 +105,43 @@ class WorkAppPresentationTest {
         )
 
         assertFalse(result.checked)
+        assertFalse(result.toggleEnabled)
+    }
+
+    @Test
+    fun widgetAccessDefaultsToOff() {
+        val result = crossProfileWidgetPresentation(
+            access = CrossProfileWidgetAccess.Disabled,
+            error = null,
+            busy = false,
+        )
+
+        assertEquals("Off · widgets stay inside Work", result.body)
+        assertFalse(result.checked)
+        assertTrue(result.toggleEnabled)
+    }
+
+    @Test
+    fun widgetAccessCannotBeToggledWhenPolicyFails() {
+        val result = crossProfileWidgetPresentation(
+            access = null,
+            error = "Harbor is not the profile owner",
+            busy = false,
+        )
+
+        assertFalse(result.checked)
+        assertFalse(result.toggleEnabled)
+    }
+
+    @Test
+    fun widgetAccessCannotBeToggledDuringAnotherPolicyOperation() {
+        val result = crossProfileWidgetPresentation(
+            access = CrossProfileWidgetAccess.Enabled,
+            error = null,
+            busy = true,
+        )
+
+        assertTrue(result.checked)
         assertFalse(result.toggleEnabled)
     }
 }

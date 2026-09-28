@@ -59,6 +59,7 @@ Harbor is designed to keep its normal Work-profile path local and based on Andro
 - Send selected files from Personal to Work.
 - Send a single Personal APK into Work and open Android's confirmation-based installer.
 - On Android 11+, manage each Work app's eligibility for Android's cross-profile connection flow while leaving final consent to Android.
+- Allow a Work app's widgets on the Personal launcher, per app and off by default.
 
 Shizuku is **not required** for these normal Work-profile features.
 

@@ -1,6 +1,7 @@
 package com.monstera.harbor.ui.privacy
 
 import com.monstera.harbor.core.policy.CrossProfilePackageAccess
+import com.monstera.harbor.core.policy.CrossProfileWidgetAccess
 
 /**
  * Pure presentation helpers for Work app interaction and copy.
@@ -68,6 +69,33 @@ internal fun crossProfileAccessPresentation(
     )
     else -> CrossProfileAccessPresentation(
         body = "Off · Android consent is still required",
+        checked = false,
+        toggleEnabled = !busy,
+    )
+}
+
+internal fun crossProfileWidgetPresentation(
+    access: CrossProfileWidgetAccess?,
+    error: String?,
+    busy: Boolean,
+): CrossProfileAccessPresentation = when {
+    error != null -> CrossProfileAccessPresentation(
+        body = "Unavailable · $error",
+        checked = false,
+        toggleEnabled = false,
+    )
+    access == null -> CrossProfileAccessPresentation(
+        body = "Checking Android policy…",
+        checked = false,
+        toggleEnabled = false,
+    )
+    access == CrossProfileWidgetAccess.Enabled -> CrossProfileAccessPresentation(
+        body = "Personal launcher can show this app's widgets",
+        checked = true,
+        toggleEnabled = !busy,
+    )
+    else -> CrossProfileAccessPresentation(
+        body = "Off · widgets stay inside Work",
         checked = false,
         toggleEnabled = !busy,
     )
