@@ -61,6 +61,8 @@ import com.monstera.harbor.core.data.ManagedApp
 import com.monstera.harbor.core.policy.PolicyResult
 import com.monstera.harbor.core.policy.CrossProfilePackageAccess
 import com.monstera.harbor.core.policy.CrossProfilePackagePolicy
+import com.monstera.harbor.core.policy.CrossProfileWidgetAccess
+import com.monstera.harbor.core.policy.CrossProfileWidgetPolicy
 import com.monstera.harbor.core.policy.WorkProfileController
 import com.monstera.harbor.core.topology.HarborPrivilegeState
 import com.monstera.harbor.core.topology.PackageName
@@ -79,6 +81,7 @@ import com.monstera.harbor.ui.privacy.WorkAppRowClickIntent
 import com.monstera.harbor.ui.privacy.appStatusLabel
 import com.monstera.harbor.ui.privacy.appStatusTone
 import com.monstera.harbor.ui.privacy.crossProfileAccessPresentation
+import com.monstera.harbor.ui.privacy.crossProfileWidgetPresentation
 import com.monstera.harbor.ui.privacy.launcherShortcutActionLabel
 import com.monstera.harbor.ui.privacy.workAppCountLabel
 import com.monstera.harbor.ui.privacy.workAppRowClickIntent
@@ -91,6 +94,7 @@ fun WorkProfileScreen(
     preferences: HarborPreferences,
     controller: WorkProfileController,
     crossProfilePackagePolicy: CrossProfilePackagePolicy,
+    crossProfileWidgetPolicy: CrossProfileWidgetPolicy,
     ownPackage: String,
     privilegeState: HarborPrivilegeState,
     iconProvider: AppIconProvider,
@@ -113,6 +117,9 @@ fun WorkProfileScreen(
     var crossProfileAccess by remember { mutableStateOf<CrossProfilePackageAccess?>(null) }
     var crossProfileAccessError by remember { mutableStateOf<String?>(null) }
     var crossProfileAccessBusy by remember { mutableStateOf(false) }
+    var widgetAccess by remember { mutableStateOf<CrossProfileWidgetAccess?>(null) }
+    var widgetAccessError by remember { mutableStateOf<String?>(null) }
+    var widgetAccessBusy by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(false) }
     var showNavigation by remember { mutableStateOf(false) }
     val shortcutRequestNotice by preferences.shortcutRequestNotice.collectAsStateWithLifecycle(initialValue = null)
@@ -140,16 +147,29 @@ fun WorkProfileScreen(
             }
         }
     }
+    LaunchedEffect(selectedPackage) {
+        widgetAccess = null
+        widgetAccessError = null
+        widgetAccessBusy = false
+        selectedPackage?.let { packageName ->
+            when (val result = crossProfileWidgetPolicy.accessFor(packageName)) {
+                is PolicyResult.Success -> widgetAccess = result.value
+                is PolicyResult.Failure -> widgetAccessError = result.reason
+            }
+        }
+    }
 
     selectedApp?.let { app ->
         AppActionSheet(
             app = app,
             iconProvider = iconProvider,
             sheetState = sheetState,
-            busy = uiState.operationInProgress || crossProfileAccessBusy,
+            busy = uiState.operationInProgress || crossProfileAccessBusy || widgetAccessBusy,
             crossProfileAccess = crossProfileAccess,
             crossProfileAccessError = crossProfileAccessError,
             crossProfileAccessBusy = crossProfileAccessBusy,
+            widgetAccess = widgetAccess,
+            widgetAccessError = widgetAccessError,
             onDismiss = { selectedPackage = null },
             onLaunch = {
                 if (!onLaunchPackage(app.packageName.value)) scope.launch { snackbar.showSnackbar("No launchable activity is available") }
@@ -182,6 +202,22 @@ fun WorkProfileScreen(
                         }
                     }
                     crossProfileAccessBusy = false
+                }
+            },
+            onToggleWidgetAccess = {
+                val enabled = widgetAccess != CrossProfileWidgetAccess.Enabled
+                widgetAccessBusy = true
+                scope.launch {
+                    when (val result = crossProfileWidgetPolicy.setAccess(app.packageName, enabled)) {
+                        is PolicyResult.Success -> {
+                            widgetAccess = result.value
+                            snackbar.showSnackbar(
+                                if (enabled) "Widgets from ${app.label} can be added in Personal" else "Widgets from ${app.label} stay inside Work",
+                            )
+                        }
+                        is PolicyResult.Failure -> snackbar.showSnackbar(result.reason)
+                    }
+                    widgetAccessBusy = false
                 }
             },
         )
@@ -411,10 +447,15 @@ private fun EmptyWorkState(queryBlank: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheetState: SheetState, busy: Boolean, crossProfileAccess: CrossProfilePackageAccess?, crossProfileAccessError: String?, crossProfileAccessBusy: Boolean, onDismiss: () -> Unit, onLaunch: () -> Unit, onToggleHidden: () -> Unit, onDetails: () -> Unit, onUninstall: () -> Unit, onAddShortcut: () -> Unit, onToggleCrossProfileAccess: () -> Unit) {
+private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheetState: SheetState, busy: Boolean, crossProfileAccess: CrossProfilePackageAccess?, crossProfileAccessError: String?, crossProfileAccessBusy: Boolean, widgetAccess: CrossProfileWidgetAccess?, widgetAccessError: String?, onDismiss: () -> Unit, onLaunch: () -> Unit, onToggleHidden: () -> Unit, onDetails: () -> Unit, onUninstall: () -> Unit, onAddShortcut: () -> Unit, onToggleCrossProfileAccess: () -> Unit, onToggleWidgetAccess: () -> Unit) {
     val crossProfilePresentation = crossProfileAccessPresentation(
         access = crossProfileAccess,
         error = crossProfileAccessError,
+        busy = busy,
+    )
+    val widgetPresentation = crossProfileWidgetPresentation(
+        access = widgetAccess,
+        error = widgetAccessError,
         busy = busy,
     )
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = HarborColors.sheet, dragHandle = { Box(Modifier.padding(top = 10.dp).size(width = 44.dp, height = 4.dp).clip(RoundedCornerShape(50)).background(HarborColors.textSecondary)) }) {
@@ -436,6 +477,21 @@ private fun AppActionSheet(app: ManagedApp, iconProvider: AppIconProvider, sheet
                         checked = crossProfilePresentation.checked,
                         onCheckedChange = null,
                         enabled = crossProfilePresentation.toggleEnabled,
+                        modifier = Modifier.clearAndSetSemantics { },
+                    )
+                },
+            )
+            Direction2ActionRow(
+                icon = HarborIconKind.Work,
+                title = "Widgets in Personal",
+                body = widgetPresentation.body,
+                enabled = widgetPresentation.toggleEnabled,
+                onClick = onToggleWidgetAccess,
+                trailing = {
+                    Switch(
+                        checked = widgetPresentation.checked,
+                        onCheckedChange = null,
+                        enabled = widgetPresentation.toggleEnabled,
                         modifier = Modifier.clearAndSetSemantics { },
                     )
                 },

@@ -142,6 +142,7 @@ fun HarborRoot(
             preferences = graph.preferences,
             controller = graph.policyController,
             crossProfilePackagePolicy = graph.crossProfilePackagePolicy,
+            crossProfileWidgetPolicy = graph.crossProfileWidgetPolicy,
             ownPackage = context.packageName,
             privilegeState = privilegeState,
             iconProvider = graph.iconProvider,
